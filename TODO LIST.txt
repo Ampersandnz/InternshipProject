@@ -1,0 +1,15 @@
+APP:
+1)	Test app on physical device to ensure scanning actually works (Displays full book info from Google Books).
+
+7)	Send/receive messages about book.
+		Message about which book was scanned, need two buttons to determine if it's been returned or borrowed for books with multiple copies?.
+
+DATABASE:
+2)	Build pages and host with Tomcat
+
+3)	Does it only need to save barcode ID?
+4)	What about books with multiple copies?
+		Presumably can just allow it, unique identifier is ID not isbn/barcode so can have multiple copies per list and will check out/return first the query encounters.
+5)	For start just two columns in table (Books in and out of stock)?
+
+6)	Implement sending/receiving of messages about book returning and borrowing.
