@@ -120,7 +120,7 @@ public class IntentIntegrator {
 	private static final String BS_PACKAGE = "com.google.zxing.client.android";
 	private static final String BSPLUS_PACKAGE = "com.srowen.bs.android";
 
-	// supported barcode formats
+	// Supported barcode formats
 	public static final Collection<String> PRODUCT_CODE_TYPES = list("UPC_A", "UPC_E", "EAN_8", "EAN_13", "RSS_14");
 	public static final Collection<String> ONE_D_CODE_TYPES =
 			list("UPC_A", "UPC_E", "EAN_8", "EAN_13", "CODE_39", "CODE_93", "CODE_128",
@@ -246,9 +246,9 @@ public class IntentIntegrator {
 		Intent intentScan = new Intent(BS_PACKAGE + ".SCAN");
 		intentScan.addCategory(Intent.CATEGORY_DEFAULT);
 
-		// check which types of codes to scan for
+		// Check which types of codes to scan for
 		if (desiredBarcodeFormats != null) {
-			// set the desired barcode types
+			// Set the desired barcode types
 			StringBuilder joinedByComma = new StringBuilder();
 			for (String format : desiredBarcodeFormats) {
 				if (joinedByComma.length() > 0) {
@@ -260,9 +260,11 @@ public class IntentIntegrator {
 		}
 
 		String targetAppPackage = findTargetAppPackage(intentScan);
+
 		if (targetAppPackage == null) {
 			return showDownloadDialog();
 		}
+
 		intentScan.setPackage(targetAppPackage);
 		intentScan.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intentScan.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -357,11 +359,7 @@ public class IntentIntegrator {
 				int intentOrientation = intent.getIntExtra("SCAN_RESULT_ORIENTATION", Integer.MIN_VALUE);
 				Integer orientation = intentOrientation == Integer.MIN_VALUE ? null : intentOrientation;
 				String errorCorrectionLevel = intent.getStringExtra("SCAN_RESULT_ERROR_CORRECTION_LEVEL");
-				return new IntentResult(contents,
-						formatName,
-						rawBytes,
-						orientation,
-						errorCorrectionLevel);
+				return new IntentResult(contents, formatName, rawBytes, orientation, errorCorrectionLevel);
 			}
 			return new IntentResult();
 		}
@@ -393,9 +391,11 @@ public class IntentIntegrator {
 		intent.putExtra("ENCODE_TYPE", type);
 		intent.putExtra("ENCODE_DATA", text);
 		String targetAppPackage = findTargetAppPackage(intent);
+		
 		if (targetAppPackage == null) {
 			return showDownloadDialog();
 		}
+		
 		intent.setPackage(targetAppPackage);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -430,5 +430,4 @@ public class IntentIntegrator {
 			}
 		}
 	}
-
 }

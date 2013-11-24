@@ -36,6 +36,12 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+/**
+ * 
+ * @author Michael Lo
+ * Using code from http://mobile.tutsplus.com/tutorials/android/android-sdk-create-a-book-scanning-app-part-3/
+ * 
+ */
 public class MainActivity extends Activity implements OnClickListener {
 
 	private Button scanBtn;
@@ -61,12 +67,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		setupButtons();
 		setupTextViews();
 		setupStars();
 
-		if (savedInstanceState != null){
+		if (savedInstanceState != null) {
 			retrieveSavedState(savedInstanceState);
 		}
 	}
@@ -96,7 +102,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	public void setupStars() {
 		starViews=new ImageView[5];
-		for(int s=0; s<starViews.length; s++){
+		for(int s=0; s<starViews.length; s++) {
 			starViews[s]=new ImageView(this);
 		}
 	}
@@ -108,12 +114,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		dateText.setText(savedInstanceState.getString("date"));
 		ratingCountText.setText(savedInstanceState.getString("ratings"));
 		int numStars = savedInstanceState.getInt("stars");
-		
-		for(int s=0; s<numStars; s++){
+
+		for(int s=0; s<numStars; s++) {
 			starViews[s].setImageResource(R.drawable.star);
 			starLayout.addView(starViews[s]);
 		}
-		
+
 		starLayout.setTag(numStars);
 		thumbImg = (Bitmap)savedInstanceState.getParcelable("thumbPic");
 		thumbView.setImageBitmap(thumbImg);
@@ -124,13 +130,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		} else {
 			previewBtn.setEnabled(false);
 		}
-		
+
 		if (savedInstanceState.getInt("isLink")==View.VISIBLE) {
 			linkBtn.setVisibility(View.VISIBLE);
 		} else {
 			linkBtn.setVisibility(View.GONE);
 		}
-		
+
 		previewBtn.setVisibility(View.VISIBLE);
 
 	}
@@ -165,7 +171,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:"+scanContent+"&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 				new GetBookInfo().execute(bookSearchString);
 			} else {
-				Toast toast = Toast.makeText(getApplicationContext(), "Not a valid scan!", Toast.LENGTH_SHORT);
+				Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
 				toast.show();
 			}
 		} else {
@@ -213,7 +219,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				JSONObject bookObject = bookArray.getJSONObject(0);
 				JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
 
-				try{ 
+				try { 
 					titleText.setText("TITLE: "+volumeObject.getString("title")); 
 				} catch (JSONException jse) { 
 					titleText.setText("");
@@ -227,20 +233,20 @@ public class MainActivity extends Activity implements OnClickListener {
 						if(a>0) authorBuild.append(", ");
 						authorBuild.append(authorArray.getString(a));
 					}
-					authorText.setText("AUTHOR(S): "+authorBuild.toString());
+					authorText.setText("Author(s): "+authorBuild.toString());
 				} catch (JSONException jse) { 
 					authorText.setText("");
 					jse.printStackTrace(); 
 				}
 
-				try{ dateText.setText("PUBLISHED: "+volumeObject.getString("publishedDate")); 
+				try { dateText.setText("Date of publication: "+volumeObject.getString("publishedDate")); 
 				} catch (JSONException jse) { 
 					dateText.setText("");
 					jse.printStackTrace(); 
 				}
 
 				try { 
-					descriptionText.setText("DESCRIPTION: "+volumeObject.getString("description")); 
+					descriptionText.setText("Description: "+volumeObject.getString("description")); 
 				} catch (JSONException jse) {  
 					descriptionText.setText("");
 					jse.printStackTrace(); 
@@ -262,7 +268,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 
 				try { 
-					ratingCountText.setText(" - "+volumeObject.getString("ratingsCount")+" ratings"); 
+					ratingCountText.setText(" - " + volumeObject.getString("ratingsCount")+" ratings"); 
 				} catch (JSONException jse) {
 					ratingCountText.setText("");
 					jse.printStackTrace();
@@ -273,7 +279,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
 					if (isEmbeddable) {
 						previewBtn.setEnabled(true);
-					} else previewBtn.setEnabled(false);
+					} else {
+						previewBtn.setEnabled(false);
+					}
 				} catch (JSONException jse) { 
 					previewBtn.setEnabled(false);
 					jse.printStackTrace(); 
@@ -294,6 +302,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					thumbView.setImageBitmap(null);
 					jse.printStackTrace();
 				}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				titleText.setText("NOT FOUND");
@@ -333,17 +342,22 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	protected void onSaveInstanceState(Bundle savedBundle) {
-		savedBundle.putString("title", ""+titleText.getText());
-		savedBundle.putString("author", ""+authorText.getText());
-		savedBundle.putString("description", ""+descriptionText.getText());
-		savedBundle.putString("date", ""+dateText.getText());
-		savedBundle.putString("ratings", ""+ratingCountText.getText());
+		savedBundle.putString("title", "" + titleText.getText());
+		savedBundle.putString("author", "" + authorText.getText());
+		savedBundle.putString("description", "" + descriptionText.getText());
+		savedBundle.putString("date", "" + dateText.getText());
+		savedBundle.putString("ratings", "" + ratingCountText.getText());
 		savedBundle.putParcelable("thumbPic", thumbImg);
-		if(starLayout.getTag()!=null)
+		
+		if(starLayout.getTag()!=null) {
 			savedBundle.putInt("stars", Integer.parseInt(starLayout.getTag().toString()));
+		}
+		
 		savedBundle.putBoolean("isEmbed", previewBtn.isEnabled());
 		savedBundle.putInt("isLink", linkBtn.getVisibility());
-		if(previewBtn.getTag()!=null)
+		
+		if(previewBtn.getTag()!=null) {
 			savedBundle.putString("isbn", previewBtn.getTag().toString());
+		}
 	}
 }
