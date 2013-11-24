@@ -12,20 +12,20 @@
 	<form method="GET" action='Controller' name="add">
 		<table>
 			<tr>
-				<td>Artist:</td>
-				<td><input type="text" name="artist"></td>
+				<td>ISBN:</td>
+				<td><input type="text" name="isbn"></td>
 			</tr>
 			<tr>
 				<td>Title:</td>
 				<td><input type="text" name="title"></td>
 			</tr>
 			<tr>
-				<td>Album:</td>
-				<td><input type="text" name="album"></td>
+				<td>In library?</td>
+				<td><input type="checkbox" name="inLibrary"></td>
 			</tr>
 			<tr>
-				<td>Rating:</td>
-				<td><input type="number" name="rating" min="0" max="5"></td>
+				<td>Currently in possession of:</td>
+				<td><input type="text" name="inPossessionOf"></td>
 			</tr>
 			<tr>
 				<td><input type="submit" name="save" value="save"> <input

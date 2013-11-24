@@ -22,7 +22,7 @@
 			lolcano
 		</property>
 		
-		<mapping class="com.mlo.music.Song"/>  
+		<mapping class="com.mlo.book.Book"/>  
 
 	</session-factory> 
 </hibernate-configuration>

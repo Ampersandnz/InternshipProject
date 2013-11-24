@@ -58,7 +58,7 @@ public class Book {
 	} 
 
 	public void setTitle( String title ) { 
-		this.isbn = title; 
+		this.title = title; 
 	} 
 
 	public boolean getInLibrary() { 

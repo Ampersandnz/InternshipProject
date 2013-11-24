@@ -51,12 +51,29 @@ public class Controller extends HttpServlet {
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("book")) {
 							int ID = Integer.parseInt(parameter.substring(4));
+							System.out.println("" + ID);
+							Book book = BM.getBook(ID);
+							for (Book b: BM.getAllBooks()) {
+								System.out.println("BOOK ID: " + b.getId());
+								if (b.getId() == ID) {
+									book = b;
+								}
+							}
+
+							String currentISBNs = (String) request.getAttribute("deletedISBNs");
+							String updatedISBNs = "";
+
+							if (!(null == currentISBNs)) {
+								updatedISBNs = currentISBNs + ", " + book.getIsbn();
+							} else {
+								updatedISBNs =  book.getIsbn();
+							}
+							request.setAttribute("deletedISBNs", updatedISBNs);
 							BM.deleteBook(ID);
-							request.setAttribute("deletedIsbn", BM.getBook(ID).getIsbn());
 						}
+						// Display delete page.
+						forward = DELETE_JSP;
 					}
-					// Display delete page.
-					forward = DELETE_JSP;
 
 				} else {
 					// Return to main list.
@@ -66,26 +83,26 @@ public class Controller extends HttpServlet {
 				break;
 
 			case "add":
-				System.out.println("RETURNING FROM ADD PAGE");
 				for (String s: parameters.keySet()) {
-					System.out.println(s);
 				}
 				if (parameters.containsKey("save")) {
 
 					String isbn = "";
-					String title = "title";
+					String title = "";
 					boolean inLibrary = false;
 					String inPossessionOf = "";
-					
+
 					try {
 						isbn = request.getParameter("isbn");
 						title = request.getParameter("title");
-						inLibrary = Boolean.parseBoolean(request.getParameter("inLibrary"));
+						if (parameters.containsKey("inLibrary")) {
+							inLibrary = true;
+						}
 						inPossessionOf = request.getParameter("inPossessionOf");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					
+
 					BM.addBook(isbn, title, inLibrary, inPossessionOf);
 				}
 
@@ -115,23 +132,22 @@ public class Controller extends HttpServlet {
 
 		//Send book list to next page.
 		request.setAttribute("allBooks",allBooks);
-		
+
 		// Change to required page.
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		view.forward(request, response);
 	}
-	
+
 	private void populateDB() {
 		/*Empty the database*/
 		BM.deleteAllBooks();
-		
+
 		/* Add few Book records to database */ 
-		BM.addBook("9780316007573", "The Ashes Of Worlds", true, "Michael Lo"); 
-		BM.addBook("isbn", "title", true, "inPossessionOf"); 
-		BM.addBook("isbn", "title", false, "inPossessionOf"); 
-		BM.addBook("isbn", "title", true, "inPossessionOf");
-		BM.addBook("isbn", "title", false, "inPossessionOf");
-		BM.addBook("isbn", "title", true, "inPossessionOf");
-		BM.addBook("isbn", "title", true, "inPossessionOf");
+		BM.addBook("9780316007573", "The Ashes Of Worlds", false, "Michael Lo"); 
+		BM.addBook("9780425037454", "The Stars My Destination", true, "Library"); 
+		BM.addBook("9780756404079", "The Name Of The Wind", false, "Library"); 
+		BM.addBook("9781429943840", "Earth Afire", true, "Michael Lo");
+		BM.addBook("9780345490711", "Judas Unchained", false, "Library");
+		BM.addBook("9780606005739", "A Wizard Of Earthsea", true, "Library");
 	}
 } 
