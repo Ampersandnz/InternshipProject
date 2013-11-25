@@ -16,8 +16,6 @@
 				<td>|</td>
 				<td>Title:</td>
 				<td>|</td>
-				<td>In library?</td>
-				<td>|</td>
 				<td>Currently in possession of:</td>
 			</tr>
 
@@ -31,8 +29,6 @@
 				<td><%=b.getIsbn()%></td>
 				<td>|</td>
 				<td><%=b.getTitle()%></td>
-				<td>|</td>
-				<td><%=b.getInLibrary()%></td>
 				<td>|</td>
 				<td><%=b.getInPossessionOf()%></td>
 			</tr>

@@ -20,10 +20,6 @@
 				<td><input type="text" name="title"></td>
 			</tr>
 			<tr>
-				<td>In library?</td>
-				<td><input type="checkbox" name="inLibrary"></td>
-			</tr>
-			<tr>
 				<td>Currently in possession of:</td>
 				<td><input type="text" name="inPossessionOf"></td>
 			</tr>

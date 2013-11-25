@@ -118,21 +118,17 @@ public class Controller extends HttpServlet {
 
 					String isbn = "";
 					String title = "";
-					boolean inLibrary = false;
 					String inPossessionOf = "";
 
 					try {
 						isbn = request.getParameter("isbn");
 						title = request.getParameter("title");
-						if (parameters.containsKey("inLibrary")) {
-							inLibrary = true;
-						}
 						inPossessionOf = request.getParameter("inPossessionOf");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 
-					BM.addBook(isbn, title, inLibrary, inPossessionOf);
+					BM.addBook(isbn, title, inPossessionOf);
 				}
 
 				// Return to main list.
@@ -143,7 +139,31 @@ public class Controller extends HttpServlet {
 				// Just return to main list without doing anything.
 				forward = SHOWALL_JSP;
 				break;
+
+			case "edit":
+				if (parameters.containsKey("save")) {
+					// No way to tell if a field has been edited or not, so just update all of them.
+					for(String parameter : parameters.keySet()) {
+						if(parameter.startsWith("isbn")) {
+							Integer ID = Integer.parseInt(parameter.substring(4));
+							BM.updateBook(ID, "isbn", request.getParameter(parameter));
+						}
+
+						if(parameter.startsWith("title")) {
+							Integer ID = Integer.parseInt(parameter.substring(5));
+							BM.updateBook(ID, "title", request.getParameter(parameter));
+						}
+
+						if(parameter.startsWith("inPossessionOf")) {
+							Integer ID = Integer.parseInt(parameter.substring(14));
+							BM.updateBook(ID, "inPossessionOf", request.getParameter(parameter));
+						}
+					}
+				}
+				forward = SHOWALL_JSP;
+				break;
 			}
+
 		}
 
 		// Populate the list of books with the contents of the database.
@@ -172,11 +192,11 @@ public class Controller extends HttpServlet {
 		BM.deleteAllBooks();
 
 		/* Add few Book records to database */ 
-		BM.addBook("9780316007573", "The Ashes Of Worlds", false, "Michael Lo"); 
-		BM.addBook("9780425037454", "The Stars My Destination", true, "Library"); 
-		BM.addBook("9780756404079", "The Name Of The Wind", false, "Library"); 
-		BM.addBook("9781429943840", "Earth Afire", true, "Michael Lo");
-		BM.addBook("9780345490711", "Judas Unchained", false, "Library");
-		BM.addBook("9780606005739", "A Wizard Of Earthsea", true, "Library");
+		BM.addBook("9780316007573", "The Ashes Of Worlds", "Michael Lo"); 
+		BM.addBook("9780425037454", "The Stars My Destination", "Library"); 
+		BM.addBook("9780756404079", "The Name Of The Wind", "Library"); 
+		BM.addBook("9781429943840", "Earth Afire",  "Michael Lo");
+		BM.addBook("9780345490711", "Judas Unchained", "Library");
+		BM.addBook("9780606005739", "A Wizard Of Earthsea", "Library");
 	}
 } 

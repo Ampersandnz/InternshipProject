@@ -14,7 +14,6 @@
 			<tr>
 				<td>ISBN:</td>
 				<td>Title:</td>
-				<td>In library?</td>
 				<td>Currently in possession of:</td>
 			</tr>
 
@@ -27,7 +26,6 @@
 			<tr>
 				<td><input type="text" value="<%=b.getIsbn()%>" name="isbn<%=b.getId()%>" /></td>
 				<td><input type="text" value="<%=b.getTitle()%>" name="title<%=b.getId()%>" /></td>
-				<td><input type="checkbox" value="<%=b.getInLibrary()%>" name="inLibrary<%=b.getId()%>" /></td>
 				<td><input type="text" value="<%=b.getInPossessionOf()%>" name="inPossessionOf<%=b.getId()%>" /></td>
 			</tr>
 

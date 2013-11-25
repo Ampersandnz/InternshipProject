@@ -33,20 +33,14 @@ public class BookManager {
 	} 
 
 	/* Method to CREATE an Book in the database */ 
-	public Integer addBook(String isbn, String title, boolean inLibrary, String inPossessionOf) { 
+	public Integer addBook(String isbn, String title, String inPossessionOf) { 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
 		Integer BookID = null; 
 		try { 
 			tx = session.beginTransaction(); 
-			Book book = new Book(); 
-
-			book.setIsbn(isbn); 
-			book.setTitle(title);
-			book.setInLibrary(inLibrary); 
-			book.setInPossessionOf(inPossessionOf); 
+			Book book = new Book(isbn, title, inPossessionOf); 
 			BookID = (Integer) session.save(book);
-
 			tx.commit();
 		} catch (HibernateException e) { 
 			if (tx!=null) {
@@ -76,12 +70,8 @@ public class BookManager {
 				book.setTitle(newData); 
 				break;
 
-			case "inPosessionOf":
+			case "inPossessionOf":
 				book.setInPossessionOf(newData); 
-				break;
-
-			case "inLibrary":
-				book.setInLibrary(Boolean.parseBoolean(newData)); 
 				break;
 			}
 
@@ -118,11 +108,8 @@ public class BookManager {
 	} 
 
 	/* Method to RETURN all the Books */ 
-	public List<Book> getAllBooks(){ 
+	public ArrayList<Book> getAllBooks( ){ 
 		Session session = factory.openSession(); 
-		return session.createCriteria(Book.class).list();
-	}
-		/*Session session = factory.openSession(); 
 		Transaction tx = null; 
 		ArrayList<Book> allBooks = new ArrayList<Book>();
 
@@ -144,7 +131,7 @@ public class BookManager {
 			session.close(); 
 		} 
 		return null;
-	}*/
+	}
 
 	public void deleteAllBooks( ) { 
 		for (Book b: this.getAllBooks()) {

@@ -20,20 +20,16 @@ public class Book {
 	@Column(name = "title") 
 	private String title; 
 
-	@Column(name = "inLibrary") 
-	private boolean inLibrary; 
-
 	@Column(name = "inPossessionOf") 
 	private String inPossessionOf; 
 	
 	public Book() {
 	}
 
-	public Book(String isbn, String title, boolean inLibrary, String inPossessionOf) {
+	public Book(String isbn, String title, String inPossessionOf) {
 		super();
 		this.isbn = isbn;
 		this.title = title;
-		this.inLibrary = inLibrary;
 		this.inPossessionOf = inPossessionOf;
 	}
 
@@ -59,14 +55,6 @@ public class Book {
 
 	public void setTitle( String title ) { 
 		this.title = title; 
-	} 
-
-	public boolean getInLibrary() { 
-		return inLibrary; 
-	} 
-
-	public void setInLibrary( boolean inLibrary ) { 
-		this.inLibrary = inLibrary; 
 	} 
 
 	public String getInPossessionOf() { 
