@@ -39,6 +39,8 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+
+
 /**
  * 
  * @author Michael Lo
@@ -67,6 +69,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private ImageView thumbView;
 
 	private Bitmap thumbImg;
+	
+	private static final String LIBRARY_USERNAME = "_library";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -155,7 +159,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		} else if (v.getId()==R.id.return_btn) {
 			//TODO: Talk to DB, return book.
-			//Set inPossessionOf to "Library", [update local list of borrowed books]
+			//Set inPossessionOf to LIBRARY_USERNAME, [update local list of borrowed books]
 		} else if (v.getId()==R.id.borrow_btn) {
 			//TODO: Talk to DB, borrow book.
 			//Set inPossessionOf to username, [update local list of borrowed books]
@@ -181,8 +185,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					toast.show();
 				}
 			} else {
-				Toast toast = Toast.makeText(getApplicationContext(), 
-						"No book scan data received!", Toast.LENGTH_SHORT);
+				Toast toast = Toast.makeText(getApplicationContext(), "No book scan data received!", Toast.LENGTH_SHORT);
 				toast.show();
 			}
 
@@ -193,9 +196,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				edit.putString("username", username);
 				edit.apply();
 				savedUsername.setText(username);
-			}
-
-			if (resultCode == RESULT_CANCELED) {    
+			} else if (resultCode == RESULT_CANCELED) {
+				
 			}
 		}
 	}

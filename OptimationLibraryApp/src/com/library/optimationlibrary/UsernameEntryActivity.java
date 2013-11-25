@@ -12,9 +12,12 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class UsernameEntryActivity extends Activity implements OnClickListener {
 
+	private static final String LIBRARY_USERNAME = "_library";
+			
 	private EditText enterUsername;
 	
 	private Button saveButton;
@@ -67,11 +70,16 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		Intent returnIntent = new Intent();	
 		if (v.getId() == R.id.saveUsername_button) {
 			String username = enterUsername.getText().toString();
-			returnIntent.putExtra("username", username);
-			setResult(RESULT_OK,returnIntent); 
-			finish();
+			if (username.equals(LIBRARY_USERNAME)) {
+				Toast toast = Toast.makeText(getApplicationContext(), "This username is reserved. Please choose another.", Toast.LENGTH_SHORT);
+				toast.show();
+			} else {
+				returnIntent.putExtra("username", username);
+				setResult(RESULT_OK,returnIntent); 
+				finish();
+			}
 		} else if (v.getId() == R.id.cancelUsername_button) {
-			setResult(RESULT_CANCELED, returnIntent);  
+			setResult(RESULT_CANCELED, returnIntent);
 			finish();
 		}
 	}
