@@ -28,9 +28,9 @@
 				<td><input type="text" name="inPossessionOf"></td>
 			</tr>
 			<tr>
-				<td><input type="submit" name="save" value="save"> <input
-					type="reset" name="reset"> <input type="submit"
-					name="back" value="back"> <input type="hidden" name="page" value="add" />
+				<td><input type="submit" name="save" value="Save"> <input
+					type="reset" name="Reset"> <input type="submit"
+					name="back" value="Back"> <input type="hidden" name="page" value="add" />
 				</td>
 			</tr>
 		</table>

@@ -80,16 +80,16 @@
                 android:orientation="horizontal" >
 
                 <Button
-                    android:id="@+id/preview_btn"
+                    android:id="@+id/borrow_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/pre" />
+                    android:text="@string/borrowBtn" />
 
                 <Button
-                    android:id="@+id/link_btn"
+                    android:id="@+id/return_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/link" />
+                    android:text="@string/returnBtn" />
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

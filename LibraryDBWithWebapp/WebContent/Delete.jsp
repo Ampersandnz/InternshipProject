@@ -10,7 +10,7 @@
 
 	Book(s) (ISBN = <%=request.getAttribute("deletedISBNs") %>) successfully removed from library system.
 	<form method="GET" action='Controller' name="delete_success">
-		<input type="submit" value="back" name="back"> <input type="hidden"
+		<input type="submit" value="Back" name="back"> <input type="hidden"
 			name="page" value="delete" />
 	</form>
 </body>

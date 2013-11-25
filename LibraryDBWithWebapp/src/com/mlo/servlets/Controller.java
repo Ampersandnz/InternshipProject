@@ -1,7 +1,8 @@
 package com.mlo.servlets;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.io.IOException;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
@@ -23,6 +24,7 @@ public class Controller extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static String ADD_JSP = "/Add.jsp";
 	private static String DELETE_JSP = "/Delete.jsp";
+	private static String EDIT_JSP = "/Edit.jsp";
 	private static String SHOWALL_JSP = "/ShowAll.jsp";
 	private static BookManager BM = new BookManager();
 	private static int needToInitialiseDatabase = 0;
@@ -48,13 +50,13 @@ public class Controller extends HttpServlet {
 					forward = ADD_JSP;
 
 				} else if (parameters.containsKey("delete")) {
+					boolean bookBeingDeleted = false;
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("book")) {
+							bookBeingDeleted = true;
 							int ID = Integer.parseInt(parameter.substring(4));
-							System.out.println("" + ID);
 							Book book = BM.getBook(ID);
 							for (Book b: BM.getAllBooks()) {
-								System.out.println("BOOK ID: " + b.getId());
 								if (b.getId() == ID) {
 									book = b;
 								}
@@ -71,8 +73,37 @@ public class Controller extends HttpServlet {
 							request.setAttribute("deletedISBNs", updatedISBNs);
 							BM.deleteBook(ID);
 						}
-						// Display delete page.
-						forward = DELETE_JSP;
+
+						if (bookBeingDeleted) {
+							// Display delete page.
+							forward = DELETE_JSP;
+						} else {
+							// Do nothing.
+							forward = SHOWALL_JSP;
+						}
+					}
+
+				} else if (parameters.containsKey("edit")) {
+					List<Book> booksToEdit = new ArrayList<Book>();
+					boolean bookBeingEdited = false;
+					for(String parameter : parameters.keySet()) {
+						if(parameter.startsWith("book")) {
+							bookBeingEdited = true;
+							int ID = Integer.parseInt(parameter.substring(4));
+							for (Book b: BM.getAllBooks()) {
+								if (b.getId() == ID) {
+									booksToEdit.add(b);
+								}
+							}
+						}
+						if (bookBeingEdited) {
+							// Display edit page.
+							request.setAttribute("booksToEdit", booksToEdit);
+							forward = EDIT_JSP;
+						} else {
+							// Do nothing.
+							forward = SHOWALL_JSP;
+						}
 					}
 
 				} else {
@@ -83,8 +114,6 @@ public class Controller extends HttpServlet {
 				break;
 
 			case "add":
-				for (String s: parameters.keySet()) {
-				}
 				if (parameters.containsKey("save")) {
 
 					String isbn = "";
@@ -118,7 +147,7 @@ public class Controller extends HttpServlet {
 		}
 
 		// Populate the list of books with the contents of the database.
-		ArrayList<Book> allBooks = new ArrayList<Book>(); 
+		List<Book> allBooks = new ArrayList<Book>(); 
 		try {
 			if (needToInitialiseDatabase == 0) {
 				BM.initialise();

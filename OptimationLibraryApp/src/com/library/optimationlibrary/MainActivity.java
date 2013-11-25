@@ -45,8 +45,8 @@ import com.google.zxing.integration.android.IntentResult;
 public class MainActivity extends Activity implements OnClickListener {
 
 	private Button scanBtn;
-	private Button previewBtn;
-	private Button linkBtn;
+	private Button borrowBtn;
+	private Button returnBtn;
 
 	private TextView authorText;
 	private TextView titleText;
@@ -79,15 +79,15 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	public void setupButtons() {
 		scanBtn = (Button)findViewById(R.id.scan_button);
-		previewBtn = (Button)findViewById(R.id.preview_btn);
-		linkBtn = (Button)findViewById(R.id.link_btn);
+		borrowBtn = (Button)findViewById(R.id.borrow_btn);
+		returnBtn = (Button)findViewById(R.id.return_btn);
 
-		previewBtn.setVisibility(View.GONE);
-		linkBtn.setVisibility(View.GONE);
+		borrowBtn.setVisibility(View.GONE);
+		returnBtn.setVisibility(View.GONE);
 
 		scanBtn.setOnClickListener(this);
-		previewBtn.setOnClickListener(this);
-		linkBtn.setOnClickListener(this);
+		borrowBtn.setOnClickListener(this);
+		returnBtn.setOnClickListener(this);
 	}
 
 	public void setupTextViews() {
@@ -123,40 +123,26 @@ public class MainActivity extends Activity implements OnClickListener {
 		starLayout.setTag(numStars);
 		thumbImg = (Bitmap)savedInstanceState.getParcelable("thumbPic");
 		thumbView.setImageBitmap(thumbImg);
-		previewBtn.setTag(savedInstanceState.getString("isbn"));
-
-		if (savedInstanceState.getBoolean("isEmbed")) {
-			previewBtn.setEnabled(true);
-		} else {
-			previewBtn.setEnabled(false);
-		}
-
-		if (savedInstanceState.getInt("isLink")==View.VISIBLE) {
-			linkBtn.setVisibility(View.VISIBLE);
-		} else {
-			linkBtn.setVisibility(View.GONE);
-		}
-
-		previewBtn.setVisibility(View.VISIBLE);
-
+		borrowBtn.setTag(savedInstanceState.getString("isbn"));
+		
+		borrowBtn.setVisibility(View.VISIBLE);
+		returnBtn.setVisibility(View.VISIBLE);
 	}
 
 	public void onClick(View v){
 		if (v.getId()==R.id.scan_button) {
-			IntentIntegrator scanIntegrator = new IntentIntegrator(this);
-			scanIntegrator.initiateScan();
+			//TODO DISABLED THE ACTUAL SCAN FOR TESTING PURPOSES
+			//TODO IntentIntegrator scanIntegrator = new IntentIntegrator(this);
+			//TODO scanIntegrator.initiateScan();
+			String bookSearchString = "https://www.googleapis.com/books/v1/volumes?q=isbn:9780756404079&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
+			new GetBookInfo().execute(bookSearchString);
 
-		} else if (v.getId()==R.id.link_btn) {
-			String tag = (String)v.getTag();
-			Intent webIntent = new Intent(Intent.ACTION_VIEW);
-			webIntent.setData(Uri.parse(tag));
-			startActivity(webIntent);
-
-		} else if (v.getId()==R.id.preview_btn) {
-			String tag = (String)v.getTag();
-			Intent intent = new Intent(this, EmbeddedBook.class);
-			intent.putExtra("isbn", tag);
-			startActivity(intent);
+		} else if (v.getId()==R.id.return_btn) {
+			//TODO: Talk to DB, return book.
+				//Set inPossessionOf to "Library", set inLibrary=true, [update local list of borrowed books]
+		} else if (v.getId()==R.id.borrow_btn) {
+			//TODO: Talk to DB, borrow book.
+				//Set inPossessionOf to username, set inLibrary=false, [update local list of borrowed books]
 		}
 	}
 
@@ -165,10 +151,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		if (scanningResult != null) {
 			String scanContent = scanningResult.getContents();
 			String scanFormat = scanningResult.getFormatName();
-			Log.v("SCAN", "content: "+scanContent+" - format: "+scanFormat);
+			Log.v("SCAN", "content: " + scanContent + " - format: " + scanFormat);
 			if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
-				previewBtn.setTag(scanContent);
-				String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:"+scanContent+"&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
+				borrowBtn.setTag(scanContent);
+				String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:" + scanContent + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 				new GetBookInfo().execute(bookSearchString);
 			} else {
 				Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
@@ -213,7 +199,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		protected void onPostExecute(String result) {
 			try {
-				previewBtn.setVisibility(View.VISIBLE);
+				borrowBtn.setVisibility(View.VISIBLE);
 				JSONObject resultObject = new JSONObject(result);
 				JSONArray bookArray = resultObject.getJSONArray("items");
 				JSONObject bookObject = bookArray.getJSONObject(0);
@@ -275,23 +261,10 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 
 				try {
-					boolean isEmbeddable = Boolean.parseBoolean (bookObject.getJSONObject("accessInfo").getString("embeddable"));
-
-					if (isEmbeddable) {
-						previewBtn.setEnabled(true);
-					} else {
-						previewBtn.setEnabled(false);
-					}
+					returnBtn.setTag(volumeObject.getString("infoLink"));
+					returnBtn.setVisibility(View.VISIBLE);
 				} catch (JSONException jse) { 
-					previewBtn.setEnabled(false);
-					jse.printStackTrace(); 
-				}
-
-				try {
-					linkBtn.setTag(volumeObject.getString("infoLink"));
-					linkBtn.setVisibility(View.VISIBLE);
-				} catch (JSONException jse) { 
-					linkBtn.setVisibility(View.GONE);
+					returnBtn.setVisibility(View.GONE);
 					jse.printStackTrace(); 
 				}
 
@@ -302,7 +275,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					thumbView.setImageBitmap(null);
 					jse.printStackTrace();
 				}
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				titleText.setText("NOT FOUND");
@@ -312,7 +285,6 @@ public class MainActivity extends Activity implements OnClickListener {
 				starLayout.removeAllViews();
 				ratingCountText.setText("");
 				thumbView.setImageBitmap(null);
-				previewBtn.setVisibility(View.GONE);
 			}
 		}
 	}
@@ -348,16 +320,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		savedBundle.putString("date", "" + dateText.getText());
 		savedBundle.putString("ratings", "" + ratingCountText.getText());
 		savedBundle.putParcelable("thumbPic", thumbImg);
-		
+
 		if(starLayout.getTag()!=null) {
 			savedBundle.putInt("stars", Integer.parseInt(starLayout.getTag().toString()));
 		}
-		
-		savedBundle.putBoolean("isEmbed", previewBtn.isEnabled());
-		savedBundle.putInt("isLink", linkBtn.getVisibility());
-		
-		if(previewBtn.getTag()!=null) {
-			savedBundle.putString("isbn", previewBtn.getTag().toString());
+
+		if(borrowBtn.getTag()!=null) {
+			savedBundle.putString("isbn", borrowBtn.getTag().toString());
 		}
 	}
 }

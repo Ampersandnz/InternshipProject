@@ -15,11 +15,11 @@ import org.hibernate.service.ServiceRegistryBuilder;
 public class BookManager {
 	private static SessionFactory factory;
 	private static ServiceRegistry serviceRegistry;
-	
+
 	public BookManager() {
-		
+
 	}
-	
+
 	public void initialise () {
 		try {
 			Configuration configuration = new Configuration();
@@ -46,7 +46,7 @@ public class BookManager {
 			book.setInLibrary(inLibrary); 
 			book.setInPossessionOf(inPossessionOf); 
 			BookID = (Integer) session.save(book);
-			
+
 			tx.commit();
 		} catch (HibernateException e) { 
 			if (tx!=null) {
@@ -59,6 +59,44 @@ public class BookManager {
 		return BookID; 
 	} 
 
+	/* Method to UPDATE details for a Book */ 
+	public void updateBook(Integer BookID, String field, String newData) { 
+		Session session = factory.openSession(); 
+		Transaction tx = null; 
+		try { 
+			tx = session.beginTransaction(); 
+			Book book = (Book)session.get(Book.class, BookID); 
+			switch (field) {
+
+			case "isbn":
+				book.setIsbn(newData); 
+				break;
+				
+			case "title":
+				book.setTitle(newData); 
+				break;
+
+			case "inPosessionOf":
+				book.setInPossessionOf(newData); 
+				break;
+
+			case "inLibrary":
+				book.setInLibrary(Boolean.parseBoolean(newData)); 
+				break;
+			}
+
+			session.update(book); 
+			tx.commit(); 
+		} catch (HibernateException e) { 
+			if (tx!=null) {
+				tx.rollback(); 
+			}
+			e.printStackTrace(); 
+		} finally { 
+			session.close(); 
+		} 
+	} 
+
 	/* Method to DELETE an Book from the records */ 
 	public void deleteBook(Integer BookID) { 
 		Session session = factory.openSession(); 
@@ -66,8 +104,7 @@ public class BookManager {
 
 		try { 
 			tx = session.beginTransaction(); 
-			Book book = 
-					(Book)session.get(Book.class, BookID); 
+			Book book = (Book)session.get(Book.class, BookID); 
 			session.delete(book); 
 			tx.commit(); 
 		} catch (HibernateException e) { 
@@ -81,8 +118,11 @@ public class BookManager {
 	} 
 
 	/* Method to RETURN all the Books */ 
-	public ArrayList<Book> getAllBooks( ){ 
+	public List<Book> getAllBooks(){ 
 		Session session = factory.openSession(); 
+		return session.createCriteria(Book.class).list();
+	}
+		/*Session session = factory.openSession(); 
 		Transaction tx = null; 
 		ArrayList<Book> allBooks = new ArrayList<Book>();
 
@@ -104,7 +144,7 @@ public class BookManager {
 			session.close(); 
 		} 
 		return null;
-	}
+	}*/
 
 	public void deleteAllBooks( ) { 
 		for (Book b: this.getAllBooks()) {
@@ -112,22 +152,8 @@ public class BookManager {
 		}
 	} 
 
-	public Book getBook(Integer BookID) {
+	public Book getBook(Integer bookID) {
 		Session session = factory.openSession(); 
-		Transaction tx = null; 
-		try { 
-			tx = session.beginTransaction(); 
-			Book book = (Book) session.createQuery("FROM Book WHERE ID EQUALS " + BookID);
-			tx.commit();
-			return book;
-		} catch (HibernateException e) { 
-			if (tx!=null) {
-				tx.rollback(); 
-			}
-			e.printStackTrace(); 
-		} finally { 
-			session.close(); 
-		} 
-		return null;
+		return ((Book) session.get(Book.class, bookID));
 	}
 }
