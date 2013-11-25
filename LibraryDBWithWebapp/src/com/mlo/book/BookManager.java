@@ -12,6 +12,11 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
+/**
+ * 
+ * @author Michael Lo
+ *
+ */
 public class BookManager {
 	private static SessionFactory factory;
 	private static ServiceRegistry serviceRegistry;

@@ -1,8 +1,8 @@
-MOST BASIC FEATURES FIRST - Borrow, return book buttons work as required, screens display correct information
+MOST BASIC FEATURES FIRST - Borrow, return book buttons work as required (or at least appear to, no actual communication with db required), screens display correct information
 	THEN INTEGRATE WITH DATABASE - Host database somewhere
 		THEN MORE ADVANCED FEATURES - Recently scanned/All currently borrowed by username in main screen
-			THEN TESTS/ERROR CHECKING/INCORRECT USER ACTIVITY - Until then just me testing functionality so assume all user actions compliant with model of expected behaviour
-				THEN USER-FRIENDLINESS/EASE OF USE/FANCINESS/AUTOMATION/UNNESSECARY BUT USEFUL FEATURES ie Automatically getting copy borrowed by saved username
+			THEN TESTS/ERROR CHECKING/INCORRECT USER ACTIVITY - Just me testing functionality so can assume all user actions compliant with model of expected behaviour while developing, but need to handle weird behaviour ie username cannot be "Library"
+				THEN USER-FRIENDLINESS/EASE OF USE/FANCINESS/AUTOMATION/UNNESSECARY BUT USEFUL FEATURES ie Automatically choosing copy to return based on saved username's borrowed books
 					THEN LOOK/FEEL/AESTHETIC - Images, colours, swiping?
 
 Scan button

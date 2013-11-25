@@ -16,9 +16,10 @@ import com.mlo.book.Book;
 import com.mlo.book.BookManager;
 
 /**
- * Servlet implementation class Controller
+ * 
+ * @author Michael Lo
+ *
  */
-
 @WebServlet("/Controller")
 public class Controller extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -163,7 +164,6 @@ public class Controller extends HttpServlet {
 				forward = SHOWALL_JSP;
 				break;
 			}
-
 		}
 
 		// Populate the list of books with the contents of the database.

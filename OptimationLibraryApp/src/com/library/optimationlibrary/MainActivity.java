@@ -19,11 +19,14 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -53,6 +56,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private TextView descriptionText;
 	private TextView dateText;
 	private TextView ratingCountText;
+	private TextView savedUsername;
+
+	private static SharedPreferences preferences;
 
 	private LinearLayout starLayout;
 
@@ -71,6 +77,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		setupButtons();
 		setupTextViews();
 		setupStars();
+		setupImageViews();
 
 		if (savedInstanceState != null) {
 			retrieveSavedState(savedInstanceState);
@@ -97,7 +104,16 @@ public class MainActivity extends Activity implements OnClickListener {
 		dateText = (TextView)findViewById(R.id.book_date);
 		starLayout = (LinearLayout)findViewById(R.id.star_layout);
 		ratingCountText = (TextView)findViewById(R.id.book_rating_count);
-		thumbView = (ImageView)findViewById(R.id.thumb);
+		savedUsername = (TextView)findViewById(R.id.saved_username);
+
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String username = preferences.getString("username", null);
+		
+		if (null == username) {
+			savedUsername.setText("Choose a username");
+		} else {
+			savedUsername.setText(username);
+		}
 	}
 
 	public void setupStars() {
@@ -105,6 +121,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		for(int s=0; s<starViews.length; s++) {
 			starViews[s]=new ImageView(this);
 		}
+	}
+
+	public void setupImageViews() {
+		thumbView = (ImageView)findViewById(R.id.thumb);
 	}
 
 	public void retrieveSavedState (Bundle savedInstanceState) {
@@ -124,7 +144,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		thumbImg = (Bitmap)savedInstanceState.getParcelable("thumbPic");
 		thumbView.setImageBitmap(thumbImg);
 		borrowBtn.setTag(savedInstanceState.getString("isbn"));
-		
+
 		borrowBtn.setVisibility(View.VISIBLE);
 		returnBtn.setVisibility(View.VISIBLE);
 	}
@@ -139,31 +159,48 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		} else if (v.getId()==R.id.return_btn) {
 			//TODO: Talk to DB, return book.
-				//Set inPossessionOf to "Library", set inLibrary=true, [update local list of borrowed books]
+			//Set inPossessionOf to "Library", set inLibrary=true, [update local list of borrowed books]
 		} else if (v.getId()==R.id.borrow_btn) {
 			//TODO: Talk to DB, borrow book.
-				//Set inPossessionOf to username, set inLibrary=false, [update local list of borrowed books]
+			//Set inPossessionOf to username, set inLibrary=false, [update local list of borrowed books]
+		} else if (v.getId()==R.id.saved_username) {
+			System.out.println("TEXTVIEW CLICKED");
+			Intent i = new Intent(this, UsernameEntryActivity.class);
+			startActivityForResult(i, 1);
 		}
 	}
 
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-		if (scanningResult != null) {
-			String scanContent = scanningResult.getContents();
-			String scanFormat = scanningResult.getFormatName();
-			Log.v("SCAN", "content: " + scanContent + " - format: " + scanFormat);
-			if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
-				borrowBtn.setTag(scanContent);
-				String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:" + scanContent + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
-				new GetBookInfo().execute(bookSearchString);
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == 0) {
+			IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+			if (scanningResult != null) {
+				String scanContent = scanningResult.getContents();
+				String scanFormat = scanningResult.getFormatName();
+				Log.v("SCAN", "content: " + scanContent + " - format: " + scanFormat);
+				if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
+					borrowBtn.setTag(scanContent);
+					String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:" + scanContent + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
+					new GetBookInfo().execute(bookSearchString);
+				} else {
+					Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
+					toast.show();
+				}
 			} else {
-				Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
+				Toast toast = Toast.makeText(getApplicationContext(), 
+						"No book scan data received!", Toast.LENGTH_SHORT);
 				toast.show();
 			}
-		} else {
-			Toast toast = Toast.makeText(getApplicationContext(), 
-					"No book scan data received!", Toast.LENGTH_SHORT);
-			toast.show();
+			
+		} else if (requestCode == 1) {
+			if(resultCode == RESULT_OK){      
+				String username=data.getStringExtra("username");
+				Editor edit = preferences.edit();
+				edit.putString("username", username);
+				edit.apply();
+				savedUsername.setText(username);
+			}
+			if (resultCode == RESULT_CANCELED) {    
+			}
 		}
 	}
 

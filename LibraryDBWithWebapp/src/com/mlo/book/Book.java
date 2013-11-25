@@ -6,6 +6,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * 
+ * @author Michael Lo
+ *
+ */
 @Entity
 @Table(name = "BOOK") 
 public class Book { 

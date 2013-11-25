@@ -91,6 +91,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/returnBtn" />
             </LinearLayout>
+            
+			<TextView
+                android:id="@+id/saved_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:textStyle="bold" />
+            
         </LinearLayout>
     </RelativeLayout>
 
