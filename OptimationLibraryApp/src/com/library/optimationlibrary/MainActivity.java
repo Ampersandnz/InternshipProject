@@ -50,13 +50,13 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Button scanBtn;
 	private Button borrowBtn;
 	private Button returnBtn;
+	private Button savedUsername;
 
 	private TextView authorText;
 	private TextView titleText;
 	private TextView descriptionText;
 	private TextView dateText;
 	private TextView ratingCountText;
-	private TextView savedUsername;
 
 	private static SharedPreferences preferences;
 
@@ -88,6 +88,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		scanBtn = (Button)findViewById(R.id.scan_button);
 		borrowBtn = (Button)findViewById(R.id.borrow_btn);
 		returnBtn = (Button)findViewById(R.id.return_btn);
+		savedUsername = (Button)findViewById(R.id.saved_username);
 
 		borrowBtn.setVisibility(View.GONE);
 		returnBtn.setVisibility(View.GONE);
@@ -95,6 +96,11 @@ public class MainActivity extends Activity implements OnClickListener {
 		scanBtn.setOnClickListener(this);
 		borrowBtn.setOnClickListener(this);
 		returnBtn.setOnClickListener(this);
+		savedUsername.setOnClickListener(this);
+
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String username = preferences.getString("username", "Choose a username");
+		savedUsername.setText(username);
 	}
 
 	public void setupTextViews() {
@@ -104,16 +110,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		dateText = (TextView)findViewById(R.id.book_date);
 		starLayout = (LinearLayout)findViewById(R.id.star_layout);
 		ratingCountText = (TextView)findViewById(R.id.book_rating_count);
-		savedUsername = (TextView)findViewById(R.id.saved_username);
-
-		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String username = preferences.getString("username", null);
-		
-		if (null == username) {
-			savedUsername.setText("Choose a username");
-		} else {
-			savedUsername.setText(username);
-		}
 	}
 
 	public void setupStars() {
@@ -149,7 +145,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		returnBtn.setVisibility(View.VISIBLE);
 	}
 
-	public void onClick(View v){
+	public void onClick(View v) {
 		if (v.getId()==R.id.scan_button) {
 			//TODO DISABLED THE ACTUAL SCAN FOR TESTING PURPOSES
 			//TODO IntentIntegrator scanIntegrator = new IntentIntegrator(this);
@@ -159,12 +155,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		} else if (v.getId()==R.id.return_btn) {
 			//TODO: Talk to DB, return book.
-			//Set inPossessionOf to "Library", set inLibrary=true, [update local list of borrowed books]
+			//Set inPossessionOf to "Library", [update local list of borrowed books]
 		} else if (v.getId()==R.id.borrow_btn) {
 			//TODO: Talk to DB, borrow book.
-			//Set inPossessionOf to username, set inLibrary=false, [update local list of borrowed books]
+			//Set inPossessionOf to username, [update local list of borrowed books]
 		} else if (v.getId()==R.id.saved_username) {
-			System.out.println("TEXTVIEW CLICKED");
 			Intent i = new Intent(this, UsernameEntryActivity.class);
 			startActivityForResult(i, 1);
 		}
@@ -190,15 +185,16 @@ public class MainActivity extends Activity implements OnClickListener {
 						"No book scan data received!", Toast.LENGTH_SHORT);
 				toast.show();
 			}
-			
+
 		} else if (requestCode == 1) {
-			if(resultCode == RESULT_OK){      
+			if(resultCode == RESULT_OK){
 				String username=data.getStringExtra("username");
 				Editor edit = preferences.edit();
 				edit.putString("username", username);
 				edit.apply();
 				savedUsername.setText(username);
 			}
+
 			if (resultCode == RESULT_CANCELED) {    
 			}
 		}
