@@ -176,10 +176,26 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		} else if (v.getId()==R.id.return_btn) {
 			//TODO: Talk to DB, return book.
-			//Set inPossessionOf to LIBRARY_USERNAME, [update local list of borrowed books]
+				//Set inPossessionOf to LIBRARY_USERNAME, [update local list of borrowed books]
+			String username = preferences.getString("username", null);
+			if (null == username) {
+				Intent i = new Intent(this, UsernameEntryActivity.class);
+				startActivityForResult(i, 1);
+			} else {
+				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" returned by " + username, Toast.LENGTH_SHORT);
+				toast.show();
+			}
 		} else if (v.getId()==R.id.borrow_btn) {
 			//TODO: Talk to DB, borrow book.
-			//Set inPossessionOf to username, [update local list of borrowed books]
+				//Set inPossessionOf to username, [update local list of borrowed books]
+			String username = preferences.getString("username", null);
+			if (null == username) {
+				Intent i = new Intent(this, UsernameEntryActivity.class);
+				startActivityForResult(i, 1);
+			} else {
+				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" borrowed by " + username, Toast.LENGTH_SHORT);
+				toast.show();
+			}
 		} else if (v.getId()==R.id.saved_username) {
 			Intent i = new Intent(this, UsernameEntryActivity.class);
 			startActivityForResult(i, 1);
@@ -257,6 +273,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					e.printStackTrace(); 
 				}
 			}
+			Log.d("JSON", bookBuilder.toString());
 			return bookBuilder.toString();
 		}
 
@@ -269,7 +286,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
 
 				try { 
-					titleText.setText("TITLE: "+volumeObject.getString("title")); 
+					titleText.setText("Title: " + volumeObject.getString("title")); 
 				} catch (JSONException jse) { 
 					titleText.setText("");
 					jse.printStackTrace(); 
@@ -278,24 +295,24 @@ public class MainActivity extends Activity implements OnClickListener {
 				StringBuilder authorBuild = new StringBuilder("");
 				try {
 					JSONArray authorArray = volumeObject.getJSONArray("authors");
-					for(int a=0; a<authorArray.length(); a++){
+					for(int a=0; a<authorArray.length(); a++) {
 						if(a>0) authorBuild.append(", ");
 						authorBuild.append(authorArray.getString(a));
 					}
-					authorText.setText("Author(s): "+authorBuild.toString());
+					authorText.setText("Author(s): " + authorBuild.toString());
 				} catch (JSONException jse) { 
 					authorText.setText("");
 					jse.printStackTrace(); 
 				}
 
-				try { dateText.setText("Date of publication: "+volumeObject.getString("publishedDate")); 
+				try { dateText.setText("Date of publication: " + volumeObject.getString("publishedDate")); 
 				} catch (JSONException jse) { 
 					dateText.setText("");
 					jse.printStackTrace(); 
 				}
 
 				try { 
-					descriptionText.setText("Description: "+volumeObject.getString("description")); 
+					descriptionText.setText("Description: " + volumeObject.getString("description")); 
 				} catch (JSONException jse) {  
 					descriptionText.setText("");
 					jse.printStackTrace(); 
