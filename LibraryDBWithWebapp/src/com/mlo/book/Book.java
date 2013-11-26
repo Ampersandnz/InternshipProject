@@ -9,6 +9,7 @@ import javax.persistence.Table;
 /**
  * 
  * @author Michael Lo
+ * Hibernate mapping bean. Each Book represents a row in the database. Constructors, getters and setters. No computation or other methods.
  *
  */
 @Entity

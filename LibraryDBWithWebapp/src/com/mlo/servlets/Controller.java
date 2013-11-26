@@ -18,7 +18,7 @@ import com.mlo.book.BookManager;
 /**
  * 
  * @author Michael Lo
- *
+ * Class to control the behaviour of the webapp. Performs actions and displays different pages in response to user activities.
  */
 @WebServlet("/Controller")
 public class Controller extends HttpServlet {
@@ -30,7 +30,11 @@ public class Controller extends HttpServlet {
 	private static BookManager BM = new BookManager();
 	private static int needToInitialiseDatabase = 0;
 
+	/**
+	 * Whenever the user clicks a button, this method is called. It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
+	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Hidden parameter identifying the page from which the browser is returning.
 		String hiddenParam = request.getParameter("page");
 		String forward="";
 
@@ -41,11 +45,11 @@ public class Controller extends HttpServlet {
 
 			// Get a map of the request parameters
 			Map<String, String[]> parameters = request.getParameterMap();
-
+			
 			switch(hiddenParam) {
 
 			case "mainList":
-
+				
 				if (parameters.containsKey("add")) {
 					// Display add page.
 					forward = ADD_JSP;
@@ -62,10 +66,10 @@ public class Controller extends HttpServlet {
 									book = b;
 								}
 							}
-
+							
 							String currentISBNs = (String) request.getAttribute("deletedISBNs");
 							String updatedISBNs = "";
-
+							
 							if (!(null == currentISBNs)) {
 								updatedISBNs = currentISBNs + ", " + book.getIsbn();
 							} else {
@@ -79,7 +83,7 @@ public class Controller extends HttpServlet {
 							// Display delete page.
 							forward = DELETE_JSP;
 						} else {
-							// Do nothing.
+							// No books were chosen for deletion. Do nothing.
 							forward = SHOWALL_JSP;
 						}
 					}
@@ -102,7 +106,7 @@ public class Controller extends HttpServlet {
 							request.setAttribute("booksToEdit", booksToEdit);
 							forward = EDIT_JSP;
 						} else {
-							// Do nothing.
+							// No books were selected for editing. Do nothing.
 							forward = SHOWALL_JSP;
 						}
 					}
@@ -137,13 +141,13 @@ public class Controller extends HttpServlet {
 				break;
 
 			case "delete":
-				// Just return to main list without doing anything.
+				// User has clicked back button from delete page. Show updated main list again.
 				forward = SHOWALL_JSP;
 				break;
 
 			case "edit":
 				if (parameters.containsKey("save")) {
-					// No way to tell if a field has been edited or not, so just update all of them.
+					// No way to tell if a field has been changed or not, so just update all of them.
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("isbn")) {
 							Integer ID = Integer.parseInt(parameter.substring(4));
@@ -179,7 +183,7 @@ public class Controller extends HttpServlet {
 			e.printStackTrace();
 		}
 
-		//Send book list to next page.
+		// Send book list to next page.
 		request.setAttribute("allBooks",allBooks);
 
 		// Change to required page.
@@ -187,11 +191,14 @@ public class Controller extends HttpServlet {
 		view.forward(request, response);
 	}
 
+	/**
+	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. Will be removed when app is complete.
+	 */
 	private void populateDB() {
-		/*Empty the database*/
+		// Empty the database
 		BM.deleteAllBooks();
 
-		/* Add few Book records to database */ 
+		// Add few Book records to database
 		BM.addBook("9780316007573", "The Ashes Of Worlds", "Michael Lo"); 
 		BM.addBook("9780425037454", "The Stars My Destination", "Library"); 
 		BM.addBook("9780756404079", "The Name Of The Wind", "Library"); 

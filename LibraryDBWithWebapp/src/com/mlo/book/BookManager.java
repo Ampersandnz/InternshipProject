@@ -15,6 +15,8 @@ import org.hibernate.service.ServiceRegistryBuilder;
 /**
  * 
  * @author Michael Lo
+ * Hibernate database interface class. Has methods to Create, Read, Update and Delete Book entries and objects to and from the database.
+ * Also provides methods to get and delete all Books in the database, for convenience.
  *
  */
 public class BookManager {
@@ -25,6 +27,9 @@ public class BookManager {
 
 	}
 
+	/**
+	 * Sets up the database interface objects. Only needs to be called once, although no harm can come of calling it again.
+	 */
 	public void initialise () {
 		try {
 			Configuration configuration = new Configuration();
@@ -37,7 +42,15 @@ public class BookManager {
 		}
 	} 
 
-	/* Method to CREATE an Book in the database */ 
+	/**
+	 * @param isbn
+	 * @param title
+	 * @param inPossessionOf
+	 * @return Book ID
+	 * 
+	 * Method to create a new row in the database, and return its unique primary key identifier.
+	 * Takes as arguments the three fields of a Book object, each corresponding to a column in the database.
+	 */
 	public Integer addBook(String isbn, String title, String inPossessionOf) { 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
@@ -58,7 +71,13 @@ public class BookManager {
 		return BookID; 
 	} 
 
-	/* Method to UPDATE details for a Book */ 
+	/**
+	 * @param BookID
+	 * @param field
+	 * @param newData
+	 * 
+	 * Method to update a single value in the database. Book ID corresponds to the row, field determines the column to be altered.
+	 */
 	public void updateBook(Integer BookID, String field, String newData) { 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
@@ -92,7 +111,11 @@ public class BookManager {
 		} 
 	} 
 
-	/* Method to DELETE an Book from the records */ 
+	/**
+	 * @param BookID
+	 * 
+	 * Method to delete the row from the database with the given primary key.
+	 */
 	public void deleteBook(Integer BookID) { 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
@@ -112,7 +135,11 @@ public class BookManager {
 		} 
 	} 
 
-	/* Method to RETURN all the Books */ 
+	/**
+	 * @return AllBooks
+	 * 
+	 * Method to return a list of Book objects, each representing one row in the database.
+	 */
 	public ArrayList<Book> getAllBooks( ){ 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
@@ -138,12 +165,21 @@ public class BookManager {
 		return null;
 	}
 
+	/**
+	 * Method to delete all entries in all rows of the database.
+	 */
 	public void deleteAllBooks( ) { 
 		for (Book b: this.getAllBooks()) {
 			this.deleteBook(b.getId());
 		}
 	} 
 
+	/**
+	 * @param bookID
+	 * @return book
+	 * 
+	 * Method to return the Book object representing the row of the database identified by the given primary key.
+	 */
 	public Book getBook(Integer bookID) {
 		Session session = factory.openSession(); 
 		return ((Book) session.get(Book.class, bookID));

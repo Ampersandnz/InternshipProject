@@ -39,8 +39,6 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-
-
 /**
  * 
  * @author Michael Lo
@@ -88,6 +86,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * Method to map all the Button objects to views in the layout, set their listener to the MainActivity and print the text on the set username button.
+	 */
 	public void setupButtons() {
 		scanBtn = (Button)findViewById(R.id.scan_button);
 		borrowBtn = (Button)findViewById(R.id.borrow_btn);
@@ -107,6 +108,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		savedUsername.setText(username);
 	}
 
+	/**
+	 * Method to map all the TextView objects to views in the layout.
+	 */
 	public void setupTextViews() {
 		authorText = (TextView)findViewById(R.id.book_author);
 		titleText = (TextView)findViewById(R.id.book_title);
@@ -116,17 +120,27 @@ public class MainActivity extends Activity implements OnClickListener {
 		ratingCountText = (TextView)findViewById(R.id.book_rating_count);
 	}
 
+	/**
+	 * Method to set up the five ImageViews for the rating stars.
+	 */
 	public void setupStars() {
 		starViews=new ImageView[5];
-		for(int s=0; s<starViews.length; s++) {
+		for(int s=0; s < starViews.length; s++) {
 			starViews[s]=new ImageView(this);
 		}
 	}
 
+	/**
+	 * Method to map the ImageView object to the book cover thumbnail view in the layout.
+	 */
 	public void setupImageViews() {
 		thumbView = (ImageView)findViewById(R.id.thumb);
 	}
 
+	/**
+	 * @param savedInstanceState
+	 * Retrieves all saved data. Is called to redraw the window when the device is rotated, resumed etc.
+	 */
 	public void retrieveSavedState (Bundle savedInstanceState) {
 		authorText.setText(savedInstanceState.getString("author"));
 		titleText.setText(savedInstanceState.getString("title"));
@@ -149,6 +163,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		returnBtn.setVisibility(View.VISIBLE);
 	}
 
+	/**
+	 * MainActivity implements OnClickListener, and OnClick() is called when one of its associated notifiers is clicked. This method then responds appropriately.
+	 */
 	public void onClick(View v) {
 		if (v.getId()==R.id.scan_button) {
 			//TODO DISABLED THE ACTUAL SCAN FOR TESTING PURPOSES
@@ -169,6 +186,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * Method to retrieve data and take actions as appropriate when a method called with StartActivityForResult() finishes.
+	 * Will either retrieve the data from a scanned barcode and use it to pull book information from the Google Books API, or get the chosen username and save it in StoredPreferences.
+	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 0) {
 			IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -178,6 +199,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				Log.v("SCAN", "content: " + scanContent + " - format: " + scanFormat);
 				if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
 					borrowBtn.setTag(scanContent);
+					// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
 					String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:" + scanContent + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 					new GetBookInfo().execute(bookSearchString);
 				} else {
@@ -202,6 +224,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * 
+	 * @author Michael Lo
+	 * Class to asynchronously download all book data from Google Books.
+	 * 
+	 */
 	private class GetBookInfo extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... bookURLs) {
@@ -310,8 +338,9 @@ public class MainActivity extends Activity implements OnClickListener {
 					thumbView.setImageBitmap(null);
 					jse.printStackTrace();
 				}
-
+				
 			} catch (Exception e) {
+				//Default to empty values
 				e.printStackTrace();
 				titleText.setText("NOT FOUND");
 				authorText.setText("");
@@ -324,6 +353,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * 
+	 * @author Michael Lo
+	 * Class to asynchronously download book cover image from Google Books.
+	 * 
+	 */
 	private class GetBookThumb extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... thumbURLs) {
@@ -334,7 +369,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				InputStream thumbIn = thumbConn.getInputStream(); 
 				BufferedInputStream thumbBuff = new BufferedInputStream(thumbIn); 
 				thumbImg = BitmapFactory.decodeStream(thumbBuff);
-
+				
 				thumbBuff.close(); 
 				thumbIn.close(); 
 			} catch(Exception e) {
@@ -348,6 +383,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * Method to save all currently displayed book data. Called when device is rotated, suspended etc.
+	 */
 	protected void onSaveInstanceState(Bundle savedBundle) {
 		savedBundle.putString("title", "" + titleText.getText());
 		savedBundle.putString("author", "" + authorText.getText());
