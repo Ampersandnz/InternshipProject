@@ -19,7 +19,7 @@ import org.hibernate.service.ServiceRegistryBuilder;
  * Also provides methods to get and delete all Books in the database, for convenience.
  *
  */
-public class BookManager {
+public class BookManager implements LibraryManager {
 	private static SessionFactory factory;
 	private static ServiceRegistry serviceRegistry;
 
@@ -52,12 +52,20 @@ public class BookManager {
 	 * Takes as arguments the three fields of a Book object, each corresponding to a column in the database.
 	 */
 	public Integer addBook(String isbn, String title, String inPossessionOf) { 
+		if (null == isbn || "".equals(isbn)) {
+			isbn = "No isbn available.";
+		}
+		if (null == title || "".equals(title)) {
+			title = "No title available.";
+		}
 		if (null == inPossessionOf || "".equals(inPossessionOf)) {
 			inPossessionOf = "_library";
 		}
+		
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
 		Integer BookID = null; 
+		
 		try { 
 			tx = session.beginTransaction(); 
 			Book book = new Book(isbn, title, inPossessionOf); 
@@ -82,6 +90,16 @@ public class BookManager {
 	 * Takes as arguments a Book object. Should only be called for Books that are not already in the database (have no id), or a copy will be created.
 	 */
 	public Integer addBook(Book bookWithoutId) { 
+		if (null == bookWithoutId.getIsbn() || "".equals(bookWithoutId.getIsbn())) {
+			bookWithoutId.setIsbn("No isbn available.");
+		}
+		if (null == bookWithoutId.getTitle() || "".equals(bookWithoutId.getTitle())) {
+			bookWithoutId.setTitle("No title available.");
+		}
+		if (null == bookWithoutId.getInPossessionOf() || "".equals(bookWithoutId.getInPossessionOf())) {
+			bookWithoutId.setInPossessionOf("_library");
+		}
+		
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
 		Integer BookID = null; 
@@ -116,10 +134,16 @@ public class BookManager {
 			switch (field) {
 
 			case "isbn":
+				if (null == newData || "".equals(newData)) {
+					newData = "No isbn available.";
+				}
 				book.setIsbn(newData); 
 				break;
 				
 			case "title":
+				if (null == newData || "".equals(newData)) {
+					newData = "No title available.";
+				}
 				book.setTitle(newData); 
 				break;
 
@@ -172,7 +196,7 @@ public class BookManager {
 	 * 
 	 * Method to return a list of Book objects, each representing one row in the database.
 	 */
-	public ArrayList<Book> getAllBooks( ){ 
+	public ArrayList<Book> getAllBooks(){ 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
 		ArrayList<Book> allBooks = new ArrayList<Book>();
@@ -200,7 +224,7 @@ public class BookManager {
 	/**
 	 * Method to delete all entries in all rows of the database.
 	 */
-	public void deleteAllBooks( ) { 
+	public void deleteAllBooks() { 
 		for (Book b: this.getAllBooks()) {
 			this.deleteBook(b.getId());
 		}

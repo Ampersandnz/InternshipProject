@@ -4,12 +4,12 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Delete book</title>
+<title>Book(s) deleted</title>
 </head>
 <body>
 
 	Book(s) (ISBN = <%=request.getAttribute("deletedISBNs") %>) successfully removed from library system.
-	<form method="GET" action='Controller' name="delete_success">
+	<form method="GET" action='librarydbforgoogleapps' name="delete_success">
 		<input type="submit" value="Back" name="back"> <input type="hidden"
 			name="page" value="delete" />
 	</form>

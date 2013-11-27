@@ -1,6 +1,8 @@
 package com.mlo;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,19 +12,33 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mlo.book.Book;
 import com.mlo.book.BookManager;
 import com.mlo.book.BookManagerList;
+import com.mlo.book.LibraryManager;
 
-@WebServlet("/Controller")
-public class Controller extends HttpServlet {
+@WebServlet("/librarydbforgoogleapps")
+public class LibraryDBForGoogleAppsServlet extends HttpServlet {
+
+
+
+
+
+	private static final String TEST_USERNAME = "Michael Lo";
+	private static final String LIBRARY_USERNAME = "_library";
+
+
+
+
 	private static final long serialVersionUID = 1L;
-	private static String ADD_JSP = "/Add.jsp";
-	private static String DELETE_JSP = "/Delete.jsp";
-	private static String EDIT_JSP = "/Edit.jsp";
-	private static String SHOWALL_JSP = "/ShowAll.jsp";
-	//private static BookManager BM = new BookManager();
-	private static BookManagerList BM = new BookManagerList();
+	private static final String ADD_JSP = "/Add.jsp";
+	private static final String DELETE_JSP = "/Delete.jsp";
+	private static final String EDIT_JSP = "/Edit.jsp";
+	private static final String SHOWALL_JSP = "/ShowAll.jsp";
+	private static final String BORROW_JSP = "/Borrow.jsp";
+	private static final String RETURN_JSP = "/Return.jsp";
+	private static LibraryManager BM = new BookManagerList(); // = new BookManager();
 	private static int needToInitialiseDatabase = 0;
 
 	/*public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -135,7 +151,101 @@ public class Controller extends HttpServlet {
 							forward = SHOWALL_JSP;
 						}
 					}
+				} else if (parameters.containsKey("borrow")) {
+					boolean bookBeingBorrowed = false;
+					for(String parameter : parameters.keySet()) {
+						if(parameter.startsWith("book")) {
+							bookBeingBorrowed = true;
+							int ID = Integer.parseInt(parameter.substring(4));
+							Book book = new Book();
+							for (Book b: BM.getAllBooks()) {
+								if (b.getId() == ID) {
+									book = b;
+								}
+							}
 
+							String currentBorrowedISBNs = (String) request.getAttribute("borrowedISBNs");
+							String currentNotBorrowedISBNs = (String) request.getAttribute("notBorrowedISBNs");
+							String borrowedISBNs = null;
+							String notBorrowedISBNs = null;
+							
+							if (book.getInPossessionOf().equals(TEST_USERNAME)) {
+								if (!(null == currentNotBorrowedISBNs)) {
+									notBorrowedISBNs = currentNotBorrowedISBNs + ", " + book.getIsbn();
+								} else {
+									notBorrowedISBNs =  book.getIsbn();
+								}
+								borrowedISBNs = currentBorrowedISBNs;
+							} else {
+								if (!(null == currentBorrowedISBNs)) {
+									borrowedISBNs = currentBorrowedISBNs + ", " + book.getIsbn();
+								} else {
+									borrowedISBNs =  book.getIsbn();
+								}
+								notBorrowedISBNs = currentNotBorrowedISBNs;
+								BM.updateBook(ID, "inPossessionOf", TEST_USERNAME);
+							}
+
+							request.setAttribute("notBorrowedISBNs", notBorrowedISBNs);
+							request.setAttribute("borrowedISBNs", borrowedISBNs);
+							request.setAttribute("borrower", TEST_USERNAME);
+						}
+
+						if (bookBeingBorrowed) {
+							// Display borrow page.
+							forward = BORROW_JSP;
+						} else {
+							// No books were chosen for borrowing. Do nothing.
+							forward = SHOWALL_JSP;
+						}
+					}
+				} else if (parameters.containsKey("return")) {
+					boolean bookBeingReturned = false;
+					for(String parameter : parameters.keySet()) {
+						if(parameter.startsWith("book")) {
+							bookBeingReturned = true;
+							int ID = Integer.parseInt(parameter.substring(4));
+							Book book = new Book();
+							for (Book b: BM.getAllBooks()) {
+								if (b.getId() == ID) {
+									book = b;
+								}
+							}
+
+							String currentReturnedISBNs = (String) request.getAttribute("returnedISBNs");
+							String currentNotReturnedISBNs = (String) request.getAttribute("notReturnedISBNs");
+							String returnedISBNs = null;
+							String notReturnedISBNs = null;
+							
+							if (book.getInPossessionOf().equals(LIBRARY_USERNAME)) {
+								if (!(null == currentNotReturnedISBNs)) {
+									notReturnedISBNs = currentNotReturnedISBNs + ", " + book.getIsbn();
+								} else {
+									notReturnedISBNs =  book.getIsbn();
+								}
+								returnedISBNs = currentReturnedISBNs;
+							} else {
+								if (!(null == currentReturnedISBNs)) {
+									returnedISBNs = currentReturnedISBNs + ", " + book.getIsbn();
+								} else {
+									returnedISBNs =  book.getIsbn();
+								}
+								notReturnedISBNs = currentNotReturnedISBNs;
+								BM.updateBook(ID, "inPossessionOf", LIBRARY_USERNAME);
+							}
+
+							request.setAttribute("notReturnedISBNs", notReturnedISBNs);
+							request.setAttribute("returnedISBNs", returnedISBNs);
+						}
+
+						if (bookBeingReturned) {
+							// Display return page.
+							forward = RETURN_JSP;
+						} else {
+							// No books were chosen for returning. Do nothing.
+							forward = SHOWALL_JSP;
+						}
+					}
 				} else {
 					// Return to main list.
 					forward = SHOWALL_JSP;
@@ -167,6 +277,16 @@ public class Controller extends HttpServlet {
 
 			case "delete":
 				// User has clicked back button from delete page. Show updated main list again.
+				forward = SHOWALL_JSP;
+				break;
+
+			case "borrow":
+				// User has clicked back button from borrow page. Show updated main list again.
+				forward = SHOWALL_JSP;
+				break;
+
+			case "return":
+				// User has clicked back button from return page. Show updated main list again.
 				forward = SHOWALL_JSP;
 				break;
 
@@ -202,6 +322,35 @@ public class Controller extends HttpServlet {
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		view.forward(request, response);
 	}
+
+	/***************************************************
+	 * doPost(): receives JSON data, parse it, map it and send back as JSON
+	 ****************************************************/
+	/* protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException{
+
+        // 1. get received JSON data from request
+        BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+        String json = "";
+        if(br != null){
+            json = br.readLine();
+        }
+
+        // 2. initiate jackson mapper
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 3. Convert received JSON to Book
+        Book book = mapper.readValue(json, Book.class);
+
+        // 4. Set response type to JSON
+        response.setContentType("application/json");            
+
+        // 5. Add book to database
+        BM.addBook(book);
+
+        // 6. Send database as JSON to client
+        mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
+    }*/
 
 	/**
 	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. Will be removed when app is complete.

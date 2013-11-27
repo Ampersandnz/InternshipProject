@@ -9,7 +9,7 @@
 </head>
 <body>
 
-	<form method="GET" action='Controller' name="showall">
+	<form method="GET" action='librarydbforgoogleapps' name="showall">
 		<table>
 			<tr>
 				<td></td>

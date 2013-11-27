@@ -9,7 +9,7 @@
 <body>
 	Edit book data
 
-	<form method="GET" action='Controller' name="edit">
+	<form method="GET" action='librarydbforgoogleapps' name="edit">
 		<table>
 			<tr>
 				<td>ISBN:</td>

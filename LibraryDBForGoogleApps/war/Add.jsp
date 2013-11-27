@@ -9,7 +9,7 @@
 <body>
 	New book entry
 
-	<form method="GET" action='Controller' name="add">
+	<form method="GET" action='librarydbforgoogleapps' name="add">
 		<table>
 			<tr>
 				<td>ISBN:</td>
