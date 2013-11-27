@@ -2,6 +2,7 @@ package com.library.optimationlibrary;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -12,6 +13,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,6 +26,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -38,6 +43,7 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.library.optimationlibrary.temporary.Person;
 
 /**
  * 
@@ -57,6 +63,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private TextView descriptionText;
 	private TextView dateText;
 	private TextView ratingCountText;
+	private TextView isConnected;
 
 	private static SharedPreferences preferences;
 
@@ -67,7 +74,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private ImageView thumbView;
 
 	private Bitmap thumbImg;
-	
+
 	private static final String LIBRARY_USERNAME = "_library";
 
 	@Override
@@ -118,6 +125,16 @@ public class MainActivity extends Activity implements OnClickListener {
 		dateText = (TextView)findViewById(R.id.book_date);
 		starLayout = (LinearLayout)findViewById(R.id.star_layout);
 		ratingCountText = (TextView)findViewById(R.id.book_rating_count);
+		isConnected = (TextView) findViewById(R.id.isConnected);
+
+		if(this.checkConnection()){
+			isConnected.setBackgroundColor(0xFF00CC00);
+			isConnected.setText("Connected to server.");
+		}
+		else{
+			isConnected.setBackgroundColor(0xFFFF0000);
+			isConnected.setText("#Not connected to server!#");
+		}
 	}
 
 	/**
@@ -167,38 +184,45 @@ public class MainActivity extends Activity implements OnClickListener {
 	 * MainActivity implements OnClickListener, and OnClick() is called when one of its associated notifiers is clicked. This method then responds appropriately.
 	 */
 	public void onClick(View v) {
-		if (v.getId()==R.id.scan_button) {
+		String username = preferences.getString("username", null);
+		switch(v.getId()) {
+		case R.id.scan_button:
 			//TODO DISABLED THE ACTUAL SCAN FOR TESTING PURPOSES
 			//TODO IntentIntegrator scanIntegrator = new IntentIntegrator(this);
 			//TODO scanIntegrator.initiateScan();
 			String bookSearchString = "https://www.googleapis.com/books/v1/volumes?q=isbn:9780756404079&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 			new GetBookInfo().execute(bookSearchString);
+			break;
 
-		} else if (v.getId()==R.id.return_btn) {
+		case R.id.return_btn:
 			//TODO: Talk to DB, return book.
-				//Set inPossessionOf to LIBRARY_USERNAME, [update local list of borrowed books]
-			String username = preferences.getString("username", null);
+			//Set inPossessionOf to LIBRARY_USERNAME, [update local list of borrowed books]
 			if (null == username) {
 				Intent i = new Intent(this, UsernameEntryActivity.class);
 				startActivityForResult(i, 1);
 			} else {
+				new HttpAsyncTask().execute("http://hmkcode.appspot.com/jsonservlet");
 				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" returned by " + username, Toast.LENGTH_SHORT);
 				toast.show();
 			}
-		} else if (v.getId()==R.id.borrow_btn) {
+			break;
+
+		case R.id.borrow_btn:
 			//TODO: Talk to DB, borrow book.
-				//Set inPossessionOf to username, [update local list of borrowed books]
-			String username = preferences.getString("username", null);
+			//Set inPossessionOf to username, [update local list of borrowed books]
 			if (null == username) {
 				Intent i = new Intent(this, UsernameEntryActivity.class);
 				startActivityForResult(i, 1);
 			} else {
+				new HttpAsyncTask().execute("http://hmkcode.appspot.com/jsonservlet");
 				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" borrowed by " + username, Toast.LENGTH_SHORT);
 				toast.show();
 			}
-		} else if (v.getId()==R.id.saved_username) {
+			break;
+		case R.id.saved_username:
 			Intent i = new Intent(this, UsernameEntryActivity.class);
 			startActivityForResult(i, 1);
+			break;
 		}
 	}
 
@@ -235,8 +259,41 @@ public class MainActivity extends Activity implements OnClickListener {
 				edit.apply();
 				savedUsername.setText(username);
 			} else if (resultCode == RESULT_CANCELED) {
-				
+
 			}
+		}
+	}
+
+	/**
+	 * @return isConnected
+	 * Method to check if a connection has been established
+	 */
+	public boolean checkConnection() {
+		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+		if (networkInfo != null && networkInfo.isConnected()) 
+			return true;
+		else
+			return false;    
+	}
+
+	/**
+	 * Method to save all currently displayed book data. Called when device is rotated, suspended etc.
+	 */
+	protected void onSaveInstanceState(Bundle savedBundle) {
+		savedBundle.putString("title", "" + titleText.getText());
+		savedBundle.putString("author", "" + authorText.getText());
+		savedBundle.putString("description", "" + descriptionText.getText());
+		savedBundle.putString("date", "" + dateText.getText());
+		savedBundle.putString("ratings", "" + ratingCountText.getText());
+		savedBundle.putParcelable("thumbPic", thumbImg);
+
+		if(starLayout.getTag()!=null) {
+			savedBundle.putInt("stars", Integer.parseInt(starLayout.getTag().toString()));
+		}
+
+		if(borrowBtn.getTag()!=null) {
+			savedBundle.putString("isbn", borrowBtn.getTag().toString());
 		}
 	}
 
@@ -355,7 +412,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					thumbView.setImageBitmap(null);
 					jse.printStackTrace();
 				}
-				
+
 			} catch (Exception e) {
 				//Default to empty values
 				e.printStackTrace();
@@ -386,7 +443,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				InputStream thumbIn = thumbConn.getInputStream(); 
 				BufferedInputStream thumbBuff = new BufferedInputStream(thumbIn); 
 				thumbImg = BitmapFactory.decodeStream(thumbBuff);
-				
+
 				thumbBuff.close(); 
 				thumbIn.close(); 
 			} catch(Exception e) {
@@ -401,22 +458,107 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	/**
-	 * Method to save all currently displayed book data. Called when device is rotated, suspended etc.
+	 * 
+	 * @author http://hmkcode.com/android-send-json-data-to-server/
+	 * Temporary class to test webserver interaction until such time as my own can be developed.
+	 *
 	 */
-	protected void onSaveInstanceState(Bundle savedBundle) {
-		savedBundle.putString("title", "" + titleText.getText());
-		savedBundle.putString("author", "" + authorText.getText());
-		savedBundle.putString("description", "" + descriptionText.getText());
-		savedBundle.putString("date", "" + dateText.getText());
-		savedBundle.putString("ratings", "" + ratingCountText.getText());
-		savedBundle.putParcelable("thumbPic", thumbImg);
+	private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... urls) {
 
-		if(starLayout.getTag()!=null) {
-			savedBundle.putInt("stars", Integer.parseInt(starLayout.getTag().toString()));
+			Person person = new Person();
+			person.setName("Michael Lo");
+			person.setCountry("New Zealand");
+			person.setTwitter("None");
+
+			return POST(urls[0], person);
 		}
-
-		if(borrowBtn.getTag()!=null) {
-			savedBundle.putString("isbn", borrowBtn.getTag().toString());
+		// onPostExecute displays the results of the AsyncTask.
+		@Override
+		protected void onPostExecute(String result) {
+			Toast.makeText(getBaseContext(), "Data Sent!", Toast.LENGTH_LONG).show();
 		}
 	}
+
+	/**
+	 * @param url
+	 * @param person
+	 * @return result
+	 * Temporary method to use with Person class and webserver until I have my own.
+	 */
+	public static String POST(String url, Person person){
+		InputStream inputStream = null;
+		String result = "";
+		try {
+
+			// 1. create HttpClient
+			HttpClient httpclient = new DefaultHttpClient();
+
+			// 2. make POST request to the given URL
+			HttpPost httpPost = new HttpPost(url);
+
+			String json = "";
+
+			// 3. build jsonObject
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.accumulate("name", person.getName());
+			jsonObject.accumulate("country", person.getCountry());
+			jsonObject.accumulate("twitter", person.getTwitter());
+
+			// 4. convert JSONObject to JSON to String
+			json = jsonObject.toString();
+
+			// ** Alternative way to convert Person object to JSON string usin Jackson Lib 
+			// ObjectMapper mapper = new ObjectMapper();
+			// json = mapper.writeValueAsString(person); 
+
+			// 5. set json to StringEntity
+			StringEntity se = new StringEntity(json);
+
+			// 6. set httpPost Entity
+			httpPost.setEntity(se);
+
+			// 7. Set some headers to inform server about the type of the content   
+			httpPost.setHeader("Accept", "application/json");
+			httpPost.setHeader("Content-type", "application/json");
+
+			// 8. Execute POST request to the given URL
+			HttpResponse httpResponse = httpclient.execute(httpPost);
+
+			// 9. receive response as inputStream
+			inputStream = httpResponse.getEntity().getContent();
+
+			// 10. convert inputstream to string
+			if(inputStream != null)
+				result = convertInputStreamToString(inputStream);
+			else
+				result = "Did not work!";
+
+		} catch (Exception e) {
+			Log.d("InputStream", e.getLocalizedMessage());
+		}
+
+		// 11. return result
+		return result;
+	}
+
+	/**
+	 * @param inputStream
+	 * @return result
+	 * @throws IOException
+	 * 
+	 * Temporary method to use with Person class and webserver until I have my own.
+	 */
+	private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+		BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+		String line = "";
+		String result = "";
+		while((line = bufferedReader.readLine()) != null) {
+			result += line;
+		}
+		inputStream.close();
+		return result;
+
+	}   
 }

@@ -13,6 +13,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Jackson JARs"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/hibernate-commons-annotations-4.0.4.Final.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/hibernate-core-4.2.6.Final.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javassist-3.15.0-GA.jar"/>

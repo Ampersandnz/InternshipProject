@@ -2,7 +2,9 @@ package com.mlo.servlets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mlo.book.Book;
 import com.mlo.book.BookManager;
 
@@ -190,6 +193,35 @@ public class Controller extends HttpServlet {
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		view.forward(request, response);
 	}
+	
+	/***************************************************
+     * doPost(): receives JSON data, parse it, map it and send back as JSON
+     ****************************************************/
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException{
+ 
+        // 1. get received JSON data from request
+        BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+        String json = "";
+        if(br != null){
+            json = br.readLine();
+        }
+ 
+        // 2. initiate jackson mapper
+        ObjectMapper mapper = new ObjectMapper();
+ 
+        // 3. Convert received JSON to Book
+        Book book = mapper.readValue(json, Book.class);
+ 
+        // 4. Set response type to JSON
+        response.setContentType("application/json");            
+ 
+        // 5. Add book to database
+        BM.addBook(book);
+ 
+        // 6. Send database as JSON to client
+        mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
+    }
 
 	/**
 	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. Will be removed when app is complete.
@@ -200,10 +232,10 @@ public class Controller extends HttpServlet {
 
 		// Add few Book records to database
 		BM.addBook("9780316007573", "The Ashes Of Worlds", "Michael Lo"); 
-		BM.addBook("9780425037454", "The Stars My Destination", "Library"); 
-		BM.addBook("9780756404079", "The Name Of The Wind", "Library"); 
+		BM.addBook("9780425037454", "The Stars My Destination", "_library"); 
+		BM.addBook("9780756404079", "The Name Of The Wind", "_library"); 
 		BM.addBook("9781429943840", "Earth Afire",  "Michael Lo");
-		BM.addBook("9780345490711", "Judas Unchained", "Library");
-		BM.addBook("9780606005739", "A Wizard Of Earthsea", "Library");
+		BM.addBook("9780345490711", "Judas Unchained", "_library");
+		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
 	}
 } 

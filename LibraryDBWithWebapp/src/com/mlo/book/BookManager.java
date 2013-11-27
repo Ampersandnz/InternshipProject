@@ -52,6 +52,9 @@ public class BookManager {
 	 * Takes as arguments the three fields of a Book object, each corresponding to a column in the database.
 	 */
 	public Integer addBook(String isbn, String title, String inPossessionOf) { 
+		if (null == inPossessionOf) {
+			inPossessionOf = "_library";
+		}
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
 		Integer BookID = null; 
@@ -59,6 +62,32 @@ public class BookManager {
 			tx = session.beginTransaction(); 
 			Book book = new Book(isbn, title, inPossessionOf); 
 			BookID = (Integer) session.save(book);
+			tx.commit();
+		} catch (HibernateException e) { 
+			if (tx!=null) {
+				tx.rollback(); 
+			}
+			e.printStackTrace(); 
+		} finally { 
+			session.close(); 
+		} 
+		return BookID; 
+	} 
+	
+	/**
+	 * @param bookWithoutId
+	 * @return Book ID
+	 * 
+	 * Method to create a new row in the database, and return its unique primary key identifier.
+	 * Takes as arguments a Book object. Should only be called for Books that are not already in the database (have no id), or a copy will be created.
+	 */
+	public Integer addBook(Book bookWithoutId) { 
+		Session session = factory.openSession(); 
+		Transaction tx = null; 
+		Integer BookID = null; 
+		try { 
+			tx = session.beginTransaction(); 
+			BookID = (Integer) session.save(bookWithoutId);
 			tx.commit();
 		} catch (HibernateException e) { 
 			if (tx!=null) {

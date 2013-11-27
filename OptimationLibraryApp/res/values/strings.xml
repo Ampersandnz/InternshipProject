@@ -8,9 +8,10 @@
     <string name="thumb">Book thumbnail</string>
     <string name="borrowBtn">Borrow book</string>
     <string name="returnBtn">Return book</string>
-    <string name="title_activity_username_entry">Enter Username:</string>
+    <string name="title_activity_username_entry">Enter username:</string>
     <string name="username">Username</string>
     <string name="saveBtn">Save</string>
     <string name="cancelBtn">Cancel</string>
+    <string name="notConnected">#Not connected to server!#</string>
 
 </resources>
