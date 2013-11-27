@@ -5,14 +5,14 @@ xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	<servlet>
-		<servlet-name>LibraryDBForGoogleApps</servlet-name>
-		<servlet-class>com.mlo.LibraryDBForGoogleAppsServlet</servlet-class>
+		<servlet-name>Controller</servlet-name>
+		<servlet-class>com.mlo.Controller</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>LibraryDBForGoogleApps</servlet-name>
-		<url-pattern>/librarydbforgoogleapps</url-pattern>
+		<servlet-name>Controller</servlet-name>
+		<url-pattern>/Controller</url-pattern>
 	</servlet-mapping>
 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
+		<welcome-file>ShowAll.jsp</welcome-file>
 	</welcome-file-list>
 </web-app>

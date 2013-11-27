@@ -52,7 +52,7 @@ public class BookManager {
 	 * Takes as arguments the three fields of a Book object, each corresponding to a column in the database.
 	 */
 	public Integer addBook(String isbn, String title, String inPossessionOf) { 
-		if (null == inPossessionOf) {
+		if (null == inPossessionOf || "".equals(inPossessionOf)) {
 			inPossessionOf = "_library";
 		}
 		Session session = factory.openSession(); 
@@ -124,6 +124,9 @@ public class BookManager {
 				break;
 
 			case "inPossessionOf":
+				if (null == newData || "".equals(newData)) {
+					newData = "_library";
+				}
 				book.setInPossessionOf(newData); 
 				break;
 			}
