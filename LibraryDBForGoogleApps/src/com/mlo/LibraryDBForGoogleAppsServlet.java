@@ -9,16 +9,15 @@ import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mlo.book.Book;
-import com.mlo.book.BookManager;
 import com.mlo.book.BookManagerList;
 import com.mlo.book.LibraryManager;
 
-@WebServlet("/librarydbforgoogleapps")
 public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 
@@ -61,6 +60,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		return bookList;
 	}*/
 
+	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Hidden parameter identifying the page from which the browser is returning.
 		String hiddenParam = request.getParameter("page");
@@ -325,17 +325,18 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 	/***************************************************
 	 * doPost(): receives JSON data, parse it, map it and send back as JSON
+	 * Code based on that sourced from http://hmkcode.com/java-servlet-send-receive-json-using-jquery-ajax/
+	 * 							   and http://hmkcode.com/android-send-json-data-to-server/
 	 ****************************************************/
-	/* protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException{
-
+	 protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
         // 1. get received JSON data from request
         BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
         String json = "";
-        if(br != null){
+        if (br != null) {
             json = br.readLine();
         }
-
+        
         // 2. initiate jackson mapper
         ObjectMapper mapper = new ObjectMapper();
 
@@ -345,12 +346,16 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
         // 4. Set response type to JSON
         response.setContentType("application/json");            
 
+        //	TODO: Add functionality for borrow and return buttons on app to both just add a book.
+        //	TODO: Then complete functionality for borrowing and returning with current app saved username.
+        
         // 5. Add book to database
         BM.addBook(book);
 
         // 6. Send database as JSON to client
-        mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
-    }*/
+        //	TODO: SEND BACK LIST OF BOOKS CURRENTLY BORROWED BY THIS USER
+        //mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
+    }
 
 	/**
 	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. Will be removed when app is complete.
