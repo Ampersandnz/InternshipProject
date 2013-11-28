@@ -55,3 +55,6 @@ local.properties
 
 # Log files
 *.log
+
+# UCDetector logs
+ucdetector_reports/*

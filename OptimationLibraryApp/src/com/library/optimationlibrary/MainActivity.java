@@ -267,11 +267,16 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		} else if (requestCode == 1) {
 			if(resultCode == RESULT_OK){
-				String username=data.getStringExtra("username");
+				String username = data.getStringExtra("username");
 				Editor edit = preferences.edit();
+				if (null == username || "".equals(username)) {
+					savedUsername.setText("Username");
+					username = null;
+				} else {
+					savedUsername.setText(username);
+				}
 				edit.putString("username", username);
 				edit.apply();
-				savedUsername.setText(username);
 			} else if (resultCode == RESULT_CANCELED) {
 
 			}

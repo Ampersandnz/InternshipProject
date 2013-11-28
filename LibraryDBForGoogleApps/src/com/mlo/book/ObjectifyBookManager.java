@@ -5,17 +5,15 @@ import java.util.ArrayList;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 
-public class ObjectifyBookManager implements LibraryManager {
+public class ObjectifyBookManager {
 
 	private static Objectify ofy;
 	private static final String LIBRARY_USERNAME = "_library";
 	
-	@Override
 	public void initialise() {
 		ofy = ObjectifyService.begin();
 	}
 
-	@Override
 	public Long addBook(String isbn, String title, String inPossessionOf) {
 		if (isbn.equals("")||null==isbn) {
 			isbn = "No isbn available.";
@@ -31,13 +29,13 @@ public class ObjectifyBookManager implements LibraryManager {
 		return book.getId();
 	}
 
-	@Override
+	
 	public Long addBook(Book bookWithoutId) {
 		ofy.put(bookWithoutId);
 		return bookWithoutId.getId();
 	}
 
-	@Override
+	
 	public void updateBook(Long bookId, String field, String newData) {
 		Book book = ofy.get(Book.class, bookId);
 		if (field.equals("isbn")) {
@@ -50,12 +48,12 @@ public class ObjectifyBookManager implements LibraryManager {
 		ofy.put(book);
 	}
 
-	@Override
+	
 	public void deleteBook(Long bookId) {
 		ofy.delete(Book.class, bookId);
 	}
 
-	@Override
+	
 	public ArrayList<Book> getAllBooks() {
 		ArrayList<Book> allBooks = new ArrayList<Book>();
 		for (Book b: ofy.query(Book.class)){
@@ -64,14 +62,14 @@ public class ObjectifyBookManager implements LibraryManager {
 		return allBooks;
 	}
 
-	@Override
+	
 	public void deleteAllBooks() {
 		for (Book b: ofy.query(Book.class)){
 			ofy.delete(b);
 		}
 	}
 
-	@Override
+	
 	public Book getBook(Long bookId) {
 		return ofy.get(Book.class, bookId);
 	}

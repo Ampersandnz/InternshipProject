@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -17,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.objectify.ObjectifyService;
 import com.mlo.book.Book;
-import com.mlo.book.LibraryManager;
 import com.mlo.book.ObjectifyBookManager;
 
 @SuppressWarnings("serial")
@@ -30,7 +30,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static final String TEST_USERNAME = "Michael Lo";
 	private static final String LIBRARY_USERNAME = "_library";
 
-
+	private static final Logger log = Logger.getLogger(LibraryDBForGoogleAppsServlet.class.getName());
 
 
 	private static final String ADD_JSP = "/Add.jsp";
@@ -39,35 +39,16 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static final String SHOWALL_JSP = "/ShowAll.jsp";
 	private static final String BORROW_JSP = "/Borrow.jsp";
 	private static final String RETURN_JSP = "/Return.jsp";
-	//private static LibraryManager BM = new BookManagerList(); // = new BookManager();
-	private static LibraryManager BM = new ObjectifyBookManager();
+	private static ObjectifyBookManager BM = new ObjectifyBookManager();
 	private static boolean firstRun = true;
 
 	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Hidden parameter identifying the page from which the browser is returning.
 		String hiddenParam = request.getParameter("page");
-		String forward="";
+		String forward = SHOWALL_JSP;
 
-		// Populate the list of books with the contents of the database.
-		List<Book> allBooks = new ArrayList<Book>(); 
-		try {
-			if (firstRun) {
-				ObjectifyService.register(Book.class);
-				BM.initialise();
-				populateDB();
-				firstRun = false;
-			}
-			allBooks = BM.getAllBooks();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		if (null == hiddenParam) {
-			// Return to main list.
-			forward = SHOWALL_JSP;
-		} else {
-
+		if (!(null == hiddenParam)) {
 			// Get a map of the request parameters
 			Map<String, String[]> parameters = request.getParameterMap();
 
@@ -104,7 +85,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 							forward = DELETE_JSP;
 						} else {
 							// No books were chosen for deletion. Do nothing.
-							forward = SHOWALL_JSP;
 						}
 					}
 
@@ -123,7 +103,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 							forward = EDIT_JSP;
 						} else {
 							// No books were selected for editing. Do nothing.
-							forward = SHOWALL_JSP;
 						}
 					}
 				} else if (parameters.containsKey("borrow")) {
@@ -166,7 +145,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 							forward = BORROW_JSP;
 						} else {
 							// No books were chosen for borrowing. Do nothing.
-							forward = SHOWALL_JSP;
 						}
 					}
 				} else if (parameters.containsKey("return")) {
@@ -208,12 +186,10 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 							forward = RETURN_JSP;
 						} else {
 							// No books were chosen for returning. Do nothing.
-							forward = SHOWALL_JSP;
 						}
 					}
 				} else {
 					// Return to main list.
-					forward = SHOWALL_JSP;
 				}
 
 				break;
@@ -237,22 +213,18 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 				// Return to main list.
-				forward = SHOWALL_JSP;
 				break;
 
 			case "delete":
 				// User has clicked back button from delete page. Show updated main list again.
-				forward = SHOWALL_JSP;
 				break;
 
 			case "borrow":
 				// User has clicked back button from borrow page. Show updated main list again.
-				forward = SHOWALL_JSP;
 				break;
 
 			case "return":
 				// User has clicked back button from return page. Show updated main list again.
-				forward = SHOWALL_JSP;
 				break;
 
 			case "edit":
@@ -275,14 +247,28 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 						}
 					}
 				}
-				forward = SHOWALL_JSP;
 				break;
 			}
 		}
+		
+		//Initialise default values
+		if (firstRun) {
+			ObjectifyService.register(Book.class);
+			BM.initialise();
+			populateDB();
+			firstRun = false;
+		}
 
+		// Populate the list of books with the contents of the database.
+		ArrayList<Book> allBooks = BM.getAllBooks();
+
+		log.info("Current size of allBooks: " + allBooks.size());
+		
 		// Send book list to next page.
-		request.setAttribute("allBooks",allBooks);
-
+		if (forward.equals(SHOWALL_JSP)) {
+			request.setAttribute("allBooks", allBooks);
+		}
+		
 		// Change to required page.
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		view.forward(request, response);
@@ -294,47 +280,39 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	 * 							   and http://hmkcode.com/android-send-json-data-to-server/
 	 ****************************************************/
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-		// 1. get received JSON data from request
 		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
 		String json = "";
 		if (br != null) {
 			json = br.readLine();
 		}
 
-		// 2. initiate jackson mapper
 		ObjectMapper mapper = new ObjectMapper();
 
-		// 3. Convert received JSON to Book
 		Book book = mapper.readValue(json, Book.class);
 
-		// 4. Set response type to JSON
-		response.setContentType("application/json");            
-
-		//	TODO: Add functionality for borrow and return buttons on app to both just add a book.
-		//	TODO: Then complete functionality for borrowing and returning with current app saved username.
-
-		// 5. Add book to database
+		response.setContentType("application/json");
+		
 		BM.addBook(book);
-
-		// 6. Send database as JSON to client
-		//	TODO: SEND BACK LIST OF BOOKS CURRENTLY BORROWED BY THIS USER
-		//mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
+		
+		mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
 	}
 
 	/**
-	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. Will be removed when app is complete.
+	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon webapp startup. 
+	 * Will be removed when system is complete.
 	 */
 	private void populateDB() {
 		// Empty the database
 		BM.deleteAllBooks();
 
 		// Add few Book records to database
-		BM.addBook("9780316007573", "The Ashes Of Worlds", "Michael Lo"); 
-		BM.addBook("9780425037454", "The Stars My Destination", "_library"); 
-		BM.addBook("9780756404079", "The Name Of The Wind", "_library"); 
+		BM.addBook("9780316007573", "The Ashes of Worlds", "Michael Lo");
+		BM.addBook("9780425037454", "The Stars My Destination", "_library");
+		BM.addBook("9780756404079", "The Name of the Wind", "_library");
 		BM.addBook("9781429943840", "Earth Afire",  "Michael Lo");
 		BM.addBook("9780345490711", "Judas Unchained", "_library");
-		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
+		log.info("Added five books");
+		BM.addBook("9780606005739", "A Wizard of Earthsea", "_library");
+		log.info("Added sixth book");
 	}
 }

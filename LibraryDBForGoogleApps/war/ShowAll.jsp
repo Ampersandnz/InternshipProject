@@ -8,7 +8,9 @@
 <title>Book list</title>
 </head>
 <body>
-
+	
+	<% List<Book> allBooks = (List<Book>) request.getAttribute("allBooks");%>
+	
 	<form method="GET" action='librarydbforgoogleapps' name="showall">
 		<table>
 			<tr>
@@ -18,10 +20,11 @@
 				<td>Title:</td>
 				<td>|</td>
 				<td>Currently in possession of:</td>
+				<td>|</td>
+				<td>Total: <%=allBooks.size() %></td>
 			</tr>
 
 			<%
-				List<Book> allBooks = (List<Book>) request.getAttribute("allBooks");
 				if (!(null == allBooks)) {
 					for (Book b : allBooks) {
 			%>
