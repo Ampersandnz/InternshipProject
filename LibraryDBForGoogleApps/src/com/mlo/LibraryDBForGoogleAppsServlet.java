@@ -1,5 +1,6 @@
 package com.mlo;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,10 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.googlecode.objectify.ObjectifyService;
 import com.mlo.book.Book;
-import com.mlo.book.BookManagerList;
 import com.mlo.book.LibraryManager;
+import com.mlo.book.ObjectifyBookManager;
 
+@SuppressWarnings("serial")
 public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 
@@ -30,35 +33,15 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 
 
-	private static final long serialVersionUID = 1L;
 	private static final String ADD_JSP = "/Add.jsp";
 	private static final String DELETE_JSP = "/Delete.jsp";
 	private static final String EDIT_JSP = "/Edit.jsp";
 	private static final String SHOWALL_JSP = "/ShowAll.jsp";
 	private static final String BORROW_JSP = "/Borrow.jsp";
 	private static final String RETURN_JSP = "/Return.jsp";
-	private static LibraryManager BM = new BookManagerList(); // = new BookManager();
-	private static int needToInitialiseDatabase = 0;
-
-	/*public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.setContentType("text/plain");
-		response.getWriter().println("Current books in memory:");
-		ArrayList<Book> bookList = testList();
-		for (Book b: bookList) {
-			response.getWriter().println(b.toString());
-		}
-	}
-
-	private ArrayList<Book> testList() {
-		ArrayList<Book> bookList = new ArrayList<Book>();
-		bookList.add(new Book("9780316007573", "The Ashes Of Worlds", "Michael Lo"));
-		bookList.add(new Book("9780425037454", "The Stars My Destination", "_library")); 
-		bookList.add(new Book("9780756404079", "The Name Of The Wind", "_library")); 
-		bookList.add(new Book("9781429943840", "Earth Afire",  "Michael Lo"));
-		bookList.add(new Book("9780345490711", "Judas Unchained", "_library"));
-		bookList.add(new Book("9780606005739", "A Wizard Of Earthsea", "_library"));
-		return bookList;
-	}*/
+	//private static LibraryManager BM = new BookManagerList(); // = new BookManager();
+	private static LibraryManager BM = new ObjectifyBookManager();
+	private static boolean firstRun = true;
 
 	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -69,10 +52,11 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		// Populate the list of books with the contents of the database.
 		List<Book> allBooks = new ArrayList<Book>(); 
 		try {
-			if (needToInitialiseDatabase == 0) {
+			if (firstRun) {
+				ObjectifyService.register(Book.class);
 				BM.initialise();
 				populateDB();
-				needToInitialiseDatabase = 1;
+				firstRun = false;
 			}
 			allBooks = BM.getAllBooks();
 		} catch (Exception e) {
@@ -100,13 +84,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("book")) {
 							bookBeingDeleted = true;
-							int ID = Integer.parseInt(parameter.substring(4));
-							Book book = BM.getBook(ID);
-							for (Book b: BM.getAllBooks()) {
-								if (b.getId() == ID) {
-									book = b;
-								}
-							}
+							Long Id = Long.parseLong(parameter.substring(4));
+							Book book = BM.getBook(Id);
 
 							String currentISBNs = (String) request.getAttribute("deletedISBNs");
 							String updatedISBNs = "";
@@ -117,7 +96,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 								updatedISBNs =  book.getIsbn();
 							}
 							request.setAttribute("deletedISBNs", updatedISBNs);
-							BM.deleteBook(ID);
+							BM.deleteBook(Id);
 						}
 
 						if (bookBeingDeleted) {
@@ -135,12 +114,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("book")) {
 							bookBeingEdited = true;
-							int ID = Integer.parseInt(parameter.substring(4));
-							for (Book b: BM.getAllBooks()) {
-								if (b.getId() == ID) {
-									booksToEdit.add(b);
-								}
-							}
+							Long Id = Long.parseLong(parameter.substring(4));
+							booksToEdit.add(BM.getBook(Id));
 						}
 						if (bookBeingEdited) {
 							// Display edit page.
@@ -156,19 +131,14 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("book")) {
 							bookBeingBorrowed = true;
-							int ID = Integer.parseInt(parameter.substring(4));
-							Book book = new Book();
-							for (Book b: BM.getAllBooks()) {
-								if (b.getId() == ID) {
-									book = b;
-								}
-							}
+							Long Id = Long.parseLong(parameter.substring(4));
+							Book book = BM.getBook(Id);
 
 							String currentBorrowedISBNs = (String) request.getAttribute("borrowedISBNs");
 							String currentNotBorrowedISBNs = (String) request.getAttribute("notBorrowedISBNs");
 							String borrowedISBNs = null;
 							String notBorrowedISBNs = null;
-							
+
 							if (book.getInPossessionOf().equals(TEST_USERNAME)) {
 								if (!(null == currentNotBorrowedISBNs)) {
 									notBorrowedISBNs = currentNotBorrowedISBNs + ", " + book.getIsbn();
@@ -183,7 +153,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 									borrowedISBNs =  book.getIsbn();
 								}
 								notBorrowedISBNs = currentNotBorrowedISBNs;
-								BM.updateBook(ID, "inPossessionOf", TEST_USERNAME);
+								BM.updateBook(Id, "inPossessionOf", TEST_USERNAME);
 							}
 
 							request.setAttribute("notBorrowedISBNs", notBorrowedISBNs);
@@ -204,19 +174,14 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("book")) {
 							bookBeingReturned = true;
-							int ID = Integer.parseInt(parameter.substring(4));
-							Book book = new Book();
-							for (Book b: BM.getAllBooks()) {
-								if (b.getId() == ID) {
-									book = b;
-								}
-							}
+							Long Id = Long.parseLong(parameter.substring(4));
+							Book book = BM.getBook(Id);
 
 							String currentReturnedISBNs = (String) request.getAttribute("returnedISBNs");
 							String currentNotReturnedISBNs = (String) request.getAttribute("notReturnedISBNs");
 							String returnedISBNs = null;
 							String notReturnedISBNs = null;
-							
+
 							if (book.getInPossessionOf().equals(LIBRARY_USERNAME)) {
 								if (!(null == currentNotReturnedISBNs)) {
 									notReturnedISBNs = currentNotReturnedISBNs + ", " + book.getIsbn();
@@ -231,7 +196,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 									returnedISBNs =  book.getIsbn();
 								}
 								notReturnedISBNs = currentNotReturnedISBNs;
-								BM.updateBook(ID, "inPossessionOf", LIBRARY_USERNAME);
+								BM.updateBook(Id, "inPossessionOf", LIBRARY_USERNAME);
 							}
 
 							request.setAttribute("notReturnedISBNs", notReturnedISBNs);
@@ -295,18 +260,18 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 					// No way to tell if a field has been changed or not, so just update all of them.
 					for(String parameter : parameters.keySet()) {
 						if(parameter.startsWith("isbn")) {
-							Integer ID = Integer.parseInt(parameter.substring(4));
-							BM.updateBook(ID, "isbn", request.getParameter(parameter));
+							Long Id = Long.parseLong(parameter.substring(4));
+							BM.updateBook(Id, "isbn", request.getParameter(parameter));
 						}
 
 						if(parameter.startsWith("title")) {
-							Integer ID = Integer.parseInt(parameter.substring(5));
-							BM.updateBook(ID, "title", request.getParameter(parameter));
+							Long Id = Long.parseLong(parameter.substring(5));
+							BM.updateBook(Id, "title", request.getParameter(parameter));
 						}
 
 						if(parameter.startsWith("inPossessionOf")) {
-							Integer ID = Integer.parseInt(parameter.substring(14));
-							BM.updateBook(ID, "inPossessionOf", request.getParameter(parameter));
+							Long Id = Long.parseLong(parameter.substring(14));
+							BM.updateBook(Id, "inPossessionOf", request.getParameter(parameter));
 						}
 					}
 				}
@@ -328,34 +293,34 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	 * Code based on that sourced from http://hmkcode.com/java-servlet-send-receive-json-using-jquery-ajax/
 	 * 							   and http://hmkcode.com/android-send-json-data-to-server/
 	 ****************************************************/
-	 protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-        // 1. get received JSON data from request
-        BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
-        String json = "";
-        if (br != null) {
-            json = br.readLine();
-        }
-        
-        // 2. initiate jackson mapper
-        ObjectMapper mapper = new ObjectMapper();
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // 3. Convert received JSON to Book
-        Book book = mapper.readValue(json, Book.class);
+		// 1. get received JSON data from request
+		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+		String json = "";
+		if (br != null) {
+			json = br.readLine();
+		}
 
-        // 4. Set response type to JSON
-        response.setContentType("application/json");            
+		// 2. initiate jackson mapper
+		ObjectMapper mapper = new ObjectMapper();
 
-        //	TODO: Add functionality for borrow and return buttons on app to both just add a book.
-        //	TODO: Then complete functionality for borrowing and returning with current app saved username.
-        
-        // 5. Add book to database
-        BM.addBook(book);
+		// 3. Convert received JSON to Book
+		Book book = mapper.readValue(json, Book.class);
 
-        // 6. Send database as JSON to client
-        //	TODO: SEND BACK LIST OF BOOKS CURRENTLY BORROWED BY THIS USER
-        //mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
-    }
+		// 4. Set response type to JSON
+		response.setContentType("application/json");            
+
+		//	TODO: Add functionality for borrow and return buttons on app to both just add a book.
+		//	TODO: Then complete functionality for borrowing and returning with current app saved username.
+
+		// 5. Add book to database
+		BM.addBook(book);
+
+		// 6. Send database as JSON to client
+		//	TODO: SEND BACK LIST OF BOOKS CURRENTLY BORROWED BY THIS USER
+		//mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
+	}
 
 	/**
 	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. Will be removed when app is complete.

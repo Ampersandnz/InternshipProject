@@ -18,9 +18,9 @@
 			</tr>
 
 			<%
-				List<Book> allBooks = (List<Book>) request.getAttribute("booksToEdit");
-					if (!(null == allBooks)) {
-						for (Book b : allBooks) {
+				List<Book> booksToEdit = (List<Book>) request.getAttribute("booksToEdit");
+					if (!(null == booksToEdit)) {
+						for (Book b : booksToEdit) {
 			%>
 			
 			<tr>

@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class BookManagerList implements LibraryManager {
 	private static ArrayList<Book> bookList = new ArrayList<Book>();
-	private static int nextID = 0;
+	private static Long nextId = new Long(0);
 	public BookManagerList() {
 
 	}
@@ -26,12 +26,12 @@ public class BookManagerList implements LibraryManager {
 	 * @param isbn
 	 * @param title
 	 * @param inPossessionOf
-	 * @return Book ID
+	 * @return Book Id
 	 * 
 	 * Method to create a new row in the database, and return its unique primary key identifier.
 	 * Takes as arguments the three fields of a Book object, each corresponding to a column in the database.
 	 */
-	public Integer addBook(String isbn, String title, String inPossessionOf) { 
+	public Long addBook(String isbn, String title, String inPossessionOf) { 
 		if (null == isbn || "".equals(isbn)) {
 			isbn = "No isbn available.";
 		}
@@ -42,23 +42,23 @@ public class BookManagerList implements LibraryManager {
 			inPossessionOf = "_library";
 		}
 		
-		Integer bookID = null; 
+		Long bookId = null; 
 		Book book = new Book(isbn, title, inPossessionOf); 
-		bookID = (Integer) nextID;
-		book.setId(bookID);
+		bookId = nextId;
+		book.setId(bookId);
 		bookList.add(book);
-		nextID++;
-		return bookID; 
+		nextId++;
+		return bookId; 
 	} 
 
 	/**
 	 * @param bookWithoutId
-	 * @return Book ID
+	 * @return Book Id
 	 * 
 	 * Method to create a new row in the database, and return its unique primary key identifier.
 	 * Takes as arguments a Book object. Should only be called for Books that are not already in the database (have no id), or a copy will be created.
 	 */
-	public Integer addBook(Book bookWithoutId) { 
+	public Long addBook(Book bookWithoutId) { 
 		if (null == bookWithoutId.getIsbn() || "".equals(bookWithoutId.getIsbn())) {
 			bookWithoutId.setIsbn("No isbn available.");
 		}
@@ -69,21 +69,21 @@ public class BookManagerList implements LibraryManager {
 			bookWithoutId.setInPossessionOf("_library");
 		}
 		
-		Integer bookID = (Integer) nextID;
-		bookWithoutId.setId(bookID);
+		Long bookId = nextId;
+		bookWithoutId.setId(bookId);
 		bookList.add(bookWithoutId);
-		return bookID; 
+		return bookId; 
 	} 
 
 	/**
-	 * @param BookID
+	 * @param BookId
 	 * @param field
 	 * @param newData
 	 * 
-	 * Method to update a single value in the database. Book ID corresponds to the row, field determines the column to be altered.
+	 * Method to update a single value in the database. Book Id corresponds to the row, field determines the column to be altered.
 	 */
-	public void updateBook(Integer bookID, String field, String newData) { 
-		Book book = this.getBook(bookID);
+	public void updateBook(Long bookId, String field, String newData) { 
+		Book book = this.getBook(bookId);
 		switch (field) {
 
 		case "isbn":
@@ -110,14 +110,14 @@ public class BookManagerList implements LibraryManager {
 	} 
 
 	/**
-	 * @param BookID
+	 * @param BookId
 	 * 
 	 * Method to delete the row from the database with the given primary key.
 	 */
-	public void deleteBook(Integer bookID) { 
+	public void deleteBook(Long bookId) { 
 		try {
 			for (Book b: bookList) {
-				if (b.getId() == bookID) {
+				if (b.getId() == bookId) {
 					bookList.remove(b);
 				}
 			} 
@@ -145,14 +145,14 @@ public class BookManagerList implements LibraryManager {
 	} 
 
 	/**
-	 * @param bookID
+	 * @param bookId
 	 * @return book
 	 * 
 	 * Method to return the Book object representing the row of the database identified by the given primary key.
 	 */
-	public Book getBook(Integer bookID) {
+	public Book getBook(Long bookId) {
 		for (Book b: bookList) {
-			if (b.getId() == bookID) {
+			if (b.getId() == bookId) {
 				return b;
 			}
 		}

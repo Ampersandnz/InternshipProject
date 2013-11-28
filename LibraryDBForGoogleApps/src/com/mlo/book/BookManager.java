@@ -46,12 +46,12 @@ public class BookManager implements LibraryManager {
 	 * @param isbn
 	 * @param title
 	 * @param inPossessionOf
-	 * @return Book ID
+	 * @return Book Id
 	 * 
 	 * Method to create a new row in the database, and return its unique primary key identifier.
 	 * Takes as arguments the three fields of a Book object, each corresponding to a column in the database.
 	 */
-	public Integer addBook(String isbn, String title, String inPossessionOf) { 
+	public Long addBook(String isbn, String title, String inPossessionOf) { 
 		if (null == isbn || "".equals(isbn)) {
 			isbn = "No isbn available.";
 		}
@@ -64,12 +64,12 @@ public class BookManager implements LibraryManager {
 		
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
-		Integer BookID = null; 
+		Long BookId = null; 
 		
 		try { 
 			tx = session.beginTransaction(); 
 			Book book = new Book(isbn, title, inPossessionOf); 
-			BookID = (Integer) session.save(book);
+			BookId = (Long) session.save(book);
 			tx.commit();
 		} catch (HibernateException e) { 
 			if (tx!=null) {
@@ -79,17 +79,17 @@ public class BookManager implements LibraryManager {
 		} finally { 
 			session.close(); 
 		} 
-		return BookID; 
+		return BookId; 
 	} 
 	
 	/**
 	 * @param bookWithoutId
-	 * @return Book ID
+	 * @return Book Id
 	 * 
 	 * Method to create a new row in the database, and return its unique primary key identifier.
 	 * Takes as arguments a Book object. Should only be called for Books that are not already in the database (have no id), or a copy will be created.
 	 */
-	public Integer addBook(Book bookWithoutId) { 
+	public Long addBook(Book bookWithoutId) { 
 		if (null == bookWithoutId.getIsbn() || "".equals(bookWithoutId.getIsbn())) {
 			bookWithoutId.setIsbn("No isbn available.");
 		}
@@ -102,10 +102,10 @@ public class BookManager implements LibraryManager {
 		
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
-		Integer BookID = null; 
+		Long BookId = null; 
 		try { 
 			tx = session.beginTransaction(); 
-			BookID = (Integer) session.save(bookWithoutId);
+			BookId = (Long) session.save(bookWithoutId);
 			tx.commit();
 		} catch (HibernateException e) { 
 			if (tx!=null) {
@@ -115,22 +115,22 @@ public class BookManager implements LibraryManager {
 		} finally { 
 			session.close(); 
 		} 
-		return BookID; 
+		return BookId; 
 	} 
 
 	/**
-	 * @param BookID
+	 * @param BookId
 	 * @param field
 	 * @param newData
 	 * 
-	 * Method to update a single value in the database. Book ID corresponds to the row, field determines the column to be altered.
+	 * Method to update a single value in the database. Book Id corresponds to the row, field determines the column to be altered.
 	 */
-	public void updateBook(Integer BookID, String field, String newData) { 
+	public void updateBook(Long BookId, String field, String newData) { 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
 		try { 
 			tx = session.beginTransaction(); 
-			Book book = (Book)session.get(Book.class, BookID); 
+			Book book = (Book)session.get(Book.class, BookId); 
 			switch (field) {
 
 			case "isbn":
@@ -168,17 +168,17 @@ public class BookManager implements LibraryManager {
 	} 
 
 	/**
-	 * @param BookID
+	 * @param BookId
 	 * 
 	 * Method to delete the row from the database with the given primary key.
 	 */
-	public void deleteBook(Integer BookID) { 
+	public void deleteBook(Long BookId) { 
 		Session session = factory.openSession(); 
 		Transaction tx = null; 
 
 		try { 
 			tx = session.beginTransaction(); 
-			Book book = (Book)session.get(Book.class, BookID); 
+			Book book = (Book)session.get(Book.class, BookId); 
 			session.delete(book); 
 			tx.commit(); 
 		} catch (HibernateException e) { 
@@ -231,13 +231,13 @@ public class BookManager implements LibraryManager {
 	} 
 
 	/**
-	 * @param bookID
+	 * @param bookId
 	 * @return book
 	 * 
 	 * Method to return the Book object representing the row of the database identified by the given primary key.
 	 */
-	public Book getBook(Integer bookID) {
+	public Book getBook(Long bookId) {
 		Session session = factory.openSession(); 
-		return ((Book) session.get(Book.class, bookID));
+		return ((Book) session.get(Book.class, bookId));
 	}
 }

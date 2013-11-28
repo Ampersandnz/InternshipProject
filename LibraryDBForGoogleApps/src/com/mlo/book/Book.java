@@ -1,32 +1,22 @@
 package com.mlo.book;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Table;
+
+import com.googlecode.objectify.annotation.Entity;
 
 /**
  * 
  * @author Michael Lo
- * Hibernate mapping bean. Each Book represents a row in the database. Constructors, getters and setters. No computation or other methods.
- *
+ * 
  */
+
 @Entity
-@Table(name = "BOOK") 
 public class Book { 
 
-	@Id @GeneratedValue 
-	@Column(name = "id") 
-	private int id; 
-
-	@Column(name = "isbn") 
-	private String isbn; 
+	@Id private Long id; 
 	
-	@Column(name = "title") 
+	private String isbn; 
 	private String title; 
-
-	@Column(name = "inPossessionOf") 
 	private String inPossessionOf; 
 	
 	public Book() {
@@ -39,12 +29,12 @@ public class Book {
 		this.inPossessionOf = inPossessionOf;
 	}
 
-	public int getId() { 
+	public Long getId() { 
 		return id; 
 	} 
 
-	public void setId( int id ) { 
-		this.id = id; 
+	public void setId( Long bookID ) { 
+		this.id = bookID; 
 	} 
 
 	public String getIsbn() { 
