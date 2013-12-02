@@ -1,32 +1,16 @@
 package com.mlo.book;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
 /**
  * 
  * @author Michael Lo
- * Hibernate mapping bean. Each Book represents a row in the database. Constructors, getters and setters. No computation or other methods.
  *
  */
-@Entity
-@Table(name = "BOOK") 
 public class Book { 
 
-	@Id @GeneratedValue 
-	@Column(name = "id") 
 	private int id; 
 
-	@Column(name = "isbn") 
 	private String isbn; 
-	
-	@Column(name = "title") 
 	private String title; 
-
-	@Column(name = "inPossessionOf") 
 	private String inPossessionOf; 
 	
 	public Book() {

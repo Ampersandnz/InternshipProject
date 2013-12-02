@@ -262,7 +262,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		// Populate the list of books with the contents of the database.
 		ArrayList<Book> allBooks = BM.getAllBooks();
 
-		log.info("Current size of allBooks: " + allBooks.size());
+		log.warning("Current size of allBooks: " + allBooks.size());
 		
 		// Send book list to next page.
 		if (forward.equals(SHOWALL_JSP)) {
@@ -282,19 +282,48 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
 		String json = "";
+		ObjectMapper mapper = new ObjectMapper();
+		
 		if (br != null) {
 			json = br.readLine();
 		}
-
-		ObjectMapper mapper = new ObjectMapper();
-
-		Book book = mapper.readValue(json, Book.class);
-
+		
+		if (json.startsWith("ADD")) {
+			Book book = mapper.readValue(json.substring(4), Book.class);
+			BM.addBook(book);
+			mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
+			
+		} else if (json.startsWith("DELETE")) {
+			BM.deleteBook(Long.parseLong(json.substring(7)));
+			
+		} else if (json.startsWith("BORROW")) {			
+			Book book = mapper.readValue(json.substring(7), Book.class);
+			BM.updateBook(book.getId(), "inPossessionOf", book.getInPossessionOf());
+			
+		} else if (json.startsWith("RETURN")) {		
+			Book book = mapper.readValue(json.substring(4), Book.class);
+			BM.updateBook(book.getId(), "inPossessionOf", LIBRARY_USERNAME);
+			
+		} else if (json.startsWith("GETBORROWED")) {
+			List<Book> borrowedByUsername = new ArrayList<Book>();
+			for (Book b: BM.getAllBooks()) {
+				if (b.getInPossessionOf().equals(json.substring(12))) {
+					borrowedByUsername.add(b);
+				}
+			}
+			mapper.writeValue(response.getOutputStream(), borrowedByUsername);
+			
+		} else if (json.startsWith("GETBOOKFROMISBN")) {
+			List<Book> booksMatchingIsbn = new ArrayList<Book>();
+			for (Book b: BM.getAllBooks()) {
+				if (b.getIsbn().equals(json.substring(16))) {
+					booksMatchingIsbn.add(b);
+				}
+			}
+			mapper.writeValue(response.getOutputStream(), booksMatchingIsbn);
+		}
+		
 		response.setContentType("application/json");
-		
-		BM.addBook(book);
-		
-		mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
 	}
 
 	/**
@@ -311,8 +340,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		BM.addBook("9780756404079", "The Name of the Wind", "_library");
 		BM.addBook("9781429943840", "Earth Afire",  "Michael Lo");
 		BM.addBook("9780345490711", "Judas Unchained", "_library");
-		log.info("Added five books");
+		log.warning("Added five books");
 		BM.addBook("9780606005739", "A Wizard of Earthsea", "_library");
-		log.info("Added sixth book");
+		log.warning("Added sixth book");
 	}
 }
