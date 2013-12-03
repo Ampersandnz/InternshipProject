@@ -22,10 +22,7 @@ import android.widget.Toast;
  *
  */
 public class UsernameEntryActivity extends Activity implements OnClickListener {
-
-	//Would use res/values/strings, but access from outside XMLs is overly complex. Easier to just define it at the top of both activities separately.
-	private static final String LIBRARY_USERNAME = "_library";
-			
+	
 	private EditText enterUsername;
 	
 	private Button saveButton;
@@ -90,7 +87,7 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		if (v.getId() == R.id.saveUsername_button) {
 			String username = enterUsername.getText().toString();
 			//LIBRARY_USERNAME is reserved just in case, although it's unlikely that allowing it would cause issues or that anyone would attempt to set their name to it.
-			if (username.equals(LIBRARY_USERNAME)) {
+			if (username.equals(MainActivity.LIBRARY_USERNAME)) {
 				Toast toast = Toast.makeText(getApplicationContext(), "This username is reserved. Please choose another.", Toast.LENGTH_SHORT);
 				toast.show();
 			} else {

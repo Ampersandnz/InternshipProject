@@ -24,7 +24,11 @@ public class ObjectifyBookManager {
 		if (inPossessionOf.equals("")||null==inPossessionOf) {
 			inPossessionOf = LIBRARY_USERNAME;
 		}
-		Book book = new Book(isbn, title, inPossessionOf);
+		Book book = new Book();
+		book.setIsbn(isbn);
+		book.setTitle(title);
+		book.setInPossessionOf(inPossessionOf);
+		
 		ofy.put(book);
 		return book.getId();
 	}

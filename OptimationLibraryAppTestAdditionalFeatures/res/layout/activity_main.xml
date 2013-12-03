@@ -96,10 +96,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/buttons"
+            android:id="@+id/borrowReturnButtons"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/bookDetailsList"
+            android:layout_centerHorizontal="true"
             android:orientation="horizontal" >
 
             <Button
@@ -117,12 +118,50 @@
                 android:text="@string/returnBtn" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/addDeleteButtons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/borrowReturnButtons"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/add_btn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/addBtn" />
+
+            <Button
+                android:id="@+id/delete_btn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/deleteBtn" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/saved_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttons"
+            android:layout_below="@+id/addDeleteButtons"
             android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:id="@+id/dbId_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/saved_username"
+            android:layout_centerHorizontal="true" />
+        
+        <TextView
+            android:id="@+id/dbId_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/saved_username"
+            android:layout_toLeftOf="@+id/dbId_id"
+            android:text="@string/dbId_text" />
     </RelativeLayout>
 
 </ScrollView>

@@ -22,18 +22,6 @@ public class Book {
 	public Book() {
 	}
 
-	Book(String isbn, String title, String inPossessionOf) {
-		this();
-		this.isbn = isbn;
-		this.title = title;
-		this.inPossessionOf = inPossessionOf;
-	}
-
-	Book(Long id, String isbn, String title, String inPossessionOf) {
-		this(isbn, title, inPossessionOf);
-		this.id = id;
-	}
-
 	public Long getId() { 
 		return id; 
 	} 

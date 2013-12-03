@@ -22,24 +22,21 @@ import com.mlo.book.ObjectifyBookManager;
 
 @SuppressWarnings("serial")
 public class LibraryDBForGoogleAppsServlet extends HttpServlet {
-
-
-
-
-
+	
 	private static final String TEST_USERNAME = "Michael Lo";
 	private static final String LIBRARY_USERNAME = "_library";
-
+	
 	private static final Logger log = Logger.getLogger(LibraryDBForGoogleAppsServlet.class.getName());
-
-
+	
 	private static final String ADD_JSP = "/Add.jsp";
 	private static final String DELETE_JSP = "/Delete.jsp";
 	private static final String EDIT_JSP = "/Edit.jsp";
 	private static final String SHOWALL_JSP = "/ShowAll.jsp";
 	private static final String BORROW_JSP = "/Borrow.jsp";
 	private static final String RETURN_JSP = "/Return.jsp";
+	
 	private static ObjectifyBookManager BM = new ObjectifyBookManager();
+	
 	private static boolean firstRun = true;
 
 	@SuppressWarnings("unchecked")
@@ -289,25 +286,24 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		}
 		
 		if (json.startsWith("ADD")) {
-			Book book = mapper.readValue(json.substring(4), Book.class);
-			BM.addBook(book);
-			mapper.writeValue(response.getOutputStream(), BM.getAllBooks());
+			Book book = mapper.readValue(json.substring(3), Book.class);
+			Long id = BM.addBook(book);
+			mapper.writeValue(response.getOutputStream(), id);
 			
 		} else if (json.startsWith("DELETE")) {
-			BM.deleteBook(Long.parseLong(json.substring(7)));
+			BM.deleteBook(Long.parseLong(json.substring(6)));
 			
-		} else if (json.startsWith("BORROW")) {			
-			Book book = mapper.readValue(json.substring(7), Book.class);
+		} else if (json.startsWith("BORROW")) {
+			Book book = mapper.readValue(json.substring(6), Book.class);
 			BM.updateBook(book.getId(), "inPossessionOf", book.getInPossessionOf());
 			
-		} else if (json.startsWith("RETURN")) {		
-			Book book = mapper.readValue(json.substring(4), Book.class);
-			BM.updateBook(book.getId(), "inPossessionOf", LIBRARY_USERNAME);
+		} else if (json.startsWith("RETURN")) {
+			BM.updateBook(Long.parseLong(json.substring(6)), "inPossessionOf", LIBRARY_USERNAME);
 			
 		} else if (json.startsWith("GETBORROWED")) {
 			List<Book> borrowedByUsername = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {
-				if (b.getInPossessionOf().equals(json.substring(12))) {
+				if (b.getInPossessionOf().equals(json.substring(11))) {
 					borrowedByUsername.add(b);
 				}
 			}
@@ -316,7 +312,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		} else if (json.startsWith("GETBOOKFROMISBN")) {
 			List<Book> booksMatchingIsbn = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {
-				if (b.getIsbn().equals(json.substring(16))) {
+				if (b.getIsbn().equals(json.substring(15))) {
 					booksMatchingIsbn.add(b);
 				}
 			}
@@ -340,8 +336,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		BM.addBook("9780756404079", "The Name of the Wind", "_library");
 		BM.addBook("9781429943840", "Earth Afire",  "Michael Lo");
 		BM.addBook("9780345490711", "Judas Unchained", "_library");
-		log.warning("Added five books");
 		BM.addBook("9780606005739", "A Wizard of Earthsea", "_library");
-		log.warning("Added sixth book");
 	}
 }
