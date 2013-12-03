@@ -3,12 +3,13 @@ package com.mlo.book;
 /**
  * 
  * @author Michael Lo
- *
+ * 
  */
+
 public class Book { 
 
-	private int id; 
-
+	private Long id; 
+	
 	private String isbn; 
 	private String title; 
 	private String inPossessionOf; 
@@ -17,18 +18,23 @@ public class Book {
 	}
 
 	public Book(String isbn, String title, String inPossessionOf) {
-		super();
+		this();
 		this.isbn = isbn;
 		this.title = title;
 		this.inPossessionOf = inPossessionOf;
 	}
 
-	public int getId() { 
+	public Book(Long id, String isbn, String title, String inPossessionOf) {
+		this(isbn, title, inPossessionOf);
+		this.id = id;
+	}
+
+	public Long getId() { 
 		return id; 
 	} 
 
-	public void setId( int id ) { 
-		this.id = id; 
+	public void setId( Long bookID ) { 
+		this.id = bookID; 
 	} 
 
 	public String getIsbn() { 

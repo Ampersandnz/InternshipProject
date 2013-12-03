@@ -26,10 +26,11 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/isConnected"
             android:layout_centerHorizontal="true"
-            android:background="#ff333333"
             android:padding="10dp"
             android:text="@string/scan"
-            android:textColor="#ffcccccc" />
+            android:textColor="#ffcccccc"
+            android:background="@drawable/black" 
+        	style="@style/ButtonText" />
 
         <LinearLayout
             android:id="@+id/bookDetailsList"
@@ -96,10 +97,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/buttons"
+            android:id="@+id/borrowReturnButtons"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/bookDetailsList"
+            android:layout_centerHorizontal="true"
             android:orientation="horizontal" >
 
             <Button
@@ -107,22 +109,70 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/borrowBtn" />
+                android:text="@string/borrowBtn"
+                android:background="@drawable/yellow" 
+        		style="@style/ButtonText" />
 
             <Button
                 android:id="@+id/return_btn"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/returnBtn" />
+                android:text="@string/returnBtn"
+                android:background="@drawable/purple" 
+        		style="@style/ButtonText" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/addDeleteButtons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/borrowReturnButtons"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/add_btn"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="@string/addBtn"
+                android:background="@drawable/green"
+        		style="@style/ButtonText" />
+
+            <Button
+                android:id="@+id/delete_btn"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="@string/deleteBtn"
+                android:background="@drawable/red" 
+        		style="@style/ButtonText" />
         </LinearLayout>
 
         <Button
             android:id="@+id/saved_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttons"
+            android:layout_below="@+id/addDeleteButtons"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/blue" 
+        	style="@style/ButtonText" />
+
+        <TextView
+            android:id="@+id/dbId_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/saved_username"
             android:layout_centerHorizontal="true" />
+        
+        <TextView
+            android:id="@+id/dbId_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/saved_username"
+            android:layout_toLeftOf="@+id/dbId_id"
+            android:text="@string/dbId_text" />
     </RelativeLayout>
 
 </ScrollView>

@@ -9,7 +9,7 @@
     tools:context=".CopyActivity" >
 
     <ListView
-        android:id="@android:id/list"
+        android:id="@+id/chooseCopyList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/hello_world" />

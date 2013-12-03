@@ -2,19 +2,18 @@ package com.library.optimationlibrary;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,7 +30,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -40,6 +38,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.mlo.book.Book;
@@ -52,16 +52,20 @@ import com.mlo.book.Book;
  */
 public class MainActivity extends Activity implements OnClickListener {
 
-	
 	private static final String WEBAPP_URL = "http://1.optimation-library-db.appspot.com/librarydbforgoogleapps";
 	private static final String TEST_ISBN = "9780756404079";
-	private static final String LIBRARY_USERNAME = "_library";
-	
-	
-	
+
+	private static final int _scanBarcode = 0;
+	private static final int _chooseUsername = 1;
+	private static final int _chooseCopy = 2;
+
+	public static final String LIBRARY_USERNAME = "_library";
+
 	private Button scanBtn;
 	private Button borrowBtn;
 	private Button returnBtn;
+	private Button addBtn;
+	private Button deleteBtn;
 	private Button savedUsername;
 
 	private TextView authorText;
@@ -70,6 +74,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private TextView dateText;
 	private TextView ratingCountText;
 	private TextView isConnected;
+	private TextView dbIdText;
+	private TextView dbId;
 
 	private static SharedPreferences preferences;
 
@@ -104,29 +110,27 @@ public class MainActivity extends Activity implements OnClickListener {
 		scanBtn = (Button)findViewById(R.id.scan_button);
 		borrowBtn = (Button)findViewById(R.id.borrow_btn);
 		returnBtn = (Button)findViewById(R.id.return_btn);
+		addBtn = (Button)findViewById(R.id.add_btn);
+		deleteBtn = (Button)findViewById(R.id.delete_btn);
 		savedUsername = (Button)findViewById(R.id.saved_username);
 
 		borrowBtn.setVisibility(View.GONE);
 		returnBtn.setVisibility(View.GONE);
+		addBtn.setVisibility(View.GONE);
+		deleteBtn.setVisibility(View.GONE);
 
 		scanBtn.setOnClickListener(this);
 		borrowBtn.setOnClickListener(this);
 		returnBtn.setOnClickListener(this);
+		addBtn.setOnClickListener(this);
+		deleteBtn.setOnClickListener(this);
 		savedUsername.setOnClickListener(this);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String username = preferences.getString("username", "Choose a username");
 		savedUsername.setText(username);
-		
-		
-		
-		
-		
+
 		borrowBtn.setTag(TEST_ISBN);
-		
-		
-		
-		
 	}
 
 	/**
@@ -139,16 +143,16 @@ public class MainActivity extends Activity implements OnClickListener {
 		dateText = (TextView)findViewById(R.id.book_date);
 		starLayout = (LinearLayout)findViewById(R.id.star_layout);
 		ratingCountText = (TextView)findViewById(R.id.book_rating_count);
-		isConnected = (TextView) findViewById(R.id.isConnected);
 
-		if(this.checkConnection()){
-			isConnected.setBackgroundColor(0xFF00CC00);
-			isConnected.setText("Connected to server.");
-		}
-		else{
-			isConnected.setBackgroundColor(0xFFFF0000);
-			isConnected.setText("#Not connected to server!#");
-		}
+		isConnected = (TextView) findViewById(R.id.isConnected);
+		isConnected.setOnClickListener(this);
+
+		dbIdText = (TextView)findViewById(R.id.dbId_text);
+		dbId = (TextView)findViewById(R.id.dbId_id);
+		dbIdText.setVisibility(View.GONE);
+		dbId.setVisibility(View.GONE);
+
+		this.checkConnection();
 	}
 
 	/**
@@ -192,10 +196,15 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		borrowBtn.setVisibility(View.VISIBLE);
 		returnBtn.setVisibility(View.VISIBLE);
+		addBtn.setVisibility(View.VISIBLE);
+		deleteBtn.setVisibility(View.VISIBLE);
+		
+		dbId.setText(savedInstanceState.getString("id"));
 	}
 
 	/**
-	 * MainActivity implements OnClickListener, and OnClick() is called when one of its associated notifiers is clicked. This method then responds appropriately.
+	 * MainActivity implements OnClickListener, and OnClick() is called when one of its associated notifiers is clicked. 
+	 * This method then responds appropriately.
 	 */
 	public void onClick(View v) {
 		String username = preferences.getString("username", null);
@@ -204,39 +213,60 @@ public class MainActivity extends Activity implements OnClickListener {
 			//TODO DISABLED THE ACTUAL SCAN FOR TESTING PURPOSES
 			//TODO IntentIntegrator scanIntegrator = new IntentIntegrator(this);
 			//TODO scanIntegrator.initiateScan();
-			
-			String bookSearchString = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + TEST_ISBN + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
-			new GetBookInfo().execute(bookSearchString);
-			break;
 
-		case R.id.return_btn:
-			//TODO: Talk to DB, return book.
-			//Set inPossessionOf to LIBRARY_USERNAME, [update local list of borrowed books]
-			if (null == username) {
-				Intent i = new Intent(this, UsernameEntryActivity.class);
-				startActivityForResult(i, 1);
-			} else {
-				new HttpAsyncTask().execute(WEBAPP_URL);
-				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" returned by " + username, Toast.LENGTH_SHORT);
-				toast.show();
-			}
+			new GetBookInfo().execute("https://www.googleapis.com/books/v1/volumes?q=isbn:" + TEST_ISBN + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0");
+			new GetBookIds().execute(WEBAPP_URL, TEST_ISBN);
 			break;
 
 		case R.id.borrow_btn:
-			//TODO: Talk to DB, borrow book.
-			//Set inPossessionOf to username, [update local list of borrowed books]
 			if (null == username) {
 				Intent i = new Intent(this, UsernameEntryActivity.class);
-				startActivityForResult(i, 1);
+				startActivityForResult(i, _chooseUsername);
 			} else {
-				new HttpAsyncTask().execute(WEBAPP_URL);
-				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" borrowed by " + username, Toast.LENGTH_SHORT);
-				toast.show();
+				if (checkConnection()) {
+					new HttpBorrowAsyncTask().execute(WEBAPP_URL);
+					Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" borrowed by " + username + ".", Toast.LENGTH_SHORT);
+					toast.show();
+				}
 			}
 			break;
+
+		case R.id.return_btn:
+			if (null == username) {
+				Intent i = new Intent(this, UsernameEntryActivity.class);
+				startActivityForResult(i, _chooseUsername);
+			} else {
+				if (checkConnection()) {
+					new HttpReturnAsyncTask().execute(WEBAPP_URL);
+					Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" returned by " + username + ".", Toast.LENGTH_SHORT);
+					toast.show();
+				}
+			}
+			break;
+
+		case R.id.add_btn:
+			if (checkConnection()) {
+				new HttpAddAsyncTask().execute(WEBAPP_URL);
+				Toast addToast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" added to library.", Toast.LENGTH_SHORT);
+				addToast.show();
+			}
+			break;
+
+		case R.id.delete_btn:
+			if (checkConnection()) {
+				new HttpDeleteAsyncTask().execute(WEBAPP_URL);
+				Toast deleteToast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" deleted from library.", Toast.LENGTH_SHORT);
+				deleteToast.show();
+			}
+			break;
+
 		case R.id.saved_username:
 			Intent i = new Intent(this, UsernameEntryActivity.class);
-			startActivityForResult(i, 1);
+			startActivityForResult(i, _chooseUsername);
+			break;
+
+		case R.id.isConnected:
+			checkConnection();
 			break;
 		}
 	}
@@ -244,20 +274,28 @@ public class MainActivity extends Activity implements OnClickListener {
 	/**
 	 * Method to retrieve data and take actions as appropriate when a method called with StartActivityForResult() finishes.
 	 * Will either retrieve the data from a scanned barcode and use it to pull book information from the Google Books API, 
-	 * 		or get the chosen username and save it in StoredPreferences.
+	 * 															or get the chosen username and save it in StoredPreferences.
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == 0) {
+		switch (requestCode) {
+		case _scanBarcode:
 			IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 			if (scanningResult != null) {
 				String scanContent = scanningResult.getContents();
 				String scanFormat = scanningResult.getFormatName();
-				Log.v("SCAN", "content: " + scanContent + " - format: " + scanFormat);
 				if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
-					borrowBtn.setTag(scanContent);
-					// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
-					String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:" + scanContent + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
-					new GetBookInfo().execute(bookSearchString);
+					if (checkConnection()) {
+						borrowBtn.setTag(scanContent);
+						// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
+						String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+"q=isbn:" + scanContent + "&key=AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
+						new GetBookInfo().execute(bookSearchString);
+						new GetBookIds().execute(WEBAPP_URL, scanContent);
+
+					} else { 					
+						Toast toast = Toast.makeText(getApplicationContext(), "No network connection!", Toast.LENGTH_SHORT);
+						toast.show();
+					}
+
 				} else {
 					Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
 					toast.show();
@@ -266,9 +304,10 @@ public class MainActivity extends Activity implements OnClickListener {
 				Toast toast = Toast.makeText(getApplicationContext(), "No book scan data received!", Toast.LENGTH_SHORT);
 				toast.show();
 			}
+			break;
 
-		} else if (requestCode == 1) {
-			if(resultCode == RESULT_OK){
+		case _chooseUsername:
+			if(resultCode == RESULT_OK) {
 				String username = data.getStringExtra("username");
 				Editor edit = preferences.edit();
 				if (null == username || "".equals(username)) {
@@ -280,22 +319,40 @@ public class MainActivity extends Activity implements OnClickListener {
 				edit.putString("username", username);
 				edit.apply();
 			} else if (resultCode == RESULT_CANCELED) {
-
 			}
+
+		case _chooseCopy:
+			if(resultCode == RESULT_OK) {
+				String chosenId = data.getStringExtra("chosenId");
+				if (null != chosenId && !("".equals(chosenId))) {
+					Long idToSave = Long.parseLong(chosenId);
+
+					dbId.setText(idToSave.toString());
+					dbIdText.setVisibility(View.VISIBLE);
+					dbId.setVisibility(View.VISIBLE);
+				}
+			} else if (resultCode == RESULT_CANCELED) {
+			}
+			break;
 		}
 	}
 
 	/**
 	 * @return isConnected
-	 * Method to check if a connection has been established
+	 * Method to check if a network connection has been established
 	 */
 	public boolean checkConnection() {
 		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-		if (networkInfo != null && networkInfo.isConnected()) 
+		if (networkInfo != null && networkInfo.isConnected()) {
+			isConnected.setVisibility(View.GONE);
 			return true;
-		else
-			return false;    
+		} else {
+			isConnected.setBackgroundColor(0xFFFF0000);
+			isConnected.setVisibility(View.VISIBLE);
+			isConnected.setText("#Not connected to network!# \n#Click here to rescan.#");
+			return false;
+		}
 	}
 
 	/**
@@ -316,13 +373,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		if(borrowBtn.getTag()!=null) {
 			savedBundle.putString("isbn", borrowBtn.getTag().toString());
 		}
+		
+		savedBundle.putString("id", dbId.getText().toString());
 	}
 
 	/**
-	 * 
 	 * @author Michael Lo
-	 * Class to asynchronously download all book data from Google Books.
-	 * 
+	 * Class to asynchronously download book data from Google Books.
 	 */
 	private class GetBookInfo extends AsyncTask<String, Void, String> {
 		@Override
@@ -351,13 +408,11 @@ public class MainActivity extends Activity implements OnClickListener {
 					e.printStackTrace(); 
 				}
 			}
-			Log.d("JSON", bookBuilder.toString());
 			return bookBuilder.toString();
 		}
 
 		protected void onPostExecute(String result) {
 			try {
-				borrowBtn.setVisibility(View.VISIBLE);
 				JSONObject resultObject = new JSONObject(result);
 				JSONArray bookArray = resultObject.getJSONArray("items");
 				JSONObject bookObject = bookArray.getJSONObject(0);
@@ -420,9 +475,15 @@ public class MainActivity extends Activity implements OnClickListener {
 
 				try {
 					returnBtn.setTag(volumeObject.getString("infoLink"));
+					borrowBtn.setVisibility(View.VISIBLE);
 					returnBtn.setVisibility(View.VISIBLE);
+					addBtn.setVisibility(View.VISIBLE);
+					deleteBtn.setVisibility(View.VISIBLE);
 				} catch (JSONException jse) { 
+					borrowBtn.setVisibility(View.GONE);
 					returnBtn.setVisibility(View.GONE);
+					addBtn.setVisibility(View.GONE);
+					deleteBtn.setVisibility(View.GONE);
 					jse.printStackTrace(); 
 				}
 
@@ -449,10 +510,59 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	/**
-	 * 
+	 * @author Michael Lo
+	 * Class to asynchronously find books in the database matching the ISBN of the scanned book.
+	 * If more than one copy exists in the database, the user will be prompted to select the copy they wish to interact with.
+	 */
+	private class GetBookIds extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... ISBNs) {
+			String url = ISBNs[0];
+			String isbn = ISBNs[1];
+
+			Book book = new Book();
+			book.setIsbn(isbn);
+
+			String returnValue = PostMethods.POSTGetBookFromIsbn(url, book);
+			return returnValue;
+		}
+
+		protected void onPostExecute(String result) {
+			ObjectMapper mapper = new ObjectMapper();
+			List<Book> booksMatchingId = null;
+
+			try {
+				booksMatchingId = mapper.readValue(result, new TypeReference<List<Book>>(){});
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			if (null == booksMatchingId || booksMatchingId.isEmpty()) {
+				dbId.setText("No copy of this book found in library.");
+				dbId.setVisibility(View.VISIBLE);
+			} else if (booksMatchingId.size() == 1) {
+				dbId.setText(booksMatchingId.get(0).getId().toString());
+				dbIdText.setVisibility(View.VISIBLE);
+				dbId.setVisibility(View.VISIBLE);
+			} else {
+				Intent i = new Intent(MainActivity.this, ChooseCopyActivity.class);
+				ArrayList<String> inPossessionOf = new ArrayList<String>();
+				ArrayList<String> ids = new ArrayList<String>();
+				for (Book b: booksMatchingId) {
+					inPossessionOf.add(b.getInPossessionOf());
+					ids.add(b.getId().toString());
+				}
+				i.putStringArrayListExtra("inPossessionOf", inPossessionOf);
+				i.putStringArrayListExtra("ids", ids);
+
+				startActivityForResult(i, _chooseCopy);
+			}
+		}
+	}
+
+	/**
 	 * @author Michael Lo
 	 * Class to asynchronously download book cover image from Google Books.
-	 * 
 	 */
 	private class GetBookThumb extends AsyncTask<String, Void, String> {
 		@Override
@@ -478,97 +588,81 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	/**
-	 * 
-	 * @author http://hmkcode.com/android-send-json-data-to-server/
-	 * Temporary class to test webserver interaction until such time as my own can be developed.
-	 *
-	 */
-	private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+	private class HttpAddAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... urls) {
+		protected String doInBackground(String... URLs) {
 			
-			Book book = new Book(borrowBtn.getTag().toString(), titleText.getText().toString().substring(7), preferences.getString("username", "No saved username found!"));
+			Book book = new Book(borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
+			
+			String returnValue = "";
 
-			String returnValue = POST(urls[0], book);
+			returnValue = PostMethods.POSTAdd(URLs[0], book);
 
-			Log.d("HTTP", returnValue);
 			return returnValue;
 		}
-		// onPostExecute displays the results of the AsyncTask.
+
+		@Override
+		protected void onPostExecute(String result) {
+			dbId.setText(result);
+			dbIdText.setVisibility(View.VISIBLE);
+			dbId.setVisibility(View.VISIBLE);
+		}
+	}	
+
+	private class HttpDeleteAsyncTask extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... URLs) {
+
+			Book book = new Book(Long.parseLong(dbId.getText().toString()), borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
+
+			String returnValue = "";
+
+			returnValue = PostMethods.POSTDelete(URLs[0], book);
+
+			return returnValue;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dbIdText.setVisibility(View.GONE);
+			dbId.setVisibility(View.GONE);
+			new GetBookIds().execute(WEBAPP_URL, borrowBtn.getTag().toString());
+		}
+	}	
+
+	private class HttpBorrowAsyncTask extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... URLs) {
+
+			Book book = new Book(Long.parseLong(dbId.getText().toString()), borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
+
+			String returnValue = "";
+
+			returnValue = PostMethods.POSTBorrow(URLs[0], book);
+
+			return returnValue;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+		}
+	}	
+
+	private class HttpReturnAsyncTask extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... URLs) {
+
+			Book book = new Book(Long.parseLong(dbId.getText().toString()), borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
+
+			String returnValue = "";
+
+			returnValue = PostMethods.POSTReturn(URLs[0], book);
+
+			return returnValue;
+		}
+
 		@Override
 		protected void onPostExecute(String result) {
 		}
 	}
-
-	/**
-	 * @param url
-	 * @param book
-	 * @return result
-	 * Temporary method to use with Book class and webserver until I have finished setting up both borrow and return commands.
-	 */
-	public static String POST(String url, Book book){
-		InputStream inputStream = null;
-		String result = "";
-		
-		try {
-			HttpClient httpclient = new DefaultHttpClient();
-
-			HttpPost httpPost = new HttpPost(url);
-
-			String json = "";
-
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.accumulate("isbn", book.getIsbn());
-			jsonObject.accumulate("title", book.getTitle());
-			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
-
-			json = jsonObject.toString();
-			
-			json = "ADD" + json;
-
-			Log.d("HTTP", json);
-			
-			StringEntity se = new StringEntity(json);
-
-			httpPost.setEntity(se);
-			
-			httpPost.setHeader("Accept", "application/json");
-			httpPost.setHeader("Content-type", "application/json");
-
-			HttpResponse httpResponse = httpclient.execute(httpPost);
-
-			inputStream = httpResponse.getEntity().getContent();
-
-			if(inputStream != null) {
-				result = convertInputStreamToString(inputStream);
-			} else {
-				result = "Did not work!";
-			}
-
-		} catch (Exception e) {
-			Log.d("InputStream", e.getLocalizedMessage());
-		}
-
-		return result;
-	}
-
-	/**
-	 * @param inputStream
-	 * @return result
-	 * @throws IOException
-	 * 
-	 * Temporary method to use with Book class and webserver until I have sorted all functionality properly.
-	 */
-	private static String convertInputStreamToString(InputStream inputStream) throws IOException {
-		BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-		String line = "";
-		String result = "";
-		while((line = bufferedReader.readLine()) != null) {
-			result += line;
-		}
-		inputStream.close();
-		return result;
-
-	}   
 }

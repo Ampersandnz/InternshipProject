@@ -120,13 +120,13 @@ public class PostMethods {
 			
 			String json = "";
 
+			jsonObject.accumulate("id", book.getId());
 			jsonObject.accumulate("isbn", book.getIsbn());
 			jsonObject.accumulate("title", book.getTitle());
 			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
 
 			json = jsonObject.toString();
 			
-			//TODO: Send "BORROW" + book ID + username
 			json = _borrow + json;
 			
 			StringEntity se = new StringEntity(json);
@@ -236,7 +236,6 @@ public class PostMethods {
 
 			String json = "";
 
-			//TODO: Send "GETBOOKFROMISBN" + isbn, get [list of] book[s] matching that isbn. If one, display its details. If more than one, prompt user to select the correct one.
 			json = _getBookFromIsbn + book.getIsbn();
 
 			StringEntity se = new StringEntity(json);
