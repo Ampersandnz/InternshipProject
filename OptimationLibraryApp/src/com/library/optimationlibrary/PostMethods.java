@@ -199,13 +199,12 @@ public class PostMethods {
 			
 			String json = "";
 			
-			//TODO: Send "GETBORRWED" + username, get list of books borrowed by username
-			json = _getBorrowed + json;
-
+			json = _getBorrowed + book.getInPossessionOf();
+			
 			StringEntity se = new StringEntity(json);
-
+			
 			httpPost.setEntity(se);
-
+			
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
@@ -220,8 +219,9 @@ public class PostMethods {
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
+		
 		return result;
 	}
 

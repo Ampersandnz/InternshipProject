@@ -16,21 +16,20 @@
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="5dp"
             android:background="#FF0000"
-            android:text="@string/notConnected"
             android:textColor="#FFF"
             android:textSize="18sp" />
 
         <Button
             android:id="@+id/scan_button"
+            style="@style/ButtonText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/isConnected"
             android:layout_centerHorizontal="true"
+            android:background="@drawable/black"
             android:padding="10dp"
             android:text="@string/scan"
-            android:textColor="#ffcccccc"
-            android:background="@drawable/black" 
-        	style="@style/ButtonText" />
+            android:textColor="#ffcccccc" />
 
         <LinearLayout
             android:id="@+id/bookDetailsList"
@@ -106,21 +105,21 @@
 
             <Button
                 android:id="@+id/borrow_btn"
+                style="@style/ButtonText"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/borrowBtn"
-                android:background="@drawable/yellow" 
-        		style="@style/ButtonText" />
+                android:background="@drawable/yellow"
+                android:text="@string/borrowBtn" />
 
             <Button
                 android:id="@+id/return_btn"
+                style="@style/ButtonText"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/returnBtn"
-                android:background="@drawable/purple" 
-        		style="@style/ButtonText" />
+                android:background="@drawable/purple"
+                android:text="@string/returnBtn" />
         </LinearLayout>
 
         <LinearLayout
@@ -133,31 +132,31 @@
 
             <Button
                 android:id="@+id/add_btn"
+                style="@style/ButtonText"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_weight="1"
-                android:text="@string/addBtn"
                 android:background="@drawable/green"
-        		style="@style/ButtonText" />
+                android:text="@string/addBtn" />
 
             <Button
                 android:id="@+id/delete_btn"
+                style="@style/ButtonText"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_weight="1"
-                android:text="@string/deleteBtn"
-                android:background="@drawable/red" 
-        		style="@style/ButtonText" />
+                android:background="@drawable/red"
+                android:text="@string/deleteBtn" />
         </LinearLayout>
 
         <Button
             android:id="@+id/saved_username"
+            style="@style/ButtonText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/addDeleteButtons"
             android:layout_centerHorizontal="true"
-            android:background="@drawable/blue" 
-        	style="@style/ButtonText" />
+            android:background="@drawable/blue" />
 
         <TextView
             android:id="@+id/dbId_id"
@@ -165,7 +164,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/saved_username"
             android:layout_centerHorizontal="true" />
-        
+
         <TextView
             android:id="@+id/dbId_text"
             android:layout_width="wrap_content"
@@ -173,6 +172,23 @@
             android:layout_below="@+id/saved_username"
             android:layout_toLeftOf="@+id/dbId_id"
             android:text="@string/dbId_text" />
+
+        <TextView
+            android:id="@+id/currentlyBorrowed_list_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dbId_id"
+            android:layout_centerHorizontal="true"
+            android:text="@string/currentlyBorrowed_list_title_text" />
+
+        <LinearLayout
+            android:id="@+id/currentlyBorrowed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/currentlyBorrowed_list_title"
+            android:orientation="vertical"
+            android:textColor="#FFF"
+            android:textSize="15sp" />
     </RelativeLayout>
 
 </ScrollView>

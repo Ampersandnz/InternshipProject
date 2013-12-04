@@ -12,10 +12,9 @@
     <string name="deleteBtn">Delete book from library</string>
     <string name="saveBtn">Save</string>
     <string name="cancelBtn">Cancel</string>
-    <string name="title_activity_username_entry">Enter username:</string>
+    <string name="title_activity_username_entry">Enter username: </string>
     <string name="username">Username</string>
-    <string name="notConnected">#Not connected to server!#</string>
-    <string name="title_activity_choose_copy">Choose copy by current owner:</string>
+    <string name="title_activity_choose_copy">Choose copy by current owner: </string>
     <string name="dbId_text">ID: </string>
-
+    <string name="currentlyBorrowed_list_title_text">Currently borrowed: </string>
 </resources>
