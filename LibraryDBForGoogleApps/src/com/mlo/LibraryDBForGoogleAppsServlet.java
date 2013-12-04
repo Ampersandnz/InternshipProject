@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -25,8 +24,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	
 	private static final String TEST_USERNAME = "Michael Lo";
 	private static final String LIBRARY_USERNAME = "_library";
-	
-	private static final Logger log = Logger.getLogger(LibraryDBForGoogleAppsServlet.class.getName());
 	
 	private static final String ADD_JSP = "/Add.jsp";
 	private static final String DELETE_JSP = "/Delete.jsp";
@@ -258,8 +255,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		// Populate the list of books with the contents of the database.
 		ArrayList<Book> allBooks = BM.getAllBooks();
-
-		log.warning("Current size of allBooks: " + allBooks.size());
 		
 		// Send book list to next page.
 		if (forward.equals(SHOWALL_JSP)) {
@@ -336,6 +331,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		BM.addBook("9780756404079", "The Name of the Wind", "_library");
 		BM.addBook("9781429943840", "Earth Afire",  "Michael Lo");
 		BM.addBook("9780345490711", "Judas Unchained", "_library");
-		BM.addBook("9780606005739", "A Wizard of Earthsea", "_library");
+		BM.addBook("9780606005739", "A Wizard of Earthsea", "_library"); 
 	}
 }

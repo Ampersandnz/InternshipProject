@@ -18,12 +18,15 @@ public class ObjectifyBookManager {
 		if (isbn.equals("")||null==isbn) {
 			isbn = "No isbn available.";
 		}
+		
 		if (title.equals("")||null==title) {
 			title = "No title available.";
 		}
+		
 		if (inPossessionOf.equals("")||null==inPossessionOf) {
 			inPossessionOf = LIBRARY_USERNAME;
 		}
+		
 		Book book = new Book();
 		book.setIsbn(isbn);
 		book.setTitle(title);
@@ -72,9 +75,7 @@ public class ObjectifyBookManager {
 	}
 
 	public void deleteAllBooks() {
-		for (Book b: ofy.query(Book.class)){
-			ofy.delete(b);
-		}
+		ofy.delete(ofy.query(Book.class).fetchKeys());
 	}
 
 	public Book getBook(Long bookId) {
