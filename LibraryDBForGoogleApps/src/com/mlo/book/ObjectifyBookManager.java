@@ -43,20 +43,24 @@ public class ObjectifyBookManager {
 
 	public void updateBook(Long bookId, String field, String newData) {
 		Book book = ofy.get(Book.class, bookId);
+		
 		if (field.equals("isbn")) {
 			if (newData.equals("")||null==newData) {
 				newData = "No isbn available.";
 			}
 			book.setIsbn(newData);
+			
 		} else if (field.equals("title")) {
 			if (newData.equals("")||null==newData) {
 				newData = "No title available.";
 			}
 			book.setTitle(newData);
+			
 		} else if (field.equals("inPossessionOf")) {
 			if (newData.equals("")||null==newData) {
 				newData = LIBRARY_USERNAME;
 			}
+			
 			book.setInPossessionOf(newData);
 		}
 		ofy.put(book);

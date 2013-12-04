@@ -326,10 +326,10 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		BM.deleteAllBooks();
 
 		// Add few Book records to database
-		BM.addBook("9780316007573", "The Ashes of Worlds", "Michael Lo");
+		BM.addBook("9780316007573", "The Ashes of Worlds", TEST_USERNAME);
 		BM.addBook("9780425037454", "The Stars My Destination", "_library");
 		BM.addBook("9780756404079", "The Name of the Wind", "_library");
-		BM.addBook("9781429943840", "Earth Afire",  "Michael Lo");
+		BM.addBook("9781429943840", "Earth Afire",  TEST_USERNAME);
 		BM.addBook("9780345490711", "Judas Unchained", "_library");
 		BM.addBook("9780606005739", "A Wizard of Earthsea", "_library"); 
 	}

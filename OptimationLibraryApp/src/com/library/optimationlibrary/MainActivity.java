@@ -242,7 +242,6 @@ public class MainActivity extends Activity implements OnClickListener{
 						new HttpBorrowAsyncTask().execute(WEBAPP_URL);
 						Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" borrowed by " + username + ".", Toast.LENGTH_SHORT);
 						toast.show();
-						new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 					}
 				}
 			}
@@ -261,7 +260,6 @@ public class MainActivity extends Activity implements OnClickListener{
 						new HttpReturnAsyncTask().execute(WEBAPP_URL);
 						Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" returned by " + username + ".", Toast.LENGTH_SHORT);
 						toast.show();
-						new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 					}
 				}
 			}
@@ -272,7 +270,6 @@ public class MainActivity extends Activity implements OnClickListener{
 				new HttpAddAsyncTask().execute(WEBAPP_URL);
 				Toast addToast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" added to library.", Toast.LENGTH_SHORT);
 				addToast.show();
-				new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 			}
 			break;
 
@@ -285,7 +282,6 @@ public class MainActivity extends Activity implements OnClickListener{
 					new HttpDeleteAsyncTask().execute(WEBAPP_URL);
 					Toast deleteToast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" deleted from library.", Toast.LENGTH_SHORT);
 					deleteToast.show();
-					new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 				}
 			}
 			break;
@@ -348,6 +344,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				}
 				edit.putString("username", username);
 				edit.apply();
+				new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 			} else if (resultCode == RESULT_CANCELED) {
 			}
 
@@ -642,6 +639,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			borrowBtn.setVisibility(View.VISIBLE);
 			returnBtn.setVisibility(View.VISIBLE);
 			new GetBookIds().execute(WEBAPP_URL, borrowBtn.getTag().toString());
+			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}	
 
@@ -668,6 +666,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			dbIdText.setVisibility(View.GONE);
 			dbId.setVisibility(View.GONE);
 			new GetBookIds().execute(WEBAPP_URL, borrowBtn.getTag().toString());
+			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}	
 
@@ -686,6 +685,7 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		@Override
 		protected void onPostExecute(String result) {
+			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}	
 
@@ -704,6 +704,7 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		@Override
 		protected void onPostExecute(String result) {
+			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}
 
@@ -711,6 +712,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		String bookSearchString = GOOGLE_BOOKS_URL + "q=isbn:" + isbn + "&key=" + API_KEY;
 		new GetBookInfo().execute(bookSearchString);
 		new GetBookIds().execute(WEBAPP_URL, isbn);
+		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 	}
 
 	/**
@@ -736,26 +738,31 @@ public class MainActivity extends Activity implements OnClickListener{
 		protected void onPostExecute(String result) {
 			ObjectMapper mapper = new ObjectMapper();
 			List<Book> borrowedByUser = null;
-
+			
 			try {
 				borrowedByUser = mapper.readValue(result, new TypeReference<List<Book>>(){});
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
+			
+			currentlyBorrowedList.removeAllViews();
+			
 			if (!(null == borrowedByUser) && !(borrowedByUser.isEmpty())) {
-
+				
 				currentlyBorrowed = new TextView[borrowedByUser.size()];
-
-				currentlyBorrowedList.removeAllViews();
+				
+				for (int i = 0; i < currentlyBorrowedList.getChildCount(); i++) {
+					View v = currentlyBorrowedList.getChildAt(i);
+					v.setVisibility(View.GONE);
+				}
 				
 				for(int t = 0; t < currentlyBorrowed.length; t++) {
 					TextView text = currentlyBorrowed[t];
 					text = new TextView(MainActivity.this);
 					text.setText(borrowedByUser.get(t).toString());
-					text.setOnClickListener(MainActivity.this);
 					currentlyBorrowedList.addView(text);
 				}
+				
 				currentlyBorrowedTitle.setVisibility(View.VISIBLE);
 			} else {
 				currentlyBorrowedTitle.setVisibility(View.GONE);

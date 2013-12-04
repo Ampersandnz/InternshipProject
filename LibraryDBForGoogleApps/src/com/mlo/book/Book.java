@@ -55,6 +55,6 @@ public class Book {
 	} 
 	
 	public String toString() {
-		return this.title + " (" + this.isbn + "), currently in possession of: " + this.inPossessionOf;
+		return this.title + " (" + this.isbn + ")";
 	}
 } 
