@@ -56,5 +56,8 @@ local.properties
 # Log files
 *.log
 
-# UCDetector logs
+# UCDetector logs folders
 ucdetector_reports/*
+
+# Remote Systems Temp Files folder
+RemoteSystemsTempFiles/*
