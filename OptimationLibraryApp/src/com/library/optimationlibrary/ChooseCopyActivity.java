@@ -6,10 +6,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
@@ -25,32 +25,26 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// Make us non-modal, so that others can receive touch events.
-		getWindow().setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL, LayoutParams.FLAG_NOT_TOUCH_MODAL);
-
-		// ...but notify us that it happened.
-		getWindow().setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
-
 		setContentView(R.layout.activity_choose_copy);
 		setupDim();
 		setupListView();
 	}
 
 	private void setupDim() {
+		Window window = getWindow();
 		WindowManager.LayoutParams lp = getWindow().getAttributes();
 		lp.dimAmount=0.75f;
-		getWindow().setAttributes(lp);
-		getWindow().setBackgroundDrawable(new ColorDrawable(0x7f000000));
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		window.setAttributes(lp);
+		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
+		window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		window.setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL, LayoutParams.FLAG_NOT_TOUCH_MODAL);
+		window.setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 	}
 
 	private void setupListView() {
 		theList = (ListView)findViewById(R.id.chooseCopyList);
-
 		ArrayList<String> nameList = getIntent().getStringArrayListExtra("inPossessionOf");
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nameList);
-
-		theList.setAdapter(adapter);
+		theList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nameList));
 		theList.setOnItemClickListener(this);
 	}
 
@@ -64,11 +58,6 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Intent returnIntent = new Intent();
-		ArrayList<String> inPossessionOf = getIntent().getStringArrayListExtra("inPossessionOf");
-		ArrayList<String> ids = getIntent().getStringArrayListExtra("ids");
-		Log.d("DEBUG", "Position clicked: " + position);
-		Log.d("DEBUG", "Name clicked: " + inPossessionOf.get(position));
-		Log.d("DEBUG", "Id returned: " + ids.get(position));
 		returnIntent.putExtra("chosenId", getIntent().getStringArrayListExtra("ids").get(position));
 		setResult(RESULT_OK,returnIntent); 
 		finish();

@@ -1,5 +1,9 @@
 package com.mlo.book;
 
+//TODO: OPTIMISE
+//TODO: FROM
+//TODO: HERE
+//TODO: DOWN
 import java.util.ArrayList;
 
 import com.googlecode.objectify.Objectify;

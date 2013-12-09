@@ -1,5 +1,9 @@
 package com.mlo;
 
+//TODO: OPTIMISE
+//TODO: FROM
+//TODO: HERE
+//TODO: DOWN
 
 import java.io.BufferedReader;
 import java.io.IOException;

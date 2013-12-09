@@ -1,14 +1,14 @@
 package com.library.optimationlibrary;
 
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,11 +41,12 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	 * Method to dim the background and make the window more easily readable, as well as looking better.
 	 */
 	private void setupDim() {
+		Window window = getWindow();
 		WindowManager.LayoutParams lp = getWindow().getAttributes();
 		lp.dimAmount=0.75f;
-		getWindow().setAttributes(lp);
-		getWindow().setBackgroundDrawable(new ColorDrawable(0x7f000000));
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		window.setAttributes(lp);
+		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
+		window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 	}
 
 	/**
@@ -53,8 +54,7 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	 */
 	private void setupEditText() {
 		enterUsername = (EditText)findViewById(R.id.enter_username);
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String username = preferences.getString("username", null);
+		String username = PreferenceManager.getDefaultSharedPreferences(this).getString("username", null);
 		
 		if (!(null == username)) {
 			enterUsername.setText(username);
@@ -86,7 +86,7 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		Intent returnIntent = new Intent();	
 		if (v.getId() == R.id.saveUsername_button) {
 			String username = enterUsername.getText().toString();
-			//LIBRARY_USERNAME is reserved just in case, although it's unlikely that allowing it would cause issues or that anyone would attempt to set their name to it.
+			//LIBRARY_USERNAME is reserved just in case, although it's unlikely that anyone would attempt to set their name to it.
 			if (username.equals(MainActivity.LIBRARY_USERNAME)) {
 				Toast toast = Toast.makeText(getApplicationContext(), "This username is reserved. Please choose another.", Toast.LENGTH_SHORT);
 				toast.show();

@@ -9,7 +9,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
@@ -53,36 +52,23 @@ import com.mlo.book.Book;
 public class MainActivity extends Activity implements OnClickListener{
 
 	private static final String WEBAPP_URL = "http://1.optimation-library-db.appspot.com/librarydbforgoogleapps";
-	private static final String TEST_ISBN = "9780756404079";
 	private static final String API_KEY = "AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
-	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?";
+	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
-	private static final int _scanBarcode = 0;
 	private static final int _chooseUsername = 1;
 	private static final int _chooseCopy = 2;
 
 	public static final String LIBRARY_USERNAME = "_library";
 
-	private Button scanBtn;
-	private Button borrowBtn;
-	private Button returnBtn;
-	private Button addBtn;
-	private Button deleteBtn;
-	private Button savedUsername;
+	private Button scanBtn, borrowBtn, returnBtn, addBtn, deleteBtn, savedUsername;
 
-	private TextView authorText;
-	private TextView titleText;
-	private TextView descriptionText;
-	private TextView dateText;
-	private TextView ratingCountText;
-	private TextView isConnected;
-	private TextView dbIdText;
-	private TextView dbId;
-	private TextView currentlyBorrowedTitle;
+	private TextView[] currentlyBorrowed;
+
+	private TextView authorText, titleText, descriptionText, dateText, ratingCountText, isConnected, dbIdText, dbId, currentlyBorrowedTitle;
 
 	private static SharedPreferences preferences;
 
-	private LinearLayout starLayout;
+	private LinearLayout starLayout, currentlyBorrowedList;
 
 	private ImageView[] starViews;
 
@@ -90,32 +76,25 @@ public class MainActivity extends Activity implements OnClickListener{
 
 	private Bitmap thumbImg;
 
-	private LinearLayout currentlyBorrowedList;
-
-	private TextView[] currentlyBorrowed;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
+		
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
 		setupButtons();
 		setupTextViews();
 		setupStars();
-		setupImageViews();
-
-		currentlyBorrowedList = (LinearLayout)findViewById(R.id.currentlyBorrowed);
-		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+		thumbView = (ImageView)findViewById(R.id.thumb);
+		setupListView();
 
 		if (savedInstanceState != null) {
 			retrieveSavedState(savedInstanceState);
 		}
 	}
 
-	/**
-	 * Method to map all the Button objects to views in the layout, set their listener to the MainActivity and print the text on the set username button.
-	 */
 	private void setupButtons() {
 		scanBtn = (Button)findViewById(R.id.scan_button);
 		borrowBtn = (Button)findViewById(R.id.borrow_btn);
@@ -136,16 +115,9 @@ public class MainActivity extends Activity implements OnClickListener{
 		deleteBtn.setOnClickListener(this);
 		savedUsername.setOnClickListener(this);
 
-		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String username = preferences.getString("username", "Choose a username");
-		savedUsername.setText(username);
-
-		borrowBtn.setTag(TEST_ISBN);
+		savedUsername.setText(preferences.getString("username", "Choose a username"));
 	}
 
-	/**
-	 * Method to map all the TextView objects to views in the layout.
-	 */
 	private void setupTextViews() {
 		authorText = (TextView)findViewById(R.id.book_author);
 		titleText = (TextView)findViewById(R.id.book_title);
@@ -153,10 +125,10 @@ public class MainActivity extends Activity implements OnClickListener{
 		dateText = (TextView)findViewById(R.id.book_date);
 		starLayout = (LinearLayout)findViewById(R.id.star_layout);
 		ratingCountText = (TextView)findViewById(R.id.book_rating_count);
-		
+
 		currentlyBorrowedTitle = (TextView)findViewById(R.id.currentlyBorrowed_list_title);
 		currentlyBorrowedTitle.setVisibility(View.GONE);
-		
+
 		isConnected = (TextView) findViewById(R.id.isConnected);
 		isConnected.setOnClickListener(this);
 
@@ -168,9 +140,6 @@ public class MainActivity extends Activity implements OnClickListener{
 		this.checkConnection();
 	}
 
-	/**
-	 * Method to set up the five ImageViews for the rating stars.
-	 */
 	private void setupStars() {
 		starViews=new ImageView[5];
 		for(int s=0; s < starViews.length; s++) {
@@ -178,11 +147,9 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}
 
-	/**
-	 * Method to map the ImageView object to the book cover thumbnail view in the layout.
-	 */
-	private void setupImageViews() {
-		thumbView = (ImageView)findViewById(R.id.thumb);
+	private void setupListView() {
+		currentlyBorrowedList = (LinearLayout)findViewById(R.id.currentlyBorrowed);
+		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 	}
 
 	/**
@@ -206,7 +173,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		thumbImg = (Bitmap)savedInstanceState.getParcelable("thumbPic");
 		thumbView.setImageBitmap(thumbImg);
 		borrowBtn.setTag(savedInstanceState.getString("isbn"));
-		
+
 		borrowBtn.setVisibility(View.VISIBLE);
 		returnBtn.setVisibility(View.VISIBLE);
 		addBtn.setVisibility(View.VISIBLE);
@@ -215,18 +182,14 @@ public class MainActivity extends Activity implements OnClickListener{
 		dbId.setText(savedInstanceState.getString("id"));
 	}
 
-	/**
-	 * MainActivity implements OnClickListener, and OnClick() is called when one of its associated notifiers is clicked. 
-	 * This method then responds appropriately.
-	 */
 	public void onClick(View v) {
 		String username = preferences.getString("username", null);
+
 		switch(v.getId()) {
+
 		case R.id.scan_button:
-			//TODO DISABLED THE ACTUAL SCAN FOR TESTING PURPOSES
-			//TODO IntentIntegrator scanIntegrator = new IntentIntegrator(this);
-			//TODO scanIntegrator.initiateScan();
-			getBook(TEST_ISBN);
+			IntentIntegrator scanIntegrator = new IntentIntegrator(this);
+			scanIntegrator.initiateScan();
 			break;
 
 		case R.id.borrow_btn:
@@ -303,34 +266,25 @@ public class MainActivity extends Activity implements OnClickListener{
 	 * 															or get the chosen username and save it in StoredPreferences.
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-		case _scanBarcode:
-			IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-			if (scanningResult != null) {
-				String scanContent = scanningResult.getContents();
-				String scanFormat = scanningResult.getFormatName();
-				if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
-					if (checkConnection()) {
-						borrowBtn.setTag(scanContent);
-						// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
-						getBook(scanContent);
-
-					} else { 					
-						Toast toast = Toast.makeText(getApplicationContext(), "No network connection!", Toast.LENGTH_SHORT);
-						toast.show();
-					}
-
-				} else {
-					Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
+		IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+		if (scanningResult != null) {
+			String scanContent = scanningResult.getContents();
+			String scanFormat = scanningResult.getFormatName();
+			if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
+				if (checkConnection()) {
+					borrowBtn.setTag(scanContent);
+					getBook(scanContent);
+				} else { 					
+					Toast toast = Toast.makeText(getApplicationContext(), "No network connection!", Toast.LENGTH_SHORT);
 					toast.show();
 				}
-
 			} else {
-				Toast toast = Toast.makeText(getApplicationContext(), "No book scan data received!", Toast.LENGTH_SHORT);
+				Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
 				toast.show();
 			}
+		}
 
-			break;
+		switch (requestCode) {
 
 		case _chooseUsername:
 			if(resultCode == RESULT_OK) {
@@ -352,9 +306,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			if(resultCode == RESULT_OK) {
 				String chosenId = data.getStringExtra("chosenId");
 				if (null != chosenId && !("".equals(chosenId))) {
-					Long idToSave = Long.parseLong(chosenId);
-
-					dbId.setText(idToSave.toString());
+					dbId.setText(Long.parseLong(chosenId) + "");
 					dbIdText.setVisibility(View.VISIBLE);
 					dbId.setVisibility(View.VISIBLE);
 					borrowBtn.setVisibility(View.VISIBLE);
@@ -377,7 +329,6 @@ public class MainActivity extends Activity implements OnClickListener{
 			isConnected.setVisibility(View.GONE);
 			return true;
 		} else {
-			isConnected.setBackgroundColor(0xFFFF0000);
 			isConnected.setVisibility(View.VISIBLE);
 			isConnected.setText("#Not connected to network!# \n#Click here to rescan.#");
 			return false;
@@ -405,7 +356,7 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		savedBundle.putString("id", dbId.getText().toString());
 	}
-
+	
 	/**
 	 * @author Michael Lo
 	 * Class to asynchronously download book data from Google Books.
@@ -418,18 +369,14 @@ public class MainActivity extends Activity implements OnClickListener{
 			for (String bookSearchURL : bookURLs) {
 				HttpClient bookClient = new DefaultHttpClient();
 				try {
-					HttpGet bookGet = new HttpGet(bookSearchURL);
-					HttpResponse bookResponse = bookClient.execute(bookGet);
+					HttpResponse bookResponse = bookClient.execute(new HttpGet(bookSearchURL));
 					StatusLine bookSearchStatus = bookResponse.getStatusLine();
 
-					if (bookSearchStatus.getStatusCode()==200) {
-						HttpEntity bookEntity = bookResponse.getEntity();
-						InputStream bookContent = bookEntity.getContent();
-						InputStreamReader bookInput = new InputStreamReader(bookContent);
-						BufferedReader bookReader = new BufferedReader(bookInput);
+					if (bookSearchStatus.getStatusCode() == 200) {
+						BufferedReader bookReader = new BufferedReader(new InputStreamReader(bookResponse.getEntity().getContent()));
 						String lineIn;
 
-						while ((lineIn=bookReader.readLine())!=null) {
+						while ((lineIn = bookReader.readLine()) != null) {
 							bookBuilder.append(lineIn);
 						}
 					}
@@ -439,7 +386,10 @@ public class MainActivity extends Activity implements OnClickListener{
 			}
 			return bookBuilder.toString();
 		}
-
+		//TODO: OPTIMISE
+		//TODO: FROM
+		//TODO: HERE
+		//TODO: DOWN
 		protected void onPostExecute(String result) {
 			try {
 				JSONObject resultObject = new JSONObject(result);
@@ -568,12 +518,14 @@ public class MainActivity extends Activity implements OnClickListener{
 				dbIdText.setVisibility(View.GONE);
 				borrowBtn.setVisibility(View.GONE);
 				returnBtn.setVisibility(View.GONE);
+				deleteBtn.setVisibility(View.GONE);
 			} else if (booksMatchingId.size() == 1) {
 				dbId.setText(booksMatchingId.get(0).getId().toString());
 				dbIdText.setVisibility(View.VISIBLE);
 				dbId.setVisibility(View.VISIBLE);
 				borrowBtn.setVisibility(View.VISIBLE);
 				returnBtn.setVisibility(View.VISIBLE);
+				deleteBtn.setVisibility(View.VISIBLE);
 			} else {
 				Intent i = new Intent(MainActivity.this, ChooseCopyActivity.class);
 				ArrayList<String> inPossessionOf = new ArrayList<String>();
@@ -638,7 +590,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			dbId.setVisibility(View.VISIBLE);
 			borrowBtn.setVisibility(View.VISIBLE);
 			returnBtn.setVisibility(View.VISIBLE);
-			new GetBookIds().execute(WEBAPP_URL, borrowBtn.getTag().toString());
+			deleteBtn.setVisibility(View.VISIBLE);
 			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}	
@@ -687,7 +639,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		protected void onPostExecute(String result) {
 			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
-	}	
+	}
 
 	private class HttpReturnAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
@@ -709,7 +661,8 @@ public class MainActivity extends Activity implements OnClickListener{
 	}
 
 	private void getBook(String isbn) {
-		String bookSearchString = GOOGLE_BOOKS_URL + "q=isbn:" + isbn + "&key=" + API_KEY;
+		// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
+		String bookSearchString = GOOGLE_BOOKS_URL + isbn + "&key=" + API_KEY;
 		new GetBookInfo().execute(bookSearchString);
 		new GetBookIds().execute(WEBAPP_URL, isbn);
 		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
@@ -738,31 +691,31 @@ public class MainActivity extends Activity implements OnClickListener{
 		protected void onPostExecute(String result) {
 			ObjectMapper mapper = new ObjectMapper();
 			List<Book> borrowedByUser = null;
-			
+
 			try {
 				borrowedByUser = mapper.readValue(result, new TypeReference<List<Book>>(){});
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 			currentlyBorrowedList.removeAllViews();
-			
+
 			if (!(null == borrowedByUser) && !(borrowedByUser.isEmpty())) {
-				
+
 				currentlyBorrowed = new TextView[borrowedByUser.size()];
-				
+
 				for (int i = 0; i < currentlyBorrowedList.getChildCount(); i++) {
 					View v = currentlyBorrowedList.getChildAt(i);
 					v.setVisibility(View.GONE);
 				}
-				
+
 				for(int t = 0; t < currentlyBorrowed.length; t++) {
 					TextView text = currentlyBorrowed[t];
 					text = new TextView(MainActivity.this);
 					text.setText(borrowedByUser.get(t).toString());
 					currentlyBorrowedList.addView(text);
 				}
-				
+
 				currentlyBorrowedTitle.setVisibility(View.VISIBLE);
 			} else {
 				currentlyBorrowedTitle.setVisibility(View.GONE);

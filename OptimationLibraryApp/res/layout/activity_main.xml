@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="5dp"
-            android:background="#FF0000"
+            android:background="#FFFF0000"
             android:textColor="#FFF"
             android:textSize="18sp" />
 

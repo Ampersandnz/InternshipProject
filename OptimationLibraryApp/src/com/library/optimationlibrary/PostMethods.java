@@ -16,6 +16,11 @@ import com.mlo.book.Book;
 
 public class PostMethods {
 
+	//TODO: OPTIMISE
+	//TODO: FROM
+	//TODO: HERE
+	//TODO: DOWN
+	
 	private static final String _add = "ADD";
 	private static final String _delete = "DELETE";
 	private static final String _borrow = "BORROW";
