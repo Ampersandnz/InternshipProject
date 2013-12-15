@@ -14,13 +14,14 @@ import org.json.JSONObject;
 
 import com.mlo.book.Book;
 
+/**
+ * 
+ * @author Michael Lo
+ * Class containing the HTTP POST methods used to send and receive data with the server.
+ *
+ */
 public class PostMethods {
 
-	//TODO: OPTIMISE
-	//TODO: FROM
-	//TODO: HERE
-	//TODO: DOWN
-	
 	private static final String _add = "ADD";
 	private static final String _delete = "DELETE";
 	private static final String _borrow = "BORROW";
@@ -28,23 +29,27 @@ public class PostMethods {
 	private static final String _getBorrowed = "GETBORROWED";
 	private static final String _getBookFromIsbn = "GETBOOKFROMISBN";
 
-	public PostMethods() {
+	static InputStream inputStream = null;
+	static String result = "";
+	static HttpClient httpClient = null;
+	static HttpPost httpPost = null;
+	static JSONObject jsonObject = null;
+	static String json = "";
+	static StringEntity stringEntity = null;
+	static HttpResponse httpResponse = null;
 
+	PostMethods() {
 	}
 
-	public static String POSTAdd(String url, Book book) {
-		InputStream inputStream = null;
-		String result = "";
+	static void commonActions(String url) {
+		httpClient = new DefaultHttpClient();
+		httpPost = new HttpPost(url);
+		jsonObject = new JSONObject();
+	}
 
+	static String POSTAdd(String url, Book book) {		
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
-
-			HttpPost httpPost = new HttpPost(url);
-
-			JSONObject jsonObject = new JSONObject();
-
-			String json = "";
-
+			commonActions(url);
 			jsonObject.accumulate("isbn", book.getIsbn());
 			jsonObject.accumulate("title", book.getTitle());
 			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
@@ -53,14 +58,14 @@ public class PostMethods {
 
 			json = _add + json;
 
-			StringEntity se = new StringEntity(json);
+			stringEntity = new StringEntity(json);
 
-			httpPost.setEntity(se);
+			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			HttpResponse httpResponse = httpclient.execute(httpPost);
+			httpResponse = httpClient.execute(httpPost);
 
 			inputStream = httpResponse.getEntity().getContent();
 
@@ -69,34 +74,27 @@ public class PostMethods {
 			} else {
 				result = "Did not work!";
 			}
-			
+
 		} catch (Exception e) {
 		}
 
 		return result;
 	}
 
-	public static String POSTDelete(String url, Book book) {
-		InputStream inputStream = null;
-		String result = "";
-
+	static String POSTDelete(String url, Book book) {
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
-
-			HttpPost httpPost = new HttpPost(url);
-
-			String json = "";
+			commonActions(url);
 
 			json = _delete + book.getId();
 
-			StringEntity se = new StringEntity(json);
+			stringEntity = new StringEntity(json);
 
-			httpPost.setEntity(se);
+			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			HttpResponse httpResponse = httpclient.execute(httpPost);
+			httpResponse = httpClient.execute(httpPost);
 
 			inputStream = httpResponse.getEntity().getContent();
 
@@ -112,18 +110,9 @@ public class PostMethods {
 		return result;
 	}
 
-	public static String POSTBorrow(String url, Book book) {
-		InputStream inputStream = null;
-		String result = "";
-
+	static String POSTBorrow(String url, Book book) {
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
-
-			HttpPost httpPost = new HttpPost(url);
-
-			JSONObject jsonObject = new JSONObject();
-			
-			String json = "";
+			commonActions(url);
 
 			jsonObject.accumulate("id", book.getId());
 			jsonObject.accumulate("isbn", book.getIsbn());
@@ -131,17 +120,17 @@ public class PostMethods {
 			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
 
 			json = jsonObject.toString();
-			
-			json = _borrow + json;
-			
-			StringEntity se = new StringEntity(json);
 
-			httpPost.setEntity(se);
+			json = _borrow + json;
+
+			stringEntity = new StringEntity(json);
+
+			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			HttpResponse httpResponse = httpclient.execute(httpPost);
+			HttpResponse httpResponse = httpClient.execute(httpPost);
 
 			inputStream = httpResponse.getEntity().getContent();
 
@@ -157,27 +146,20 @@ public class PostMethods {
 		return result;
 	}
 
-	public static String POSTReturn(String url, Book book) {
-		InputStream inputStream = null;
-		String result = "";
-
+	static String POSTReturn(String url, Book book) {
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
+			commonActions(url);
 
-			HttpPost httpPost = new HttpPost(url);
-			
-			String json = "";
-			
 			json = _return + book.getId();
 
-			StringEntity se = new StringEntity(json);
+			stringEntity = new StringEntity(json);
 
-			httpPost.setEntity(se);
+			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			HttpResponse httpResponse = httpclient.execute(httpPost);
+			HttpResponse httpResponse = httpClient.execute(httpPost);
 
 			inputStream = httpResponse.getEntity().getContent();
 
@@ -193,27 +175,20 @@ public class PostMethods {
 		return result;
 	}
 
-	public static String POSTGetBorrowed(String url, Book book) {
-		InputStream inputStream = null;
-		String result = "";
-
+	static String POSTGetBorrowed(String url, Book book) {
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
-			
-			HttpPost httpPost = new HttpPost(url);
-			
-			String json = "";
-			
+			commonActions(url);
+
 			json = _getBorrowed + book.getInPossessionOf();
-			
-			StringEntity se = new StringEntity(json);
-			
-			httpPost.setEntity(se);
-			
+
+			stringEntity = new StringEntity(json);
+
+			httpPost.setEntity(stringEntity);
+
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			HttpResponse httpResponse = httpclient.execute(httpPost);
+			HttpResponse httpResponse = httpClient.execute(httpPost);
 
 			inputStream = httpResponse.getEntity().getContent();
 
@@ -226,31 +201,24 @@ public class PostMethods {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
 
-	public static String POSTGetBookFromIsbn(String url, Book book) {
-		InputStream inputStream = null;
-		String result = "";
-
+	static String POSTGetBookFromIsbn(String url, Book book) {
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
-
-			HttpPost httpPost = new HttpPost(url);
-
-			String json = "";
+			commonActions(url);
 
 			json = _getBookFromIsbn + book.getIsbn();
 
-			StringEntity se = new StringEntity(json);
+			stringEntity = new StringEntity(json);
 
-			httpPost.setEntity(se);
+			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			HttpResponse httpResponse = httpclient.execute(httpPost);
+			httpResponse = httpClient.execute(httpPost);
 
 			inputStream = httpResponse.getEntity().getContent();
 
@@ -266,13 +234,6 @@ public class PostMethods {
 		return result;
 	}
 
-	/**
-	 * @param inputStream
-	 * @return result
-	 * @throws IOException
-	 * 
-	 * Temporary method to use with Book class and webserver until I have sorted all functionality properly.
-	 */
 	private static String convertInputStreamToString(InputStream inputStream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
 		String line = "";
@@ -282,6 +243,5 @@ public class PostMethods {
 		}
 		inputStream.close();
 		return result;
-
-	}   
+	}
 }

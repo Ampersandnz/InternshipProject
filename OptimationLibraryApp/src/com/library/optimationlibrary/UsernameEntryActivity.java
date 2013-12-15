@@ -18,7 +18,7 @@ import android.widget.Toast;
  * 
  * @author Michael Lo
  * Activity containing an EditText, that is brought up for users to enter their name. LIBRARY_USERNAME is reserved, as books in possession of that name are considered in the library.
- * Acts as a dialog, and returns data to MainActivity when the save button is clicked.
+ * Acts like a dialog, and returns data to MainActivity when the save button is clicked.
  *
  */
 public class UsernameEntryActivity extends Activity implements OnClickListener {
