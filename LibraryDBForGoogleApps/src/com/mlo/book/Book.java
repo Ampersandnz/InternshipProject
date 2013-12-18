@@ -7,6 +7,7 @@ import com.googlecode.objectify.annotation.Entity;
 /**
  * 
  * @author Michael Lo
+ * Set() methods return this, so multiple set() calls can be concatenated together.
  * 
  */
 
@@ -22,36 +23,47 @@ public class Book {
 	public Book() {
 	}
 
+	public Book(String isbn, String title, String inPossessionOf) {
+		this();
+		this.isbn = isbn;
+		this.title = title;
+		this.inPossessionOf = inPossessionOf;
+	}
+
 	public Long getId() { 
 		return id; 
 	} 
 
-	public void setId( Long bookID ) { 
-		this.id = bookID; 
+	public Book setId( Long bookID ) { 
+		this.id = bookID;
+		return this;
 	} 
 
 	public String getIsbn() { 
 		return isbn; 
 	} 
 
-	public void setIsbn( String isbn ) { 
-		this.isbn = isbn; 
+	public Book setIsbn( String isbn ) { 
+		this.isbn = isbn;
+		return this;
 	} 
 
 	public String getTitle() { 
 		return title; 
 	} 
 
-	public void setTitle( String title ) { 
-		this.title = title; 
+	public Book setTitle( String title ) { 
+		this.title = title;
+		return this;
 	} 
 
 	public String getInPossessionOf() { 
 		return inPossessionOf; 
 	} 
 
-	public void setInPossessionOf( String inPossessionOf ) { 
-		this.inPossessionOf = inPossessionOf; 
+	public Book setInPossessionOf( String inPossessionOf ) { 
+		this.inPossessionOf = inPossessionOf;
+		return this;
 	} 
 	
 	public String toString() {

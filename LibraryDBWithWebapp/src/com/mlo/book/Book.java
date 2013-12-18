@@ -10,7 +10,7 @@ import javax.persistence.Table;
  * 
  * @author Michael Lo
  * Hibernate mapping bean. Each Book represents a row in the database. Constructors, getters and setters. No computation or other methods.
- *
+ * Set() methods return this, so multiple set() calls can be concatenated together.
  */
 @Entity
 @Table(name = "BOOK") 
@@ -48,32 +48,36 @@ public class Book {
 		return id; 
 	} 
 
-	public void setId( Long id ) { 
-		this.id = id; 
+	public Book setId( Long id ) { 
+		this.id = id;
+		return this;
 	} 
 
 	public String getIsbn() { 
 		return isbn; 
 	} 
 
-	public void setIsbn( String isbn ) { 
-		this.isbn = isbn; 
+	public Book setIsbn( String isbn ) { 
+		this.isbn = isbn;
+		return this;
 	} 
 
 	public String getTitle() { 
 		return title; 
 	} 
 
-	public void setTitle( String title ) { 
-		this.title = title; 
+	public Book setTitle( String title ) { 
+		this.title = title;
+		return this;
 	} 
 
 	public String getInPossessionOf() { 
 		return inPossessionOf; 
 	} 
 
-	public void setInPossessionOf( String inPossessionOf ) { 
-		this.inPossessionOf = inPossessionOf; 
+	public Book setInPossessionOf( String inPossessionOf ) { 
+		this.inPossessionOf = inPossessionOf;
+		return this;
 	} 
 	
 	public String toString() {

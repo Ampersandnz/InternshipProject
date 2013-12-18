@@ -102,19 +102,19 @@ public class MainActivity extends Activity implements OnClickListener{
 		addBtn = (Button)findViewById(R.id.add_btn);
 		deleteBtn = (Button)findViewById(R.id.delete_btn);
 		savedUsername = (Button)findViewById(R.id.saved_username);
-
+		
 		borrowBtn.setVisibility(View.GONE);
 		returnBtn.setVisibility(View.GONE);
 		addBtn.setVisibility(View.GONE);
 		deleteBtn.setVisibility(View.GONE);
-
+		
 		scanBtn.setOnClickListener(this);
 		borrowBtn.setOnClickListener(this);
 		returnBtn.setOnClickListener(this);
 		addBtn.setOnClickListener(this);
 		deleteBtn.setOnClickListener(this);
 		savedUsername.setOnClickListener(this);
-
+		
 		savedUsername.setText(preferences.getString("username", "Choose a username"));
 	}
 
@@ -386,10 +386,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			}
 			return bookBuilder.toString();
 		}
-		//TODO: OPTIMISE
-		//TODO: FROM
-		//TODO: HERE
-		//TODO: DOWN
+		
 		protected void onPostExecute(String result) {
 			try {
 				JSONObject resultObject = new JSONObject(result);

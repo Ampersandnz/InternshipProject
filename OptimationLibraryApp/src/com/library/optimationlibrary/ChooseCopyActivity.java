@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -32,11 +31,13 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 
 	private void setupDim() {
 		Window window = getWindow();
-		WindowManager.LayoutParams lp = getWindow().getAttributes();
+		LayoutParams lp = getWindow().getAttributes();
 		lp.dimAmount=0.75f;
 		window.setAttributes(lp);
 		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
-		window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		window.addFlags(LayoutParams.FLAG_DIM_BEHIND);
+		
+		// Allows interception of any touches on the screen that are outside this activity.
 		window.setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL, LayoutParams.FLAG_NOT_TOUCH_MODAL);
 		window.setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 	}
@@ -65,8 +66,7 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// If we've received a touch notification that the user has touched
-		// outside the app, do nothing. This forces the user to select a copy of the book before the activity can close.
+		// If we've received a touch notification that the user has touched outside the activity, do nothing. This forces the user to select a copy of the book before the activity can close.
 		if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
 		}
 		

@@ -9,7 +9,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -42,11 +42,11 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	 */
 	private void setupDim() {
 		Window window = getWindow();
-		WindowManager.LayoutParams lp = getWindow().getAttributes();
+		LayoutParams lp = getWindow().getAttributes();
 		lp.dimAmount=0.75f;
 		window.setAttributes(lp);
 		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
-		window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		window.addFlags(LayoutParams.FLAG_DIM_BEHIND);
 	}
 
 	/**

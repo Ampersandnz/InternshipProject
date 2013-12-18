@@ -31,10 +31,7 @@ public class ObjectifyBookManager {
 			inPossessionOf = LIBRARY_USERNAME;
 		}
 		
-		Book book = new Book();
-		book.setIsbn(isbn);
-		book.setTitle(title);
-		book.setInPossessionOf(inPossessionOf);
+		Book book = new Book(isbn, title, inPossessionOf);
 		
 		ofy.put(book);
 		return book.getId();
