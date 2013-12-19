@@ -47,7 +47,14 @@ public class Controller extends HttpServlet {
 		// Hidden parameter identifying the page from which the browser is returning.
 		String hiddenParam = request.getParameter("page");
 		String forward = SHOWALL_JSP;
-
+		
+		//Initialise default values
+		if (firstRun) {
+			BM.initialise();
+			populateDB();
+			firstRun = false;
+		}
+		
 		if (!(null == hiddenParam)) {
 			// Get a map of the request parameters
 			Map<String, String[]> parameters = request.getParameterMap();
@@ -250,13 +257,6 @@ public class Controller extends HttpServlet {
 				break;
 			}
 		}
-		
-		//Initialise default values
-		if (firstRun) {
-			BM.initialise();
-			populateDB();
-			firstRun = false;
-		}
 
 		// Populate the list of books with the contents of the database.
 		ArrayList<Book> allBooks = BM.getAllBooks();
@@ -264,6 +264,8 @@ public class Controller extends HttpServlet {
 		// Send book list to next page.
 		if (forward.equals(SHOWALL_JSP)) {
 			request.setAttribute("allBooks", allBooks);
+			System.out.println("List of books sent to ShowAll");
+			System.out.println(allBooks + "\n");
 		}
 		
 		// Change to required page.
@@ -337,5 +339,7 @@ public class Controller extends HttpServlet {
 		BM.addBook("9781429943840", "Earth Afire",  TEST_USERNAME);
 		BM.addBook("9780345490711", "Judas Unchained", "_library");
 		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
+		
+		System.out.println("populateDB() called.");
 	}
 } 

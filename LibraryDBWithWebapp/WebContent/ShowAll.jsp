@@ -8,9 +8,16 @@
 <title>Book list</title>
 </head>
 <body>
-	
-	<% List<Book> allBooks = (List<Book>) request.getAttribute("allBooks");%>
-	
+
+	<% 
+	List<?> allBooks = null;
+	Object temp = request.getAttribute("allBooks");
+	System.out.println("List of books received by ShowAll:");
+	System.out.println(temp + "\n");
+	if (temp instanceof List<?>) {
+		allBooks = (List<?>) temp;
+	%>
+
 	<form method="GET" action='Controller' name="showall">
 		<table>
 			<tr>
@@ -25,8 +32,10 @@
 			</tr>
 
 			<%
-				if (!(null == allBooks)) {
-					for (Book b : allBooks) {
+			if (!(null == allBooks)) {
+				for (Object o : allBooks) {
+					if (o instanceof Book) {
+						Book b = (Book) o;
 			%>
 			<tr>
 				<td><input type="checkbox" name="book<%=b.getId()%>" /></td>
@@ -40,6 +49,8 @@
 			<%
 				}
 				}
+				}
+			}
 			%>
 
 		</table>
