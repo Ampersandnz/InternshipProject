@@ -67,51 +67,24 @@ public class Controller extends HttpServlet {
 					// Display add page.
 					forward = ADD_JSP;
 
-				} else if (parameters.containsKey("delete")) {
-					boolean bookBeingDeleted = false;
-					for(String parameter : parameters.keySet()) {
-						if(parameter.startsWith("book")) {
-							bookBeingDeleted = true;
-							Long Id = Long.parseLong(parameter.substring(4));
-							Book book = BM.getBook(Id);
-
-							String currentISBNs = (String) request.getAttribute("deletedISBNs");
-							String updatedISBNs = "";
-
-							if (!(null == currentISBNs)) {
-								updatedISBNs = currentISBNs + ", " + book.getIsbn();
-							} else {
-								updatedISBNs =  book.getIsbn();
-							}
-							request.setAttribute("deletedISBNs", updatedISBNs);
-							BM.deleteBook(Id);
-						}
-
-						if (bookBeingDeleted) {
-							// Display delete page.
-							forward = DELETE_JSP;
-						} else {
-							// No books were chosen for deletion. Do nothing.
-						}
+				} else if (parameters.containsKey("delete")) {					
+					if (deleteBook(parameters, request)) {
+						// Display delete page.
+						forward = DELETE_JSP;
+					} else {
+						// No books were chosen for deletion. Do nothing.
 					}
 
 				} else if (parameters.containsKey("edit")) {
-					List<Book> booksToEdit = new ArrayList<Book>();
-					boolean bookBeingEdited = false;
-					for(String parameter : parameters.keySet()) {
-						if(parameter.startsWith("book")) {
-							bookBeingEdited = true;
-							Long Id = Long.parseLong(parameter.substring(4));
-							booksToEdit.add(BM.getBook(Id));
-						}
-						if (bookBeingEdited) {
-							// Display edit page.
-							request.setAttribute("booksToEdit", booksToEdit);
-							forward = EDIT_JSP;
-						} else {
-							// No books were selected for editing. Do nothing.
-						}
+					List<Book> booksToEdit = editBook(parameters, request);
+					if (booksToEdit.size() != 0) {
+						// Display edit page.
+						request.setAttribute("booksToEdit", booksToEdit);
+						forward = EDIT_JSP;
+					} else {
+						// No books were selected for editing. Do nothing.
 					}
+					
 				} else if (parameters.containsKey("borrow")) {
 					boolean bookBeingBorrowed = false;
 					for(String parameter : parameters.keySet()) {
@@ -323,6 +296,10 @@ public class Controller extends HttpServlet {
 		
 		response.setContentType("application/json");
 	}
+	
+	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+	}
 
 	/**
 	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. 
@@ -341,5 +318,40 @@ public class Controller extends HttpServlet {
 		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
 		
 		System.out.println("populateDB() called.");
+	}
+	
+	private boolean deleteBook(Map<String, String[]> parameters, HttpServletRequest request) {
+		boolean bookBeingDeleted = false;
+		for(String parameter : parameters.keySet()) {
+			if(parameter.startsWith("book")) {
+				bookBeingDeleted = true;
+				Long Id = Long.parseLong(parameter.substring(4));
+				Book book = BM.getBook(Id);
+
+				String currentISBNs = (String) request.getAttribute("deletedISBNs");
+				String updatedISBNs = "";
+
+				if (!(null == currentISBNs)) {
+					updatedISBNs = currentISBNs + ", " + book.getIsbn();
+				} else {
+					updatedISBNs =  book.getIsbn();
+				}
+				request.setAttribute("deletedISBNs", updatedISBNs);
+				BM.deleteBook(Id);
+				bookBeingDeleted = true;
+			}
+		}
+		return bookBeingDeleted;
+	}
+	
+	private List<Book> editBook(Map<String, String[]> parameters, HttpServletRequest request) {
+		List<Book> booksToEdit = new ArrayList<Book>();
+		for(String parameter : parameters.keySet()) {
+			if(parameter.startsWith("book")) {
+				Long Id = Long.parseLong(parameter.substring(4));
+				booksToEdit.add(BM.getBook(Id));
+			}
+		}
+		return booksToEdit;
 	}
 } 
