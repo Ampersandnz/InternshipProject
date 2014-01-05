@@ -9,7 +9,7 @@
 <body>
 	New book entry
 
-	<form method="GET" action='Controller' name="add">
+	<form method="POST" action='Controller' name="add">
 		<table>
 			<tr>
 				<td>ISBN:</td>

@@ -18,7 +18,7 @@
 		allBooks = (List<?>) temp;
 	%>
 
-	<form method="GET" action='Controller' name="showall">
+	<form method="POST" action='Controller' name="showall">
 		<table>
 			<tr>
 				<td></td>

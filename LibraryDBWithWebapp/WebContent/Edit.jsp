@@ -10,7 +10,7 @@
 <body>
 	Edit book data
 
-	<form method="GET" action='Controller' name="edit">
+	<form method="POST" action='Controller' name="edit">
 		<table>
 			<tr>
 				<td>ISBN:</td>
