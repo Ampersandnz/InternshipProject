@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mlo.book.*;
+import com.mlo.user.*;
 
 /**
  * @author Michael Lo
@@ -37,6 +38,7 @@ public class Controller extends HttpServlet {
 	private static final String RETURN_JSP = "/Return.jsp";
 
 	private static BookManager BM = new BookManager();
+	private static UserManager UM = new UserManager();
 
 	private static boolean firstRun = true;
 	
@@ -45,40 +47,48 @@ public class Controller extends HttpServlet {
 	 * Will be removed when system is complete.
 	 */
 	private void populateDB() {
-		// Empty the database
+		// Empty the databases
 		BM.deleteAllBooks();
+		UM.deleteAllUsers();
 
-		// Add few User records to database
+		// Add few Book records to database
 		BM.addBook("9780316007573", "The Ashes Of Worlds", TEST_USERNAME); 
 		BM.addBook("9780425037454", "The Stars My Destination", "_library"); 
 		BM.addBook("9780756404079", "The Name Of The Wind", "_library"); 
 		BM.addBook("9781429943840", "Earth Afire",  TEST_USERNAME);
 		BM.addBook("9780345490711", "Judas Unchained", "_library");
 		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
+		
+		// Add few User records to database
+		UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz"); 
+		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com"); 
 
-		System.out.println("populateDB() called.");
 	}
 
 	/**
-	 * Whenever the user clicks a button, this method is called. It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
+	 * Whenever the user clicks a button, this method is called. 
+	 * It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Hidden parameter identifying the page from which the browser is returning.
-		String forward = SHOWALL_JSP;
-
 		//Initialise default values
 		if (firstRun) {
 			BM.initialise();
+			UM.initialise();
 			populateDB();
 			firstRun = false;
 		}
+		
+		// Hidden parameter identifying the page from which the browser is returning.
+		String forward = SHOWALL_JSP;
 
 		// Populate the list of books with the contents of the database.
 		ArrayList<Book> allBooks = BM.getAllBooks();
+		ArrayList<User> allUsers = UM.getAllUsers();
 
 		// Send book list to next page.
 		if (forward.equals(SHOWALL_JSP)) {
 			request.setAttribute("allBooks", allBooks);
+			request.setAttribute("allUsers", allUsers);
 		}
 
 		// Change to required page.
@@ -86,12 +96,20 @@ public class Controller extends HttpServlet {
 		view.forward(request, response);
 	}
 
-	/***************************************************
+	/**
 	 * doPost(): receives JSON data, parse it, map it and send back as JSON
 	 * Code based on that sourced from http://hmkcode.com/java-servlet-send-receive-json-using-jquery-ajax/
 	 * 							   and http://hmkcode.com/android-send-json-data-to-server/
-	 ****************************************************/
+	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		//Initialise default values
+		if (firstRun) {
+			BM.initialise();
+			UM.initialise();
+			populateDB();
+			firstRun = false;
+		}
+		
 		// Hidden parameter identifying the page from which the browser is returning.
 		String hiddenParam = request.getParameter("page");
 
@@ -272,12 +290,12 @@ public class Controller extends HttpServlet {
 
 			// Populate the list of books with the contents of the database.
 			ArrayList<Book> allBooks = BM.getAllBooks();
-
+			ArrayList<User> allUsers = UM.getAllUsers();
+			
 			// Send book list to next page.
 			if (forward.equals(SHOWALL_JSP)) {
 				request.setAttribute("allBooks", allBooks);
-				System.out.println("List of books sent to ShowAll");
-				System.out.println(allBooks + "\n");
+				request.setAttribute("allUsers", allUsers);
 			}
 
 			// Change to required page.

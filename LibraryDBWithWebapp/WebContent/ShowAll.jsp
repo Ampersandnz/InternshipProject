@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"
-	import="com.mlo.book.*, java.util.ArrayList, java.util.List"%>
+	import="com.mlo.book.Book, com.mlo.user.User, java.util.ArrayList, java.util.List"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -11,14 +11,15 @@
 
 	<% 
 	List<?> allBooks = null;
+	List<?> allUsers = null;
+	
 	Object temp = request.getAttribute("allBooks");
-	System.out.println("List of books received by ShowAll:");
-	System.out.println(temp + "\n");
 	if (temp instanceof List<?>) {
 		allBooks = (List<?>) temp;
 	%>
 
 	<form method="POST" action='Controller' name="showall">
+		Books: 
 		<table>
 			<tr>
 				<td></td>
@@ -54,7 +55,7 @@
 			%>
 
 		</table>
-
+		
 		<p>
 			<input type="submit" name="borrow"
 				value="Borrow book(s) from library" />&nbsp; <input type="submit"
@@ -65,6 +66,44 @@
 				type="reset" value="Clear selection" /> <input type="hidden"
 				name="page" value="mainList" />
 		</p>
+
+		<% 
+		temp = request.getAttribute("allUsers");
+		if (temp instanceof List<?>) {
+			allUsers = (List<?>) temp;
+		%>
+		
+		Users:
+		<table>
+			<tr>
+				<td>Name:</td>
+				<td>|</td>
+				<td>Email:</td>
+				<td>|</td>
+				<td>Total: <%=allUsers.size() %></td>
+			</tr>
+
+			<%
+			if (!(null == allUsers)) {
+				for (Object o : allUsers) {
+					if (o instanceof User) {
+						User u = (User) o;
+			%>
+			<tr>
+				<td><%=u.getName()%></td>
+				<td>|</td>
+				<td><%=u.getEmail()%></td>
+			</tr>
+
+			<%
+				}
+				}
+				}
+			}
+			%>
+
+		</table>
+
 	</form>
 </body>
 </html>

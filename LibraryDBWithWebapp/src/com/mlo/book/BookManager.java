@@ -196,7 +196,7 @@ public class BookManager {
 
 		try { 
 			tx = session.beginTransaction(); 
-			List<?> Books = session.createQuery("FROM User").list(); 
+			List<?> Books = session.createQuery("FROM Book").list(); 
 			for (Iterator<?> iterator = Books.iterator(); iterator.hasNext();){ 
 				Book book = (Book) iterator.next(); 
 				allBooks.add(book);
@@ -218,8 +218,12 @@ public class BookManager {
 	 * Method to delete all entries in all rows of the database.
 	 */
 	public void deleteAllBooks( ) { 
-		for (Book b: this.getAllBooks()) {
-			this.deleteBook(b.getId());
+		try {
+			for (Book b: this.getAllBooks()) {
+				this.deleteBook(b.getId());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	} 
 

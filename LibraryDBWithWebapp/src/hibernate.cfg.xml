@@ -23,6 +23,8 @@
 		</property>
 		
 		<mapping class="com.mlo.book.Book"/>  
+		
+		<mapping class="com.mlo.user.User"/>  
 
 	</session-factory> 
 </hibernate-configuration>

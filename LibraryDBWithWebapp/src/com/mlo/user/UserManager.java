@@ -206,9 +206,13 @@ public class UserManager {
 	/**
 	 * Method to delete all entries in all rows of the database.
 	 */
-	public void deleteAllUsers( ) { 
-		for (User b: this.getAllUsers()) {
-			this.deleteUser(b.getId());
+	public void deleteAllUsers( ) {
+		try {
+			for (User b: this.getAllUsers()) {
+				this.deleteUser(b.getId());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	} 
 
