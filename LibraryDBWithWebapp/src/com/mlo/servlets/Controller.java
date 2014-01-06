@@ -62,7 +62,7 @@ public class Controller extends HttpServlet {
 		// Add few User records to database
 		UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz"); 
 		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com"); 
-
+		
 	}
 
 	/**
@@ -301,6 +301,7 @@ public class Controller extends HttpServlet {
 			// Change to required page.
 			RequestDispatcher view = request.getRequestDispatcher(forward);
 			view.forward(request, response);
+			
 		} else {
 			// Responding to a POST command from the mobile app.
 			BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
@@ -334,6 +335,19 @@ public class Controller extends HttpServlet {
 					}
 				}
 				mapper.writeValue(response.getOutputStream(), borrowedByUsername);
+
+			} else if (json.startsWith("ISALLOWEDNAME")) {
+				//TODO: CHECK CHOSEN NAME, OR SEND LIST OF AUTHENTICATED NAMES TO APP
+				String chosenName = json.substring(10);
+				
+				for (User u: UM.getAllUsers()) {
+					if (u.getName().equals(chosenName)) {
+						mapper.writeValue(response.getOutputStream(), "FALSE");
+						break;
+					}
+				}
+				
+				mapper.writeValue(response.getOutputStream(), "FALSE");
 
 			} else if (json.startsWith("GETBOOKFROMISBN")) {
 				List<Book> booksMatchingIsbn = new ArrayList<Book>();

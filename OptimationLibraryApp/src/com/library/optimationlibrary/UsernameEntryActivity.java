@@ -3,6 +3,7 @@ package com.library.optimationlibrary;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -22,12 +23,14 @@ import android.widget.Toast;
  *
  */
 public class UsernameEntryActivity extends Activity implements OnClickListener {
-	
+
 	private EditText enterUsername;
-	
+
 	private Button saveButton;
 	private Button cancelButton;
 	
+	private String username;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,12 +58,12 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	private void setupEditText() {
 		enterUsername = (EditText)findViewById(R.id.enter_username);
 		String username = PreferenceManager.getDefaultSharedPreferences(this).getString("username", null);
-		
+
 		if (!(null == username)) {
 			enterUsername.setText(username);
 		}
 	}
-	
+
 	/**
 	 * Method to map the Button objects to views in the layout and set their listener as the activity.
 	 */
@@ -85,22 +88,42 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		Intent returnIntent = new Intent();	
 		if (v.getId() == R.id.saveUsername_button) {
-			String username = enterUsername.getText().toString();
-			//LIBRARY_USERNAME is reserved just in case, although it's unlikely that anyone would attempt to set their name to it.
-			if (username.equals(MainActivity.LIBRARY_USERNAME)) {
-				Toast toast = Toast.makeText(getApplicationContext(), "This username is reserved. Please choose another.", Toast.LENGTH_SHORT);
-				toast.show();
-			} else {
-				//Return chosen name.
-				returnIntent.putExtra("username", username);
-				setResult(RESULT_OK,returnIntent); 
-				finish();
-			}
-			//Cancel and return to MainActivity. Old name, if any, will be kept.
+			username = enterUsername.getText().toString();
+			// Check attempted username against webapp's list of allowed usernames.
+			String[] data = {MainActivity.WEBAPP_URL, username};
+			new CheckIsAllowedName().execute(data);
+
+			// Cancel and return to MainActivity. Old name, if any, will be kept.
 		} else if (v.getId() == R.id.cancelUsername_button) {
 			setResult(RESULT_CANCELED, returnIntent);
 			finish();
 		}
 	}
 
+	private class CheckIsAllowedName extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... URLs) {
+			String url = URLs[0];
+			String returnValue = "";
+			String attemptedUsername = URLs[1];
+
+			returnValue = PostMethods.POSTIsAllowedName(url, attemptedUsername);
+
+			return returnValue;
+		}
+
+		protected void onPostExecute(String result) {
+			if (result.equals("TRUE")) {	
+				Intent returnIntent = new Intent();			
+				//Return chosen name.
+				returnIntent.putExtra("username", username);
+				setResult(RESULT_OK,returnIntent); 
+				finish();
+			} else if (result.equals("FALSE")) {
+				String chosenName = "";
+				Toast toast = Toast.makeText(getApplicationContext(), "Name \'" + chosenName + "\' is not allowed.", Toast.LENGTH_SHORT);
+				toast.show();
+			}
+		}
+	}
 }

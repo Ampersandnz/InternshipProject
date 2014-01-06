@@ -28,6 +28,7 @@ public class PostMethods {
 	private static final String _return = "RETURN";
 	private static final String _getBorrowed = "GETBORROWED";
 	private static final String _getBookFromIsbn = "GETBOOKFROMISBN";
+	private static final String _isAllowedName = "ISALLOWEDNAME";
 
 	static InputStream inputStream = null;
 	static String result = "";
@@ -192,6 +193,36 @@ public class PostMethods {
 
 			inputStream = httpResponse.getEntity().getContent();
 
+			if(inputStream != null) {
+				result = convertInputStreamToString(inputStream);
+			} else {
+				result = "Did not work!";
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+	
+	static String POSTIsAllowedName(String url, String name) {
+		try {
+			commonActions(url);
+			
+			json = _isAllowedName + name;
+
+			stringEntity = new StringEntity(json);
+
+			httpPost.setEntity(stringEntity);
+
+			httpPost.setHeader("Accept", "application/json");
+			httpPost.setHeader("Content-type", "application/json");
+
+			HttpResponse httpResponse = httpClient.execute(httpPost);
+
+			inputStream = httpResponse.getEntity().getContent();
+			
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {

@@ -51,7 +51,7 @@ import com.mlo.book.Book;
  */
 public class MainActivity extends Activity implements OnClickListener{
 
-	private static final String WEBAPP_URL = "http://1.optimation-library-db.appspot.com/librarydbforgoogleapps";
+	static final String WEBAPP_URL = "http://1.optimation-library-db.appspot.com/librarydbforgoogleapps";
 	private static final String API_KEY = "AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
@@ -290,6 +290,14 @@ public class MainActivity extends Activity implements OnClickListener{
 			if(resultCode == RESULT_OK) {
 				String username = data.getStringExtra("username");
 				Editor edit = preferences.edit();
+				
+				/*if (result.equals("TRUE")) {
+				} else if (result.equals("FALSE")) {
+					String chosenName = "";
+					Toast toast = Toast.makeText(getApplicationContext(), "Name " + chosenName + "is not allowed.", Toast.LENGTH_SHORT);
+					toast.show();
+				}*/
+				
 				if (null == username || "".equals(username)) {
 					savedUsername.setText("Username");
 					username = null;
