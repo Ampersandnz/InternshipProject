@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Optimation Library Barcode Scanner</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="thumb">Book thumbnail</string>
+    <string name="scan">Scan a book</string>
+    <string name="borrowBtn">Borrow book</string>
+    <string name="returnBtn">Return book</string>
+    <string name="addBtn">Add book to library</string>
+    <string name="deleteBtn">Delete book from library</string>
+    <string name="saveBtn">Save</string>
+    <string name="cancelBtn">Cancel</string>
+    <string name="title_activity_username_entry">Enter username: </string>
+    <string name="username">Username</string>
+    <string name="title_activity_choose_copy">Choose copy by current owner: </string>
+    <string name="dbId_text">ID: </string>
+    <string name="currentlyBorrowed_list_title_text">Currently borrowed: </string>
+</resources>
