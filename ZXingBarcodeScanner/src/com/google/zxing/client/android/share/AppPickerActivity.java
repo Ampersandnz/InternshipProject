@@ -28,7 +28,8 @@ public final class AppPickerActivity extends ListActivity {
 
   private AsyncTask<?,?,?> backgroundTask;
 
-  @Override
+  @SuppressWarnings("unchecked")
+@Override
   protected void onResume() {
     super.onResume();
     backgroundTask = new LoadPackagesAsyncTask(this);

@@ -15,6 +15,7 @@
  limitations under the License.
  -->
 <resources>
+  <string name="action_settings">Action Settings</string>
   <string name="app_name">Barcode Scanner</string>
   <string name="app_picker_name">Applications</string>
   <string name="bookmark_picker_name">Bookmarks</string>
@@ -47,6 +48,7 @@
   <string name="contents_phone">Phone number</string>
   <string name="contents_sms">SMS address</string>
   <string name="contents_text">Plain text</string>
+  <string name="hello_world">Hello World!</string>
   <string name="history_clear_text">Clear history</string>
   <string name="history_clear_one_history_text">Clear</string>
   <string name="history_email_title">Barcode Scanner history</string>

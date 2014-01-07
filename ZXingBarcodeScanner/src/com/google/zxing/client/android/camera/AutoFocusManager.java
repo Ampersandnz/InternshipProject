@@ -56,7 +56,8 @@ final class AutoFocusManager implements Camera.AutoFocusCallback {
     start();
   }
 
-  @Override
+  @SuppressWarnings("unchecked")
+@Override
   public synchronized void onAutoFocus(boolean success, Camera theCamera) {
     if (active) {
       outstandingTask = new AutoFocusTask();

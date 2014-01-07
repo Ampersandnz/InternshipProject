@@ -46,7 +46,8 @@ final class InactivityTimer {
     onActivity();
   }
 
-  synchronized void onActivity() {
+  @SuppressWarnings("unchecked")
+synchronized void onActivity() {
     cancel();
     inactivityTask = new InactivityAsyncTask();
     inactivityTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
