@@ -56,12 +56,12 @@
 		</table>
 
 		<p>
-			<input type="submit" name="borrow"
+			<input type="submit" name="borrowBook"
 				value="Borrow book(s) from library" />&nbsp; <input type="submit"
-				name="return" value="Return borrowed book(s) to library" />&nbsp; <input
-				type="submit" name="add" value="Add new book to library" />&nbsp; <input
-				type="submit" name="delete" value="Delete book(s) from system" />&nbsp;<input
-				type="submit" name="edit" value="Edit book(s)" />&nbsp; <input
+				name="returnBook" value="Return borrowed book(s) to library" />&nbsp; <input
+				type="submit" name="addBook" value="Add new book to library" />&nbsp; <input
+				type="submit" name="deleteBook" value="Delete book(s) from system" />&nbsp;<input
+				type="submit" name="editBook" value="Edit book(s)" />&nbsp; <input
 				type="reset" value="Clear selection" /> <input type="hidden"
 				name="page" value="mainList" />
 		</p>
