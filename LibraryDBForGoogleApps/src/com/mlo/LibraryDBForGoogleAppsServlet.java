@@ -183,7 +183,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			} else {
 				// Return to main list.
 			}
-
+			
 			break;
 
 		case "addBook":

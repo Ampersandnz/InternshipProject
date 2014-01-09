@@ -29,10 +29,8 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 
 	private Button saveButton;
 	private Button cancelButton;
-	
+
 	private String username;
-	
-	private Intent returnIntent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,20 +87,35 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	 * UsernameEntryActivity implements OnClickListener. When one of the buttons is clicked, this method is called and acts appropriately.
 	 */
 	public void onClick(View v) {
-		Intent returnIntent = new Intent();	
+		Intent returnIntent = new Intent();
 		if (v.getId() == R.id.saveUsername_button) {
 			username = enterUsername.getText().toString();
-			
+
 			// Check attempted username against webapp's list of allowed usernames.
-			returnIntent = new Intent();
 			String[] data = {MainActivity.WEBAPP_URL, username};
-			
+
 			new CheckIsAllowedName().execute(data);
-			
+
 		} else if (v.getId() == R.id.cancelUsername_button) {
 			// Cancel and return to MainActivity. Old name, if any, will be kept.
 			setResult(RESULT_CANCELED, returnIntent);
 			finish();
+		}
+	}
+
+	private void notifyServerResponded(boolean validName) {
+		Intent returnIntent = new Intent();
+		if (validName) {
+			Log.d("MyDEBUG", "Valid name, finishing activity now.");
+			
+			returnIntent.putExtra("username", username);
+			setResult(RESULT_OK,returnIntent); 
+			finish();
+		} else {
+			Log.d("MyDEBUG", "Invalid name, displaying error Toast.");
+
+			Toast toast = Toast.makeText(getApplicationContext(), "Name \'" +  username + "\' is not allowed.", Toast.LENGTH_SHORT);
+			toast.show();
 		}
 	}
 
@@ -115,7 +128,7 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		protected String doInBackground(String... URLs) {
 			String url = URLs[0];
 			String attemptedUsername = URLs[1];
-			
+
 			String returnValue = PostMethods.POSTIsAllowedName(url, attemptedUsername);
 
 			return returnValue;
@@ -123,18 +136,11 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 
 		protected void onPostExecute(String result) {
 			Log.d("MyDEBUG", "Result from asynctask is: " + result);
-			
+
 			if (result.equals("TRUE")) {
-				Log.d("MyDEBUG", "Valid name, finishing activity now.");
-				//Return chosen name.
-				returnIntent.putExtra("username", username);
-				UsernameEntryActivity.this.setResult(RESULT_OK,returnIntent); 
-				UsernameEntryActivity.this.finish();
+				notifyServerResponded(true);
 			} else if (result.equals("FALSE")) {
-				Log.d("MyDEBUG", "Invalid name, displaying error Toast.");
-				String chosenName = "";
-				Toast toast = Toast.makeText(getApplicationContext(), "Name \'" + chosenName + "\' is not allowed.", Toast.LENGTH_SHORT);
-				toast.show();
+				notifyServerResponded(false);
 			}
 		}
 	}
