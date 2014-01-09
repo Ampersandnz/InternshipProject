@@ -43,38 +43,13 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static boolean firstRun = true;
 
 	/**
-	 * Method to clear the database and then add a few default entries. Purely for ease of use, is called upon app startup. 
-	 * Will be removed when system is complete.
-	 */
-	private void populateDB() {
-		// Empty the databases
-		BM.deleteAllBooks();
-		UM.deleteAllUsers();
-
-		// Add few Book records to database
-		BM.addBook("9780316007573", "The Ashes Of Worlds", TEST_USERNAME); 
-		BM.addBook("9780425037454", "The Stars My Destination", "_library"); 
-		BM.addBook("9780756404079", "The Name Of The Wind", "_library"); 
-		BM.addBook("9781429943840", "Earth Afire",  TEST_USERNAME);
-		BM.addBook("9780345490711", "Judas Unchained", "_library");
-		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
-
-		// Add few User records to database
-		UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz"); 
-		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com"); 
-
-	}
-
-	/**
 	 * Whenever the user clicks a button, this method is called. 
 	 * It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//Initialise default values
 		if (firstRun) {
-			BM.initialise();
-			UM.initialise();
-			populateDB();
+			SH.firstRun();
 			firstRun = false;
 		}
 
@@ -104,9 +79,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//Initialise default values
 		if (firstRun) {
-			BM.initialise();
-			UM.initialise();
-			populateDB();
+			SH.firstRun();
 			firstRun = false;
 		}
 
@@ -114,13 +87,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		String hiddenParam = request.getParameter("page");
 
 		if (hiddenParam != null) {
-			//Initialise default values
-			if (firstRun) {
-				BM.initialise();
-				populateDB();
-				firstRun = false;
-			}
-
 			// Get a map of the request parameters
 			@SuppressWarnings("unchecked")
 			Map<String, String[]> parameters = request.getParameterMap();

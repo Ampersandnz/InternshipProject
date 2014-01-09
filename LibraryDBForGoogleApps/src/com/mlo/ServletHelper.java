@@ -19,7 +19,35 @@ public class ServletHelper {
 		this.BM = BM;
 		this.UM = UM;
 	}
+	
+	/**
+	 * Method to initialise and clear the databases, then add default fake entries.
+	 * Will be altered when development is complete.
+	 */
+	void firstRun() {
+		// Initialise the database managers
+		BM.initialise();
+		UM.initialise();
+		
+		// Empty the databases
+		BM.deleteAllBooks();
+		UM.deleteAllUsers();
 
+		// Add few Book records to database
+		BM.addBook("9780316007573", "The Ashes Of Worlds", LibraryDBForGoogleAppsServlet.TEST_USERNAME); 
+		BM.addBook("9780425037454", "The Stars My Destination", "_library"); 
+		BM.addBook("9780756404079", "The Name Of The Wind", "_library"); 
+		BM.addBook("9781429943840", "Earth Afire",  LibraryDBForGoogleAppsServlet.TEST_USERNAME);
+		BM.addBook("9780345490711", "Judas Unchained", "_library");
+		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
+
+		// Add few User records to database
+		UM.addUser(LibraryDBForGoogleAppsServlet.TEST_USERNAME, "michael.lo@optimation.co.nz"); 
+		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com"); 
+		UM.addUser("test", "test@fake.com"); 
+		UM.addUser("test", "test@test.com"); 
+	}
+	
 	boolean sendBorrowedBooks(HttpServletRequest request, Map<String, String[]> parameters) {
 		boolean bookBeingBorrowed = false;
 		for(String parameter : parameters.keySet()) {
