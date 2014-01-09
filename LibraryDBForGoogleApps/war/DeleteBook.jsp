@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Book(s) deleted</title>
+<title>Optimation Library System</title>
 </head>
 <body>
 

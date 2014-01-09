@@ -20,18 +20,26 @@ import com.mlo.user.*;
 public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 8890271763290445675L;
-	private static final String TEST_USERNAME = "Michael Lo";
+	
+	public static final String TEST_USERNAME = "Michael Lo";
 	public static final String LIBRARY_USERNAME = "_library";
 
-	private static final String ADD_BOOK = "/AddBook.jsp";
-	private static final String DELETE_BOOK = "/DeleteBook.jsp";
-	private static final String EDIT_BOOK = "/EditBook.jsp";
-	private static final String SHOWALL = "/ShowAll.jsp";
-	private static final String BORROW_BOOK = "/BorrowBook.jsp";
-	private static final String RETURN_BOOK = "/ReturnBook.jsp";
+	static final String ADD_BOOK = "/AddBook.jsp";
+	static final String DELETE_BOOK = "/DeleteBook.jsp";
+	static final String EDIT_BOOK = "/EditBook.jsp";
+	static final String SHOWALL = "/ShowAll.jsp";
+	static final String BORROW_BOOK = "/BorrowBook.jsp";
+	static final String RETURN_BOOK = "/ReturnBook.jsp";
 
-	private static BookManager BM = new ObjectifyBookManager();
-	private static UserManager UM = new ObjectifyUserManager();
+	static final String ADD_USER = "/AddUser.jsp";
+	static final String DELETE_USER = "/DeleteUser.jsp";
+	static final String EDIT_USER = "/EditUser.jsp";
+	
+	static BookManager BM = new ObjectifyBookManager();
+	static UserManager UM = new ObjectifyUserManager();
+	
+	private static ServletHelper SH = new ServletHelper(BM, UM);
+	
 	private static boolean firstRun = true;
 
 	/**
@@ -146,7 +154,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				forward = ADD_BOOK;
 
 			} else if (parameters.containsKey("deleteBook")) {					
-				if (deleteBook(parameters, request)) {
+				if (SH.deleteBook(parameters, request)) {
 					// Display delete page.
 					forward = DELETE_BOOK;
 				} else {
@@ -154,7 +162,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 			} else if (parameters.containsKey("editBook")) {
-				List<Book> booksToEdit = getBooksToEdit(parameters, request);
+				List<Book> booksToEdit = SH.getBooksToEdit(parameters, request);
 				if (booksToEdit.size() != 0) {
 					// Display edit page.
 					request.setAttribute("booksToEdit", booksToEdit);
@@ -164,7 +172,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 			} else if (parameters.containsKey("borrowBook")) {
-				boolean bookBeingBorrowed = sendBorrowedBooks(request, parameters);
+				boolean bookBeingBorrowed = SH.sendBorrowedBooks(request, parameters);
 
 				if (bookBeingBorrowed) {
 					// Display borrow page.
@@ -173,22 +181,45 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 					// No books were chosen for borrowing. Do nothing.
 				}
 			} else if (parameters.containsKey("returnBook")) {
-				boolean bookBeingReturned = sendReturnedBooks(request, parameters);
+				boolean bookBeingReturned = SH.sendReturnedBooks(request, parameters);
 				if (bookBeingReturned) {
 					// Display return page.
 					forward = RETURN_BOOK;
 				} else {
 					// No books were chosen for returning. Do nothing.
 				}
+
+			} else if (parameters.containsKey("addUser")) {
+				// Display add page.
+				forward = ADD_USER;
+
+			} else if (parameters.containsKey("deleteUser")) {					
+				if (SH.deleteUser(parameters, request)) {
+					// Display delete page.
+					forward = DELETE_USER;
+				} else {
+					// No users were chosen for deletion. Do nothing.
+				}
+
+			} else if (parameters.containsKey("editUser")) {
+				List<User> usersToEdit = SH.getUsersToEdit(parameters, request);
+				if (usersToEdit.size() != 0) {
+					// Display edit page.
+					request.setAttribute("usersToEdit", usersToEdit);
+					forward = EDIT_USER;
+				} else {
+					// No users were selected for editing. Do nothing.
+				}
+
 			} else {
 				// Return to main list.
 			}
-			
+
 			break;
 
 		case "addBook":
 			if (parameters.containsKey("save")) {
-				addBook(request, parameters);
+				SH.addBook(request, parameters);
 			}
 
 			// Return to main list.
@@ -196,9 +227,25 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		case "editBook":
 			if (parameters.containsKey("save")) {
-				editBook(request, parameters);
+				SH.editBook(request, parameters);
 			}
 
+			// Return to main list.
+			break;
+		
+		case "addUser":
+			if (parameters.containsKey("save")) {
+				SH.addUser(request, parameters);
+			}
+			
+			// Return to main list.
+			break;
+	
+		case "editUser":
+			if (parameters.containsKey("save")) {
+				SH.editUser(request, parameters);
+			}
+			
 			// Return to main list.
 			break;
 		}
@@ -251,7 +298,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		} else if (json.startsWith("ISALLOWEDNAME")) {
 			String chosenName = json.substring(13);
 
-			if (checkUsers(chosenName)) {
+			if (SH.checkUsers(chosenName)) {
 				response.getOutputStream().print("TRUE");
 			} else {
 				response.getOutputStream().print("FALSE");
@@ -277,160 +324,5 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		}
 
 		response.setContentType("application/json");
-	}
-
-	private boolean sendBorrowedBooks(HttpServletRequest request, Map<String, String[]> parameters) {
-		boolean bookBeingBorrowed = false;
-		for(String parameter : parameters.keySet()) {
-			if(parameter.startsWith("book")) {
-				bookBeingBorrowed = true;
-				Long Id = Long.parseLong(parameter.substring(4));
-				Book book = BM.getBook(Id);
-
-				String currentBorrowedISBNs = (String) request.getAttribute("borrowedISBNs");
-				String currentNotBorrowedISBNs = (String) request.getAttribute("notBorrowedISBNs");
-				String borrowedISBNs = null;
-				String notBorrowedISBNs = null;
-
-				if (book.getInPossessionOf().equals(TEST_USERNAME)) {
-					if (!(null == currentNotBorrowedISBNs)) {
-						notBorrowedISBNs = currentNotBorrowedISBNs + ", " + book.getIsbn();
-					} else {
-						notBorrowedISBNs =  book.getIsbn();
-					}
-					borrowedISBNs = currentBorrowedISBNs;
-				} else {
-					if (!(null == currentBorrowedISBNs)) {
-						borrowedISBNs = currentBorrowedISBNs + ", " + book.getIsbn();
-					} else {
-						borrowedISBNs =  book.getIsbn();
-					}
-					notBorrowedISBNs = currentNotBorrowedISBNs;
-					BM.updateBook(Id, "inPossessionOf", TEST_USERNAME);
-				}
-
-				request.setAttribute("notBorrowedISBNs", notBorrowedISBNs);
-				request.setAttribute("borrowedISBNs", borrowedISBNs);
-				request.setAttribute("borrower", TEST_USERNAME);
-			}
-		}
-		return bookBeingBorrowed;
-	}
-
-	private boolean sendReturnedBooks(HttpServletRequest request, Map<String, String[]> parameters) {
-		boolean bookBeingReturned = false;
-		for(String parameter : parameters.keySet()) {
-			if(parameter.startsWith("book")) {
-				bookBeingReturned = true;
-				Long Id = Long.parseLong(parameter.substring(4));
-				Book book = BM.getBook(Id);
-
-				String currentReturnedISBNs = (String) request.getAttribute("returnedISBNs");
-				String currentNotReturnedISBNs = (String) request.getAttribute("notReturnedISBNs");
-				String returnedISBNs = null;
-				String notReturnedISBNs = null;
-
-				if (book.getInPossessionOf().equals(LIBRARY_USERNAME)) {
-					if (!(null == currentNotReturnedISBNs)) {
-						notReturnedISBNs = currentNotReturnedISBNs + ", " + book.getIsbn();
-					} else {
-						notReturnedISBNs =  book.getIsbn();
-					}
-					returnedISBNs = currentReturnedISBNs;
-				} else {
-					if (!(null == currentReturnedISBNs)) {
-						returnedISBNs = currentReturnedISBNs + ", " + book.getIsbn();
-					} else {
-						returnedISBNs =  book.getIsbn();
-					}
-					notReturnedISBNs = currentNotReturnedISBNs;
-					BM.updateBook(Id, "inPossessionOf", LIBRARY_USERNAME);
-				}
-
-				request.setAttribute("notReturnedISBNs", notReturnedISBNs);
-				request.setAttribute("returnedISBNs", returnedISBNs);
-			}
-		}
-		return bookBeingReturned;
-	}
-
-	private void addBook(HttpServletRequest request, Map<String, String[]> parameters) {
-		String isbn = "";
-		String title = "";
-		String inPossessionOf = "";
-
-		try {
-			isbn = request.getParameter("isbn");
-			title = request.getParameter("title");
-			inPossessionOf = request.getParameter("inPossessionOf");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		BM.addBook(isbn, title, inPossessionOf);
-	}
-
-	private boolean deleteBook(Map<String, String[]> parameters, HttpServletRequest request) {
-		boolean bookBeingDeleted = false;
-		for(String parameter : parameters.keySet()) {
-			if(parameter.startsWith("book")) {
-				bookBeingDeleted = true;
-				Long Id = Long.parseLong(parameter.substring(4));
-				Book book = BM.getBook(Id);
-
-				String currentISBNs = (String) request.getAttribute("deletedISBNs");
-				String updatedISBNs = "";
-
-				if (!(null == currentISBNs)) {
-					updatedISBNs = currentISBNs + ", " + book.getIsbn();
-				} else {
-					updatedISBNs =  book.getIsbn();
-				}
-				request.setAttribute("deletedISBNs", updatedISBNs);
-				BM.deleteBook(Id);
-				bookBeingDeleted = true;
-			}
-		}
-		return bookBeingDeleted;
-	}
-
-	private void editBook(HttpServletRequest request, Map<String, String[]> parameters) {
-		// No way to tell if a field has been changed or not, so just update all of them.
-		for(String parameter : parameters.keySet()) {
-			if(parameter.startsWith("isbn")) {
-				Long Id = Long.parseLong(parameter.substring(4));
-				BM.updateBook(Id, "isbn", request.getParameter(parameter));
-			}
-
-			if(parameter.startsWith("title")) {
-				Long Id = Long.parseLong(parameter.substring(5));
-				BM.updateBook(Id, "title", request.getParameter(parameter));
-			}
-
-			if(parameter.startsWith("inPossessionOf")) {
-				Long Id = Long.parseLong(parameter.substring(14));
-				BM.updateBook(Id, "inPossessionOf", request.getParameter(parameter));
-			}
-		}
-	}
-
-	private List<Book> getBooksToEdit(Map<String, String[]> parameters, HttpServletRequest request) {
-		List<Book> booksToEdit = new ArrayList<Book>();
-		for(String parameter : parameters.keySet()) {
-			if(parameter.startsWith("book")) {
-				Long Id = Long.parseLong(parameter.substring(4));
-				booksToEdit.add(BM.getBook(Id));
-			}
-		}
-		return booksToEdit;
-	}
-
-	private boolean checkUsers(String chosenName) {
-		for (User u: UM.getAllUsers()) {
-			if (u.getName().equals(chosenName)) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

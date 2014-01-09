@@ -4,11 +4,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>User(s) deleted</title>
+<title>Optimation Library System</title>
 </head>
 <body>
 
-	User(s) <%=request.getAttribute("deletedUsers") %>) successfully removed from library system.
+	User(s) <%=request.getAttribute("deletedNames") %> successfully removed from library system.
 	<form method="POST" action='librarydbforgoogleapps' name="deleteUser">
 		<input type="submit" value="Back" name="back"> <input type="hidden"
 			name="page" value="deleteUser" />

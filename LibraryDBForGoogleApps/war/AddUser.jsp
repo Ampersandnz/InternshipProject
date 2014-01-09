@@ -4,29 +4,25 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Add book</title>
+<title>Optimation Library System</title>
 </head>
 <body>
-	New book entry
+	New user entry
 
 	<form method="POST" action='librarydbforgoogleapps' name="add">
 		<table>
 			<tr>
-				<td>ISBN:</td>
-				<td><input type="text" name="isbn"></td>
+				<td>Name:</td>
+				<td><input type="text" name="name"></td>
 			</tr>
 			<tr>
-				<td>Title:</td>
-				<td><input type="text" name="title"></td>
-			</tr>
-			<tr>
-				<td>Currently in possession of:</td>
-				<td><input type="text" name="inPossessionOf"></td>
+				<td>Email:</td>
+				<td><input type="text" name="email"></td>
 			</tr>
 			<tr>
 				<td><input type="submit" name="save" value="Save"> <input
 					type="reset" name="Reset"> <input type="submit"
-					name="back" value="Back"> <input type="hidden" name="page" value="add" />
+					name="back" value="Back"> <input type="hidden" name="page" value="addUser" />
 				</td>
 			</tr>
 		</table>

@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Edit user(s)</title>
+<title>Optimation Library System</title>
 </head>
 <body>
 	Edit user data
@@ -28,8 +28,8 @@
 			%>
 			
 			<tr>
-				<td><input type="text" value="<%=u.getName()%>" name="isbn<%=u.getId()%>" /></td>
-				<td><input type="text" value="<%=u.getEmail()%>" name="title<%=u.getId()%>" /></td>
+				<td><input type="text" value="<%=u.getName()%>" name="name<%=u.getId()%>" /></td>
+				<td><input type="text" value="<%=u.getEmail()%>" name="email<%=u.getId()%>" /></td>
 			</tr>
 
 			<%
