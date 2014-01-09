@@ -1,8 +1,9 @@
 InternshipProject
 =================
 
-Barcode scanning-based library system Android app for Optimation NZ Auckland office.
+Barcode scanning based library system Android app for the Optimation NZ Auckland office.
 
-I am creating an Android app that will scan barcodes, allowing an office library system to track books. This will hopefully be integrated with the similar system being developed in the Wellington office. 
+I have created an Android app that will scan barcodes, allowing an in-office library system to track books.
+The app will communicate with a webserver that controls database interaction and management.
 
-The app utilises the zxing barcode scanner and the Google Books API.
+The app utilises the zxing barcode scanner and the Google Books API. The server is currently hosted on the Google App Engine, but may be moved to a local VM running Tomcat.
