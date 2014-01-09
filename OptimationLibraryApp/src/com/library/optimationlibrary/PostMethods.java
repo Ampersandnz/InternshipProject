@@ -30,46 +30,35 @@ public class PostMethods {
 	private static final String _getBookFromIsbn = "GETBOOKFROMISBN";
 	private static final String _isAllowedName = "ISALLOWEDNAME";
 
-	static InputStream inputStream = null;
-	static String result = "";
-	static HttpClient httpClient = null;
-	static HttpPost httpPost = null;
-	static JSONObject jsonObject = null;
-	static String json = "";
-	static StringEntity stringEntity = null;
-	static HttpResponse httpResponse = null;
-
 	PostMethods() {
 	}
 
-	static void commonActions(String url) {
-		httpClient = new DefaultHttpClient();
-		httpPost = new HttpPost(url);
-		jsonObject = new JSONObject();
-	}
-
 	static String POSTAdd(String url, Book book) {		
+		String result = "";
 		try {
-			commonActions(url);
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
+			JSONObject jsonObject = new JSONObject();
+			
 			jsonObject.accumulate("isbn", book.getIsbn());
 			jsonObject.accumulate("title", book.getTitle());
 			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
 
-			json = jsonObject.toString();
+			String json = jsonObject.toString();
 
 			json = _add + json;
 
-			stringEntity = new StringEntity(json);
+			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			httpResponse = httpClient.execute(httpPost);
+			HttpResponse httpResponse = httpClient.execute(httpPost);
 
-			inputStream = httpResponse.getEntity().getContent();
-
+			InputStream inputStream = httpResponse.getEntity().getContent();
+			
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
@@ -83,21 +72,23 @@ public class PostMethods {
 	}
 
 	static String POSTDelete(String url, Book book) {
+		String result = "";
 		try {
-			commonActions(url);
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
+			
+			String json = _delete + book.getId();
 
-			json = _delete + book.getId();
-
-			stringEntity = new StringEntity(json);
+			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			httpResponse = httpClient.execute(httpPost);
+			HttpResponse httpResponse = httpClient.execute(httpPost);
 
-			inputStream = httpResponse.getEntity().getContent();
+			InputStream inputStream = httpResponse.getEntity().getContent();
 
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
@@ -112,19 +103,22 @@ public class PostMethods {
 	}
 
 	static String POSTBorrow(String url, Book book) {
+		String result = "";
 		try {
-			commonActions(url);
-
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
+			JSONObject jsonObject = new JSONObject();
+			
 			jsonObject.accumulate("id", book.getId());
 			jsonObject.accumulate("isbn", book.getIsbn());
 			jsonObject.accumulate("title", book.getTitle());
 			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
 
-			json = jsonObject.toString();
+			String json = jsonObject.toString();
 
 			json = _borrow + json;
 
-			stringEntity = new StringEntity(json);
+			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
 
@@ -133,7 +127,7 @@ public class PostMethods {
 
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 
-			inputStream = httpResponse.getEntity().getContent();
+			InputStream inputStream = httpResponse.getEntity().getContent();
 
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
@@ -148,12 +142,14 @@ public class PostMethods {
 	}
 
 	static String POSTReturn(String url, Book book) {
+		String result = "";
 		try {
-			commonActions(url);
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
+			
+			String json = _return + book.getId();
 
-			json = _return + book.getId();
-
-			stringEntity = new StringEntity(json);
+			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
 
@@ -162,7 +158,7 @@ public class PostMethods {
 
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 
-			inputStream = httpResponse.getEntity().getContent();
+			InputStream inputStream = httpResponse.getEntity().getContent();
 
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
@@ -177,12 +173,14 @@ public class PostMethods {
 	}
 
 	static String POSTGetBorrowed(String url, Book book) {
+		String result = "";
 		try {
-			commonActions(url);
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
+			
+			String json = _getBorrowed + book.getInPossessionOf();
 
-			json = _getBorrowed + book.getInPossessionOf();
-
-			stringEntity = new StringEntity(json);
+			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
 
@@ -191,7 +189,7 @@ public class PostMethods {
 
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 
-			inputStream = httpResponse.getEntity().getContent();
+			InputStream inputStream = httpResponse.getEntity().getContent();
 
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
@@ -207,12 +205,14 @@ public class PostMethods {
 	}
 	
 	static String POSTIsAllowedName(String url, String name) {
+		String result = "";
 		try {
-			commonActions(url);
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
 			
-			json = _isAllowedName + name;
+			String json = _isAllowedName + name;
 
-			stringEntity = new StringEntity(json);
+			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
 
@@ -221,7 +221,7 @@ public class PostMethods {
 
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 
-			inputStream = httpResponse.getEntity().getContent();
+			InputStream inputStream = httpResponse.getEntity().getContent();
 			
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
@@ -237,21 +237,23 @@ public class PostMethods {
 	}
 
 	static String POSTGetBookFromIsbn(String url, Book book) {
+		String result = "";
 		try {
-			commonActions(url);
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
+			
+			String json = _getBookFromIsbn + book.getIsbn();
 
-			json = _getBookFromIsbn + book.getIsbn();
-
-			stringEntity = new StringEntity(json);
+			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
 
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 
-			httpResponse = httpClient.execute(httpPost);
+			HttpResponse httpResponse = httpClient.execute(httpPost);
 
-			inputStream = httpResponse.getEntity().getContent();
+			InputStream inputStream = httpResponse.getEntity().getContent();
 
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);

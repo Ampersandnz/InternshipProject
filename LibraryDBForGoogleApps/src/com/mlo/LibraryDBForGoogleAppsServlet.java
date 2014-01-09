@@ -248,6 +248,15 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		} else if (json.startsWith("RETURN")) {
 			BM.updateBook(Long.parseLong(json.substring(6)), "inPossessionOf", LIBRARY_USERNAME);
 
+		} else if (json.startsWith("ISALLOWEDNAME")) {
+			String chosenName = json.substring(13);
+
+			if (checkUsers(chosenName)) {
+				response.getOutputStream().print("TRUE");
+			} else {
+				response.getOutputStream().print("FALSE");
+			}
+
 		} else if (json.startsWith("GETBORROWED")) {
 			List<Book> borrowedByUsername = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {
@@ -256,13 +265,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 			}
 			mapper.writeValue(response.getOutputStream(), borrowedByUsername);
-
-		} else if (json.startsWith("ISALLOWEDNAME")) {
-			String chosenName = json.substring(10);
-
-			String addToOutStream = checkUsers(chosenName);
-
-			mapper.writeValue(response.getOutputStream(), addToOutStream);
 
 		} else if (json.startsWith("GETBOOKFROMISBN")) {
 			List<Book> booksMatchingIsbn = new ArrayList<Book>();
@@ -276,7 +278,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		response.setContentType("application/json");
 	}
-	
+
 	private boolean sendBorrowedBooks(HttpServletRequest request, Map<String, String[]> parameters) {
 		boolean bookBeingBorrowed = false;
 		for(String parameter : parameters.keySet()) {
@@ -423,12 +425,12 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		return booksToEdit;
 	}
 
-	private String checkUsers(String chosenName) {
+	private boolean checkUsers(String chosenName) {
 		for (User u: UM.getAllUsers()) {
 			if (u.getName().equals(chosenName)) {
-				return "TRUE";
+				return true;
 			}
 		}
-		return "FALSE";
+		return false;
 	}
 }

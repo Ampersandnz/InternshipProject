@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +31,8 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	private Button cancelButton;
 	
 	private String username;
+	
+	private Intent returnIntent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,37 +92,46 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		Intent returnIntent = new Intent();	
 		if (v.getId() == R.id.saveUsername_button) {
 			username = enterUsername.getText().toString();
+			
 			// Check attempted username against webapp's list of allowed usernames.
+			returnIntent = new Intent();
 			String[] data = {MainActivity.WEBAPP_URL, username};
+			
 			new CheckIsAllowedName().execute(data);
-
-			// Cancel and return to MainActivity. Old name, if any, will be kept.
+			
 		} else if (v.getId() == R.id.cancelUsername_button) {
+			// Cancel and return to MainActivity. Old name, if any, will be kept.
 			setResult(RESULT_CANCELED, returnIntent);
 			finish();
 		}
 	}
 
+	/**
+	 * @author Michael Lo
+	 * Class to asynchronously check whether or not the name entered by the user is in the list allowed in the system.
+	 */
 	private class CheckIsAllowedName extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... URLs) {
 			String url = URLs[0];
-			String returnValue = "";
 			String attemptedUsername = URLs[1];
-
-			returnValue = PostMethods.POSTIsAllowedName(url, attemptedUsername);
+			
+			String returnValue = PostMethods.POSTIsAllowedName(url, attemptedUsername);
 
 			return returnValue;
 		}
 
 		protected void onPostExecute(String result) {
-			if (result.equals("TRUE")) {	
-				Intent returnIntent = new Intent();			
+			Log.d("MyDEBUG", "Result from asynctask is: " + result);
+			
+			if (result.equals("TRUE")) {
+				Log.d("MyDEBUG", "Valid name, finishing activity now.");
 				//Return chosen name.
 				returnIntent.putExtra("username", username);
-				setResult(RESULT_OK,returnIntent); 
-				finish();
+				UsernameEntryActivity.this.setResult(RESULT_OK,returnIntent); 
+				UsernameEntryActivity.this.finish();
 			} else if (result.equals("FALSE")) {
+				Log.d("MyDEBUG", "Invalid name, displaying error Toast.");
 				String chosenName = "";
 				Toast toast = Toast.makeText(getApplicationContext(), "Name \'" + chosenName + "\' is not allowed.", Toast.LENGTH_SHORT);
 				toast.show();

@@ -4,14 +4,14 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Book(s) deleted</title>
+<title>User(s) deleted</title>
 </head>
 <body>
 
-	Book(s) (ISBN = <%=request.getAttribute("deletedISBNs") %>) successfully removed from library system.
-	<form method="POST" action='librarydbforgoogleapps' name="delete">
+	User(s) <%=request.getAttribute("deletedUsers") %>) successfully removed from library system.
+	<form method="POST" action='librarydbforgoogleapps' name="deleteUser">
 		<input type="submit" value="Back" name="back"> <input type="hidden"
-			name="page" value="delete" />
+			name="page" value="deleteUser" />
 	</form>
 </body>
 </html>

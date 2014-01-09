@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-	pageEncoding="ISO-8859-1" import="com.mlo.book.*, java.util.ArrayList, java.util.List"%>
+	pageEncoding="ISO-8859-1" import="com.mlo.user.User, java.util.ArrayList, java.util.List"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -12,26 +12,24 @@
 	<form method="POST" action='librarydbforgoogleapps' name="editUser">
 		<table>
 			<tr>
-				<td>ISBN:</td>
-				<td>Title:</td>
-				<td>Currently in possession of:</td>
+				<td>Name:</td>
+				<td>Email:</td>
 			</tr>
 
 			<%
-				List<?> booksToEdit = null;
-				Object temp = request.getAttribute("booksToEdit");
+				List<?> usersToEdit = null;
+				Object temp = request.getAttribute("usersToEdit");
 				if (temp instanceof List<?>) {
-					booksToEdit = (List<?>) temp;
-					if (!(null == booksToEdit)) {
-						for (Object o : booksToEdit) {
-							if (o instanceof Book) {
-								Book b = (Book) o;
+					usersToEdit = (List<?>) temp;
+					if (!(null == usersToEdit)) {
+						for (Object o : usersToEdit) {
+							if (o instanceof User) {
+								User u = (User) o;
 			%>
 			
 			<tr>
-				<td><input type="text" value="<%=b.getIsbn()%>" name="isbn<%=b.getId()%>" /></td>
-				<td><input type="text" value="<%=b.getTitle()%>" name="title<%=b.getId()%>" /></td>
-				<td><input type="text" value="<%=b.getInPossessionOf()%>" name="inPossessionOf<%=b.getId()%>" /></td>
+				<td><input type="text" value="<%=u.getName()%>" name="isbn<%=u.getId()%>" /></td>
+				<td><input type="text" value="<%=u.getEmail()%>" name="title<%=u.getId()%>" /></td>
 			</tr>
 
 			<%
