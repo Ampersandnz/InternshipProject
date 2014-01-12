@@ -17,7 +17,6 @@ import net.sourceforge.zbar.SymbolSet;
 
 public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants {
 
-    private static final String TAG = "ZBarScannerActivity";
     private CameraPreview mPreview;
     private Camera mCamera;
     private ImageScanner mScanner;

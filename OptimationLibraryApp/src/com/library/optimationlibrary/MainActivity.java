@@ -57,9 +57,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	private static final String API_KEY = "AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
-	private static final int _scanBarcode = 0;
 	private static final int _chooseUsername = 1;
 	private static final int _chooseCopy = 2;
+	private static final int _scanBarcode = 3;
 
 	public static final String LIBRARY_USERNAME = "_library";
 
@@ -275,19 +275,14 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-
 		case _scanBarcode:
 			if (resultCode == RESULT_OK) {
 				// Scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT)
 				// Type of the scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
 				String scanContent = data.getStringExtra(ZBarConstants.SCAN_RESULT);
 				if (scanContent!=null) {
-					if (checkConnection()) {
-						borrowBtn.setTag(scanContent);
-						getBook(scanContent);
-					} else { 				
-						Toast.makeText(getApplicationContext(), "No network connection!", Toast.LENGTH_SHORT).show();
-					}
+					borrowBtn.setTag(scanContent);
+					getBook(scanContent);
 				} else {
 					Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT).show();
 				}
@@ -295,6 +290,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			} else if (resultCode == RESULT_CANCELED) {
 				Toast.makeText(this, "Scan canceled!", Toast.LENGTH_SHORT).show();
 			}
+			break;
 
 		case _chooseUsername:
 			if(resultCode == RESULT_OK) {
@@ -302,7 +298,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				Editor edit = preferences.edit();
 
 				if (null == username || "".equals(username)) {
-					savedUsername.setText("Username");
+					savedUsername.setText("Choose a username");
 					username = null;
 				} else {
 					savedUsername.setText(username);
@@ -312,6 +308,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 			} else if (resultCode == RESULT_CANCELED) {
 			}
+			break;
 
 		case _chooseCopy:
 			if(resultCode == RESULT_OK) {

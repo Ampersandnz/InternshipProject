@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -106,14 +105,10 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	private void notifyServerResponded(boolean validName) {
 		Intent returnIntent = new Intent();
 		if (validName) {
-			Log.d("MyDEBUG", "Valid name, finishing activity now.");
-			
 			returnIntent.putExtra("username", username);
 			setResult(RESULT_OK,returnIntent); 
 			finish();
 		} else {
-			Log.d("MyDEBUG", "Invalid name, displaying error Toast.");
-
 			Toast toast = Toast.makeText(getApplicationContext(), "Name \'" +  username + "\' is not allowed.", Toast.LENGTH_SHORT);
 			toast.show();
 		}
@@ -135,8 +130,6 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		}
 
 		protected void onPostExecute(String result) {
-			Log.d("MyDEBUG", "Result from asynctask is: " + result);
-
 			if (result.equals("TRUE")) {
 				notifyServerResponded(true);
 			} else if (result.equals("FALSE")) {
