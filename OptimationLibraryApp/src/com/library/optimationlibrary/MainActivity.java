@@ -9,6 +9,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sourceforge.zbar.Symbol;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
@@ -22,6 +24,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -37,17 +40,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dm.zbar.android.scanner.ZBarConstants;
+import com.dm.zbar.android.scanner.ZBarScannerActivity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.mlo.book.Book;
 
 /**
- * 
  * @author Michael Lo
  * Using code from http://mobile.tutsplus.com/tutorials/android/android-sdk-create-a-book-scanning-app-part-3/
- * 
+ * and https://github.com/DushyanthMaguluru/ZBarScanner
  */
 public class MainActivity extends Activity implements OnClickListener{
 
@@ -55,6 +57,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	private static final String API_KEY = "AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
+	private static final int _scanBarcode = 0;
 	private static final int _chooseUsername = 1;
 	private static final int _chooseCopy = 2;
 
@@ -78,9 +81,9 @@ public class MainActivity extends Activity implements OnClickListener{
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
@@ -102,19 +105,19 @@ public class MainActivity extends Activity implements OnClickListener{
 		addBtn = (Button)findViewById(R.id.add_btn);
 		deleteBtn = (Button)findViewById(R.id.delete_btn);
 		savedUsername = (Button)findViewById(R.id.saved_username);
-		
+
 		borrowBtn.setVisibility(View.GONE);
 		returnBtn.setVisibility(View.GONE);
 		addBtn.setVisibility(View.GONE);
 		deleteBtn.setVisibility(View.GONE);
-		
+
 		scanBtn.setOnClickListener(this);
 		borrowBtn.setOnClickListener(this);
 		returnBtn.setOnClickListener(this);
 		addBtn.setOnClickListener(this);
 		deleteBtn.setOnClickListener(this);
 		savedUsername.setOnClickListener(this);
-		
+
 		savedUsername.setText(preferences.getString("username", "Choose a username"));
 	}
 
@@ -188,8 +191,13 @@ public class MainActivity extends Activity implements OnClickListener{
 		switch(v.getId()) {
 
 		case R.id.scan_button:
-			IntentIntegrator scanIntegrator = new IntentIntegrator(this);
-			scanIntegrator.initiateScan();
+			if (isCameraAvailable()) {
+				Intent intent = new Intent(this, ZBarScannerActivity.class);
+				intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.ISBN10, Symbol.ISBN13, Symbol.EAN13});
+				startActivityForResult(intent, _scanBarcode);
+			} else {
+				Toast.makeText(this, "Rear Facing Camera Unavailable", Toast.LENGTH_SHORT).show();
+			}
 			break;
 
 		case R.id.borrow_btn:
@@ -266,38 +274,33 @@ public class MainActivity extends Activity implements OnClickListener{
 	 * 															or get the chosen username and save it in StoredPreferences.
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-		if (scanningResult != null) {
-			String scanContent = scanningResult.getContents();
-			String scanFormat = scanningResult.getFormatName();
-			if (scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")) {
-				if (checkConnection()) {
-					borrowBtn.setTag(scanContent);
-					getBook(scanContent);
-				} else { 					
-					Toast toast = Toast.makeText(getApplicationContext(), "No network connection!", Toast.LENGTH_SHORT);
-					toast.show();
-				}
-			} else {
-				Toast toast = Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT);
-				toast.show();
-			}
-		}
-
 		switch (requestCode) {
+
+		case _scanBarcode:
+			if (resultCode == RESULT_OK) {
+				// Scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT)
+				// Type of the scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
+				String scanContent = data.getStringExtra(ZBarConstants.SCAN_RESULT);
+				if (scanContent!=null) {
+					if (checkConnection()) {
+						borrowBtn.setTag(scanContent);
+						getBook(scanContent);
+					} else { 				
+						Toast.makeText(getApplicationContext(), "No network connection!", Toast.LENGTH_SHORT).show();
+					}
+				} else {
+					Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT).show();
+				}
+
+			} else if (resultCode == RESULT_CANCELED) {
+				Toast.makeText(this, "Scan canceled!", Toast.LENGTH_SHORT).show();
+			}
 
 		case _chooseUsername:
 			if(resultCode == RESULT_OK) {
 				String username = data.getStringExtra("username");
 				Editor edit = preferences.edit();
-				
-				/*if (result.equals("TRUE")) {
-				} else if (result.equals("FALSE")) {
-					String chosenName = "";
-					Toast toast = Toast.makeText(getApplicationContext(), "Name " + chosenName + "is not allowed.", Toast.LENGTH_SHORT);
-					toast.show();
-				}*/
-				
+
 				if (null == username || "".equals(username)) {
 					savedUsername.setText("Username");
 					username = null;
@@ -324,6 +327,15 @@ public class MainActivity extends Activity implements OnClickListener{
 			}
 			break;
 		}
+	}
+
+	/**
+	 * @return hasCamera
+	 * Method to confirm that the device has a camera with which to scan barcodes.
+	 */
+	public boolean isCameraAvailable() {
+		PackageManager pm = getPackageManager();
+		return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
 	}
 
 	/**
@@ -364,7 +376,7 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		savedBundle.putString("id", dbId.getText().toString());
 	}
-	
+
 	/**
 	 * @author Michael Lo
 	 * Class to asynchronously download book data from Google Books.
@@ -394,7 +406,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			}
 			return bookBuilder.toString();
 		}
-		
+
 		protected void onPostExecute(String result) {
 			try {
 				JSONObject resultObject = new JSONObject(result);
