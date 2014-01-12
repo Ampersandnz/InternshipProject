@@ -57,9 +57,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	private static final String API_KEY = "AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
-	private static final int _chooseUsername = 1;
-	private static final int _chooseCopy = 2;
-	private static final int _scanBarcode = 3;
+	private static final int CHOOSE_USERNAME = 1;
+	private static final int CHOOSE_COPY = 2;
+	private static final int SCAN_BARCODE = 3;
 
 	public static final String LIBRARY_USERNAME = "_library";
 
@@ -142,14 +142,14 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		this.checkConnection();
 	}
-
+	
 	private void setupStars() {
 		starViews=new ImageView[5];
 		for(int s=0; s < starViews.length; s++) {
 			starViews[s]=new ImageView(this);
 		}
 	}
-
+	
 	private void setupListView() {
 		currentlyBorrowedList = (LinearLayout)findViewById(R.id.currentlyBorrowed);
 		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
@@ -187,14 +187,14 @@ public class MainActivity extends Activity implements OnClickListener{
 
 	public void onClick(View v) {
 		String username = preferences.getString("username", null);
-
+		
 		switch(v.getId()) {
-
+		
 		case R.id.scan_button:
 			if (isCameraAvailable()) {
 				Intent intent = new Intent(this, ZBarScannerActivity.class);
 				intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.ISBN10, Symbol.ISBN13, Symbol.EAN13});
-				startActivityForResult(intent, _scanBarcode);
+				startActivityForResult(intent, SCAN_BARCODE);
 			} else {
 				Toast.makeText(this, "Rear Facing Camera Unavailable", Toast.LENGTH_SHORT).show();
 			}
@@ -203,7 +203,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		case R.id.borrow_btn:
 			if (null == username) {
 				Intent i = new Intent(this, UsernameEntryActivity.class);
-				startActivityForResult(i, _chooseUsername);
+				startActivityForResult(i, CHOOSE_USERNAME);
 			} else {
 				if (checkConnection()) {
 					if (dbId.getText().toString().equals("No copy of this book found in library.")) {
@@ -221,7 +221,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		case R.id.return_btn:
 			if (null == username) {
 				Intent i = new Intent(this, UsernameEntryActivity.class);
-				startActivityForResult(i, _chooseUsername);
+				startActivityForResult(i, CHOOSE_USERNAME);
 			} else {
 				if (checkConnection()) {
 					if (dbId.getText().toString().equals("No copy of this book found in library.")) {
@@ -259,7 +259,7 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		case R.id.saved_username:
 			Intent i = new Intent(this, UsernameEntryActivity.class);
-			startActivityForResult(i, _chooseUsername);
+			startActivityForResult(i, CHOOSE_USERNAME);
 			break;
 
 		case R.id.isConnected:
@@ -275,7 +275,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-		case _scanBarcode:
+		case SCAN_BARCODE:
 			if (resultCode == RESULT_OK) {
 				// Scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT)
 				// Type of the scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
@@ -292,7 +292,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			}
 			break;
 
-		case _chooseUsername:
+		case CHOOSE_USERNAME:
 			if(resultCode == RESULT_OK) {
 				String username = data.getStringExtra("username");
 				Editor edit = preferences.edit();
@@ -310,7 +310,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			}
 			break;
 
-		case _chooseCopy:
+		case CHOOSE_COPY:
 			if(resultCode == RESULT_OK) {
 				String chosenId = data.getStringExtra("chosenId");
 				if (null != chosenId && !("".equals(chosenId))) {
@@ -551,7 +551,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				i.putStringArrayListExtra("inPossessionOf", inPossessionOf);
 				i.putStringArrayListExtra("ids", ids);
 
-				startActivityForResult(i, _chooseCopy);
+				startActivityForResult(i, CHOOSE_COPY);
 			}
 		}
 	}

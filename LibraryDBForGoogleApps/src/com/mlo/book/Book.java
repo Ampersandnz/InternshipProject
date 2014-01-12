@@ -5,10 +5,8 @@ import javax.persistence.Id;
 import com.googlecode.objectify.annotation.Entity;
 
 /**
- * 
  * @author Michael Lo
  * Set() methods return this, so multiple set() calls can be concatenated together.
- * 
  */
 
 @Entity
