@@ -61,6 +61,8 @@ public class MainActivity extends Activity implements OnClickListener{
 	private static final int CHOOSE_COPY = 2;
 	private static final int SCAN_BARCODE = 3;
 
+	private static final int[] ALLOWED_FORMATS = new int[]{Symbol.ISBN10, Symbol.ISBN13, Symbol.EAN8, Symbol.EAN13};
+	
 	public static final String LIBRARY_USERNAME = "_library";
 
 	private Button scanBtn, borrowBtn, returnBtn, addBtn, deleteBtn, savedUsername;
@@ -81,18 +83,18 @@ public class MainActivity extends Activity implements OnClickListener{
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
+		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		
 		setupButtons();
 		setupTextViews();
 		setupStars();
 		thumbView = (ImageView)findViewById(R.id.thumb);
 		setupListView();
-
+		
 		if (savedInstanceState != null) {
 			retrieveSavedState(savedInstanceState);
 		}
@@ -113,14 +115,14 @@ public class MainActivity extends Activity implements OnClickListener{
 		returnBtn.setVisibility(View.GONE);
 		addBtn.setVisibility(View.GONE);
 		deleteBtn.setVisibility(View.GONE);
-
+		
 		scanBtn.setOnClickListener(this);
 		borrowBtn.setOnClickListener(this);
 		returnBtn.setOnClickListener(this);
 		addBtn.setOnClickListener(this);
 		deleteBtn.setOnClickListener(this);
 		savedUsername.setOnClickListener(this);
-
+		
 		savedUsername.setText(preferences.getString("username", "Choose a username"));
 	}
 
@@ -210,7 +212,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			if (isCameraAvailable()) {
 				if (checkConnection()) {
 					Intent intent = new Intent(this, ZBarScannerActivity.class);
-					intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.ISBN10, Symbol.ISBN13, Symbol.EAN13});
+					intent.putExtra(ZBarConstants.SCAN_MODES, ALLOWED_FORMATS);
 					startActivityForResult(intent, SCAN_BARCODE);
 				}
 			} else {
@@ -528,7 +530,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	 * Class to asynchronously find books in the database matching the ISBN of the scanned book.
 	 * If more than one copy exists in the database, the user will be prompted to select the copy they wish to interact with.
 	 */
-	private class GetBookIds extends AsyncTask<String, Void, String> {
+	private class GetBookId extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... ISBNs) {
 			String url = ISBNs[0];
@@ -664,7 +666,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		protected void onPostExecute(String result) {
 			dbIdText.setVisibility(View.GONE);
 			dbId.setVisibility(View.GONE);
-			new GetBookIds().execute(WEBAPP_URL, borrowBtn.getTag().toString());
+			new GetBookId().execute(WEBAPP_URL, borrowBtn.getTag().toString());
 			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}	
@@ -719,8 +721,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
 		String bookSearchString = GOOGLE_BOOKS_URL + isbn + "&key=" + API_KEY;
 		new GetBookInfo().execute(bookSearchString);
-		new GetBookIds().execute(WEBAPP_URL, isbn);
-		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+		new GetBookId().execute(WEBAPP_URL, isbn);
 	}
 
 	/**

@@ -25,7 +25,7 @@ public class PostMethods {
 	private static final String DELETE = "DELETE";
 	private static final String BORROW = "BORROW";
 	private static final String RETURN = "RETURN";
-	private static final String GETBORROWEDBYUSER = "GETBORROWEDBYUSER";
+	private static final String GETBORROWEDBYUSER = "GETBORROWED";
 	private static final String GETBOOKBYISBN = "GETBOOKFROMISBN";
 	private static final String CHECKNAME = "ISALLOWEDNAME";
 
