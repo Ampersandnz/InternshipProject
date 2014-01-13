@@ -61,3 +61,6 @@ ucdetector_reports/*
 
 # Remote Systems Temp Files folder
 RemoteSystemsTempFiles/*
+
+# Tomcat server
+Servers/*
