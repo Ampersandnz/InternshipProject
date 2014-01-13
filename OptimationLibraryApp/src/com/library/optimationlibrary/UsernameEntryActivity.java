@@ -39,7 +39,7 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	}
 
 	/**
-	 * Method to dim the background and make the window more easily readable, as well as looking better.
+	 * Method to dim the background and make the window more easily readable.
 	 */
 	private void setupDim() {
 		Window window = getWindow();
@@ -90,9 +90,13 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 
 			// Check attempted username against webapp's list of allowed usernames.
 			String[] data = {MainActivity.WEBAPP_URL, username};
-
-			new CheckIsAllowedName().execute(data);
-
+			
+			if (null == username || "".equals(username)) {
+				notifyServerResponded(true);
+			} else {
+				new CheckIsAllowedName().execute(data);
+			}
+			
 		} else if (v.getId() == R.id.cancelUsername_button) {
 			// Cancel and return to MainActivity. Old name, if any, will be kept.
 			setResult(RESULT_CANCELED, returnIntent);

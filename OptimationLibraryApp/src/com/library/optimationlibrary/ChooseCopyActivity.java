@@ -37,7 +37,7 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
 		window.addFlags(LayoutParams.FLAG_DIM_BEHIND);
 		
-		// Allows interception of any touches on the screen that are outside this activity.
+		// Allows interception screen touches that are outside the activity.
 		window.setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL, LayoutParams.FLAG_NOT_TOUCH_MODAL);
 		window.setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 	}
@@ -66,11 +66,12 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// If a touch notification is received that is touched outside the activity, do nothing. This forces the user to select a copy of the book before the activity can close.
+		// If a touch notification is received that is outside the activity, do nothing. 
+		// This forces the user to select a copy of the book before the activity can close.
 		if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
 		}
 		
-		// Delegate everything else to Activity.class.
+		// Otherwise delegate action to Activity.class.
 		return super.onTouchEvent(event);
 	}
 }

@@ -62,7 +62,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	private static final int SCAN_BARCODE = 3;
 
 	private static final int[] ALLOWED_FORMATS = new int[]{Symbol.ISBN10, Symbol.ISBN13, Symbol.EAN8, Symbol.EAN13};
-	
+
 	public static final String LIBRARY_USERNAME = "_library";
 
 	private Button scanBtn, borrowBtn, returnBtn, addBtn, deleteBtn, savedUsername;
@@ -83,18 +83,18 @@ public class MainActivity extends Activity implements OnClickListener{
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		setupButtons();
 		setupTextViews();
 		setupStars();
 		thumbView = (ImageView)findViewById(R.id.thumb);
 		setupListView();
-		
+
 		if (savedInstanceState != null) {
 			retrieveSavedState(savedInstanceState);
 		}
@@ -115,14 +115,14 @@ public class MainActivity extends Activity implements OnClickListener{
 		returnBtn.setVisibility(View.GONE);
 		addBtn.setVisibility(View.GONE);
 		deleteBtn.setVisibility(View.GONE);
-		
+
 		scanBtn.setOnClickListener(this);
 		borrowBtn.setOnClickListener(this);
 		returnBtn.setOnClickListener(this);
 		addBtn.setOnClickListener(this);
 		deleteBtn.setOnClickListener(this);
 		savedUsername.setOnClickListener(this);
-		
+
 		savedUsername.setText(preferences.getString("username", "Choose a username"));
 	}
 
@@ -290,7 +290,11 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		case R.id.isConnected:
 			// Recheck the connection to the server.
-			checkConnection();
+			if (checkConnection()) {
+				Toast.makeText(MainActivity.this, "Connection reestablished!", Toast.LENGTH_SHORT).show();
+			} else {
+				Toast.makeText(MainActivity.this, "Connection failed.", Toast.LENGTH_SHORT).show();
+			}
 			break;
 		}
 	}
@@ -374,7 +378,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			return true;
 		} else {
 			isConnected.setVisibility(View.VISIBLE);
-			isConnected.setText("#Not connected to network!# \n#Click here to rescan.#");
+			isConnected.setText("Not connected to network!\nClick here to rescan.");
 			return false;
 		}
 	}
@@ -399,6 +403,13 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 
 		savedBundle.putString("id", dbId.getText().toString());
+	}
+
+	private void getBook(String isbn) {
+		// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
+		String bookSearchString = GOOGLE_BOOKS_URL + isbn + "&key=" + API_KEY;
+		new GetBookInfo().execute(bookSearchString);
+		new GetBookId().execute(WEBAPP_URL, isbn);
 	}
 
 	/**
@@ -432,95 +443,99 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 
 		protected void onPostExecute(String result) {
-			try {
-				JSONObject resultObject = new JSONObject(result);
-				JSONArray bookArray = resultObject.getJSONArray("items");
-				JSONObject bookObject = bookArray.getJSONObject(0);
-				JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
-
-				try { 
-					titleText.setText("Title: " + volumeObject.getString("title")); 
-				} catch (JSONException jse) { 
-					titleText.setText("");
-					jse.printStackTrace(); 
-				}
-
-				StringBuilder authorBuild = new StringBuilder("");
+			if (result.equals("")) {
+				checkConnection();
+			} else {
 				try {
-					JSONArray authorArray = volumeObject.getJSONArray("authors");
-					for(int a=0; a<authorArray.length(); a++) {
-						if(a>0) authorBuild.append(", ");
-						authorBuild.append(authorArray.getString(a));
+					JSONObject resultObject = new JSONObject(result);
+					JSONArray bookArray = resultObject.getJSONArray("items");
+					JSONObject bookObject = bookArray.getJSONObject(0);
+					JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
+
+					try { 
+						titleText.setText("Title: " + volumeObject.getString("title")); 
+					} catch (JSONException jse) { 
+						titleText.setText("");
+						jse.printStackTrace(); 
 					}
-					authorText.setText("Author(s): " + authorBuild.toString());
-				} catch (JSONException jse) { 
+
+					StringBuilder authorBuild = new StringBuilder("");
+					try {
+						JSONArray authorArray = volumeObject.getJSONArray("authors");
+						for(int a=0; a<authorArray.length(); a++) {
+							if(a>0) authorBuild.append(", ");
+							authorBuild.append(authorArray.getString(a));
+						}
+						authorText.setText("Author(s): " + authorBuild.toString());
+					} catch (JSONException jse) { 
+						authorText.setText("");
+						jse.printStackTrace(); 
+					}
+
+					try { dateText.setText("Date of publication: " + volumeObject.getString("publishedDate")); 
+					} catch (JSONException jse) { 
+						dateText.setText("");
+						jse.printStackTrace(); 
+					}
+
+					try { 
+						descriptionText.setText("Description: " + volumeObject.getString("description")); 
+					} catch (JSONException jse) {  
+						descriptionText.setText("");
+						jse.printStackTrace(); 
+					}
+
+					try { 
+						double decNumStars = Double.parseDouble(volumeObject.getString("averageRating"));
+						int numStars = (int)decNumStars;
+						starLayout.setTag(numStars);
+						starLayout.removeAllViews();
+
+						for(int s=0; s<numStars; s++) {
+							starViews[s].setImageResource(R.drawable.star);
+							starLayout.addView(starViews[s]);
+						}
+					} catch (JSONException jse) { 
+						starLayout.removeAllViews();
+						jse.printStackTrace(); 
+					}
+
+					try { 
+						ratingCountText.setText(" - " + volumeObject.getString("ratingsCount")+" ratings"); 
+					} catch (JSONException jse) {
+						ratingCountText.setText("");
+						jse.printStackTrace();
+					}
+
+					try {
+						returnBtn.setTag(volumeObject.getString("infoLink"));
+						addBtn.setVisibility(View.VISIBLE);
+						deleteBtn.setVisibility(View.VISIBLE);
+					} catch (JSONException jse) { 
+						addBtn.setVisibility(View.GONE);
+						deleteBtn.setVisibility(View.GONE);
+						jse.printStackTrace(); 
+					}
+
+					try { 
+						JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
+						new GetBookThumb().execute(imageInfo.getString("smallThumbnail"));
+					} catch(JSONException jse) { 
+						thumbView.setImageBitmap(null);
+						jse.printStackTrace();
+					}
+
+				} catch (Exception e) {
+					//Default to empty values
+					e.printStackTrace();
+					titleText.setText("NOT FOUND");
 					authorText.setText("");
-					jse.printStackTrace(); 
-				}
-
-				try { dateText.setText("Date of publication: " + volumeObject.getString("publishedDate")); 
-				} catch (JSONException jse) { 
-					dateText.setText("");
-					jse.printStackTrace(); 
-				}
-
-				try { 
-					descriptionText.setText("Description: " + volumeObject.getString("description")); 
-				} catch (JSONException jse) {  
 					descriptionText.setText("");
-					jse.printStackTrace(); 
-				}
-
-				try { 
-					double decNumStars = Double.parseDouble(volumeObject.getString("averageRating"));
-					int numStars = (int)decNumStars;
-					starLayout.setTag(numStars);
+					dateText.setText("");
 					starLayout.removeAllViews();
-
-					for(int s=0; s<numStars; s++) {
-						starViews[s].setImageResource(R.drawable.star);
-						starLayout.addView(starViews[s]);
-					}
-				} catch (JSONException jse) { 
-					starLayout.removeAllViews();
-					jse.printStackTrace(); 
-				}
-
-				try { 
-					ratingCountText.setText(" - " + volumeObject.getString("ratingsCount")+" ratings"); 
-				} catch (JSONException jse) {
 					ratingCountText.setText("");
-					jse.printStackTrace();
-				}
-
-				try {
-					returnBtn.setTag(volumeObject.getString("infoLink"));
-					addBtn.setVisibility(View.VISIBLE);
-					deleteBtn.setVisibility(View.VISIBLE);
-				} catch (JSONException jse) { 
-					addBtn.setVisibility(View.GONE);
-					deleteBtn.setVisibility(View.GONE);
-					jse.printStackTrace(); 
-				}
-
-				try { 
-					JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-					new GetBookThumb().execute(imageInfo.getString("smallThumbnail"));
-				} catch(JSONException jse) { 
 					thumbView.setImageBitmap(null);
-					jse.printStackTrace();
 				}
-
-			} catch (Exception e) {
-				//Default to empty values
-				e.printStackTrace();
-				titleText.setText("NOT FOUND");
-				authorText.setText("");
-				descriptionText.setText("");
-				dateText.setText("");
-				starLayout.removeAllViews();
-				ratingCountText.setText("");
-				thumbView.setImageBitmap(null);
 			}
 		}
 	}
@@ -544,41 +559,45 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 
 		protected void onPostExecute(String result) {
-			ObjectMapper mapper = new ObjectMapper();
-			List<Book> booksMatchingId = null;
-
-			try {
-				booksMatchingId = mapper.readValue(result, new TypeReference<List<Book>>(){});
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			if (null == booksMatchingId || booksMatchingId.isEmpty()) {
-				dbId.setText("No copy of this book found in library.");
-				dbId.setVisibility(View.VISIBLE);
-				dbIdText.setVisibility(View.GONE);
-				borrowBtn.setVisibility(View.GONE);
-				returnBtn.setVisibility(View.GONE);
-				deleteBtn.setVisibility(View.GONE);
-			} else if (booksMatchingId.size() == 1) {
-				dbId.setText(booksMatchingId.get(0).getId().toString());
-				dbIdText.setVisibility(View.VISIBLE);
-				dbId.setVisibility(View.VISIBLE);
-				borrowBtn.setVisibility(View.VISIBLE);
-				returnBtn.setVisibility(View.VISIBLE);
-				deleteBtn.setVisibility(View.VISIBLE);
+			if (result.equals("")) {
+				checkConnection();
 			} else {
-				Intent i = new Intent(MainActivity.this, ChooseCopyActivity.class);
-				ArrayList<String> inPossessionOf = new ArrayList<String>();
-				ArrayList<String> ids = new ArrayList<String>();
-				for (Book b: booksMatchingId) {
-					inPossessionOf.add(b.getInPossessionOf());
-					ids.add(b.getId().toString());
-				}
-				i.putStringArrayListExtra("inPossessionOf", inPossessionOf);
-				i.putStringArrayListExtra("ids", ids);
+				ObjectMapper mapper = new ObjectMapper();
+				List<Book> booksMatchingId = null;
 
-				startActivityForResult(i, CHOOSE_COPY);
+				try {
+					booksMatchingId = mapper.readValue(result, new TypeReference<List<Book>>(){});
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				if (null == booksMatchingId || booksMatchingId.isEmpty()) {
+					dbId.setText("No copy of this book found in library.");
+					dbId.setVisibility(View.VISIBLE);
+					dbIdText.setVisibility(View.GONE);
+					borrowBtn.setVisibility(View.GONE);
+					returnBtn.setVisibility(View.GONE);
+					deleteBtn.setVisibility(View.GONE);
+				} else if (booksMatchingId.size() == 1) {
+					dbId.setText(booksMatchingId.get(0).getId().toString());
+					dbIdText.setVisibility(View.VISIBLE);
+					dbId.setVisibility(View.VISIBLE);
+					borrowBtn.setVisibility(View.VISIBLE);
+					returnBtn.setVisibility(View.VISIBLE);
+					deleteBtn.setVisibility(View.VISIBLE);
+				} else {
+					Intent i = new Intent(MainActivity.this, ChooseCopyActivity.class);
+					ArrayList<String> inPossessionOf = new ArrayList<String>();
+					ArrayList<String> ids = new ArrayList<String>();
+					for (Book b: booksMatchingId) {
+						inPossessionOf.add(b.getInPossessionOf());
+						ids.add(b.getId().toString());
+					}
+					i.putStringArrayListExtra("inPossessionOf", inPossessionOf);
+					i.putStringArrayListExtra("ids", ids);
+
+					startActivityForResult(i, CHOOSE_COPY);
+				}
 			}
 		}
 	}
@@ -602,8 +621,9 @@ public class MainActivity extends Activity implements OnClickListener{
 				thumbIn.close(); 
 			} catch(Exception e) {
 				e.printStackTrace();
+				return "";
 			}
-			return "";
+			return "completed";
 		}
 
 		protected void onPostExecute(String result) {
@@ -717,13 +737,6 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}
 
-	private void getBook(String isbn) {
-		// Uses my Google Books API key, and substitutes the ISBN pulled from the barcode.
-		String bookSearchString = GOOGLE_BOOKS_URL + isbn + "&key=" + API_KEY;
-		new GetBookInfo().execute(bookSearchString);
-		new GetBookId().execute(WEBAPP_URL, isbn);
-	}
-
 	/**
 	 * @author Michael Lo
 	 * Class to asynchronously find books in the database matching the ISBN of the scanned book.
@@ -745,36 +758,40 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 
 		protected void onPostExecute(String result) {
-			ObjectMapper mapper = new ObjectMapper();
-			List<Book> borrowedByUser = null;
-
-			try {
-				borrowedByUser = mapper.readValue(result, new TypeReference<List<Book>>(){});
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			currentlyBorrowedList.removeAllViews();
-
-			if (!(null == borrowedByUser) && !(borrowedByUser.isEmpty())) {
-
-				currentlyBorrowed = new TextView[borrowedByUser.size()];
-
-				for (int i = 0; i < currentlyBorrowedList.getChildCount(); i++) {
-					View v = currentlyBorrowedList.getChildAt(i);
-					v.setVisibility(View.GONE);
-				}
-
-				for(int t = 0; t < currentlyBorrowed.length; t++) {
-					TextView text = currentlyBorrowed[t];
-					text = new TextView(MainActivity.this);
-					text.setText(borrowedByUser.get(t).toString());
-					currentlyBorrowedList.addView(text);
-				}
-
-				currentlyBorrowedTitle.setVisibility(View.VISIBLE);
+			if (result.equals("")) {
+				checkConnection();
 			} else {
-				currentlyBorrowedTitle.setVisibility(View.GONE);
+				ObjectMapper mapper = new ObjectMapper();
+				List<Book> borrowedByUser = null;
+
+				try {
+					borrowedByUser = mapper.readValue(result, new TypeReference<List<Book>>(){});
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				currentlyBorrowedList.removeAllViews();
+
+				if (!(null == borrowedByUser) && !(borrowedByUser.isEmpty())) {
+
+					currentlyBorrowed = new TextView[borrowedByUser.size()];
+
+					for (int i = 0; i < currentlyBorrowedList.getChildCount(); i++) {
+						View v = currentlyBorrowedList.getChildAt(i);
+						v.setVisibility(View.GONE);
+					}
+
+					for(int t = 0; t < currentlyBorrowed.length; t++) {
+						TextView text = currentlyBorrowed[t];
+						text = new TextView(MainActivity.this);
+						text.setText(borrowedByUser.get(t).toString());
+						currentlyBorrowedList.addView(text);
+					}
+
+					currentlyBorrowedTitle.setVisibility(View.VISIBLE);
+				} else {
+					currentlyBorrowedTitle.setVisibility(View.GONE);
+				}
 			}
 		}
 	}

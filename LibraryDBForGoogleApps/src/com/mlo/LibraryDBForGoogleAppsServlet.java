@@ -80,6 +80,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//Initialise default values
 		if (firstRun) {
+			SH = new ServletHelper();
 			SH.firstRun();
 			firstRun = false;
 		}

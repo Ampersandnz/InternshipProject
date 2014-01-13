@@ -12,6 +12,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import com.mlo.book.Book;
 
 /**
@@ -67,7 +69,6 @@ public class PostMethods {
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
-				result = "Did not work!";
 			}
 
 		} catch (Exception e) {
@@ -104,7 +105,6 @@ public class PostMethods {
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
-				result = "Did not work!";
 			}
 
 		} catch (Exception e) {
@@ -149,7 +149,6 @@ public class PostMethods {
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
-				result = "Did not work!";
 			}
 
 		} catch (Exception e) {
@@ -186,7 +185,6 @@ public class PostMethods {
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
-				result = "Did not work!";
 			}
 
 		} catch (Exception e) {
@@ -223,7 +221,6 @@ public class PostMethods {
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
-				result = "Did not work!";
 			}
 
 		} catch (Exception e) {
@@ -240,6 +237,7 @@ public class PostMethods {
 	 * Check whether or not the chosen username is on the server's list of authenticated user accounts.
 	 */
 	static String POSTIsAllowedName(String url, String name) {
+		Log.d("MyDEBUG", "IsAllowedName() called");
 		String result = "";
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
@@ -259,15 +257,16 @@ public class PostMethods {
 			InputStream inputStream = httpResponse.getEntity().getContent();
 			
 			if(inputStream != null) {
+				Log.d("MyDEBUG", "InputStream not null");
 				result = convertInputStreamToString(inputStream);
 			} else {
-				result = "Did not work!";
+				Log.d("MyDEBUG", "InputStream null");
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		Log.d("MyDEBUG", "Result is " + result);
 		return result;
 	}
 
@@ -299,7 +298,6 @@ public class PostMethods {
 			if(inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
-				result = "Did not work!";
 			}
 
 		} catch (Exception e) {
