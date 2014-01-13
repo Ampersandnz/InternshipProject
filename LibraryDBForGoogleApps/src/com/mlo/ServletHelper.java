@@ -12,12 +12,12 @@ import com.mlo.user.User;
 import com.mlo.user.UserManager;
 
 public class ServletHelper {
-	private BookManager BM;
-	private UserManager UM;
+	private static BookManager BM;
+	private static UserManager UM;
 	
-	ServletHelper (BookManager BM, UserManager UM) {
-		this.BM = BM;
-		this.UM = UM;
+	ServletHelper () {
+		BM = LibraryDBForGoogleAppsServlet.BM;
+		UM = LibraryDBForGoogleAppsServlet.UM;
 	}
 	
 	/**
@@ -48,6 +48,11 @@ public class ServletHelper {
 		UM.addUser("test", "test@test.com"); 
 	}
 	
+	/**
+	 * @param request
+	 * @param parameters
+	 * @return borrowedBooks
+	 */
 	boolean sendBorrowedBooks(HttpServletRequest request, Map<String, String[]> parameters) {
 		boolean bookBeingBorrowed = false;
 		for(String parameter : parameters.keySet()) {
@@ -86,6 +91,11 @@ public class ServletHelper {
 		return bookBeingBorrowed;
 	}
 
+	/**
+	 * @param request
+	 * @param parameters
+	 * @return returnedBooks
+	 */
 	boolean sendReturnedBooks(HttpServletRequest request, Map<String, String[]> parameters) {
 		boolean bookBeingReturned = false;
 		for(String parameter : parameters.keySet()) {
@@ -123,6 +133,10 @@ public class ServletHelper {
 		return bookBeingReturned;
 	}
 
+	/**
+	 * @param request
+	 * @param parameters
+	 */
 	void addBook(HttpServletRequest request, Map<String, String[]> parameters) {
 		String isbn = "";
 		String title = "";
@@ -139,6 +153,10 @@ public class ServletHelper {
 		BM.addBook(isbn, title, inPossessionOf);
 	}
 	
+	/**
+	 * @param request
+	 * @param parameters
+	 */
 	void addUser(HttpServletRequest request, Map<String, String[]> parameters) {
 		String name = "";
 		String email = "";
@@ -153,6 +171,11 @@ public class ServletHelper {
 		UM.addUser(name, email);
 	}
 
+	/**
+	 * @param parameters
+	 * @param request
+	 * @return bookDeleted
+	 */
 	boolean deleteBook(Map<String, String[]> parameters, HttpServletRequest request) {
 		boolean bookBeingDeleted = false;
 		for(String parameter : parameters.keySet()) {
@@ -177,6 +200,11 @@ public class ServletHelper {
 		return bookBeingDeleted;
 	}
 	
+	/**
+	 * @param parameters
+	 * @param request
+	 * @return userDeleted
+	 */
 	boolean deleteUser(Map<String, String[]> parameters, HttpServletRequest request) {
 		boolean userBeingDeleted = false;
 		for(String parameter : parameters.keySet()) {
@@ -201,6 +229,10 @@ public class ServletHelper {
 		return userBeingDeleted;
 	}
 
+	/**
+	 * @param request
+	 * @param parameters
+	 */
 	void editBook(HttpServletRequest request, Map<String, String[]> parameters) {
 		// No way to tell if a field has been changed or not, so just update all of them.
 		for(String parameter : parameters.keySet()) {
@@ -221,6 +253,10 @@ public class ServletHelper {
 		}
 	}
 	
+	/**
+	 * @param request
+	 * @param parameters
+	 */
 	void editUser(HttpServletRequest request, Map<String, String[]> parameters) {
 		// No way to tell if a field has been changed or not, so just update all of them.
 		for(String parameter : parameters.keySet()) {
@@ -236,6 +272,11 @@ public class ServletHelper {
 		}
 	}
 
+	/**
+	 * @param parameters
+	 * @param request
+	 * @return booksToEdit
+	 */
 	List<Book> getBooksToEdit(Map<String, String[]> parameters, HttpServletRequest request) {
 		List<Book> booksToEdit = new ArrayList<Book>();
 		for(String parameter : parameters.keySet()) {
@@ -247,6 +288,11 @@ public class ServletHelper {
 		return booksToEdit;
 	}
 	
+	/**
+	 * @param parameters
+	 * @param request
+	 * @return usersToEdit
+	 */
 	List<User> getUsersToEdit(Map<String, String[]> parameters, HttpServletRequest request) {
 		List<User> usersToEdit = new ArrayList<User>();
 		for(String parameter : parameters.keySet()) {
@@ -258,6 +304,10 @@ public class ServletHelper {
 		return usersToEdit;
 	}
 
+	/**
+	 * @param chosenName
+	 * @return nameAllowed
+	 */
 	boolean checkUsers(String chosenName) {
 		for (User u: UM.getAllUsers()) {
 			if (u.getName().equals(chosenName)) {

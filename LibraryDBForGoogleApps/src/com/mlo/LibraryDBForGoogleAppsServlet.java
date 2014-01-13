@@ -30,7 +30,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	static final String SHOWALL = "/ShowAll.jsp";
 	static final String BORROW_BOOK = "/BorrowBook.jsp";
 	static final String RETURN_BOOK = "/ReturnBook.jsp";
-
+	
 	static final String ADD_USER = "/AddUser.jsp";
 	static final String DELETE_USER = "/DeleteUser.jsp";
 	static final String EDIT_USER = "/EditUser.jsp";
@@ -38,10 +38,10 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	static BookManager BM = new ObjectifyBookManager();
 	static UserManager UM = new ObjectifyUserManager();
 	
-	private static ServletHelper SH = new ServletHelper(BM, UM);
+	private static ServletHelper SH;
 	
 	private static boolean firstRun = true;
-
+	
 	/**
 	 * Whenever the user clicks a button, this method is called. 
 	 * It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
@@ -49,6 +49,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//Initialise default values
 		if (firstRun) {
+			SH = new ServletHelper();
 			SH.firstRun();
 			firstRun = false;
 		}
@@ -105,20 +106,28 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			}
 		}
 	}
-
+	
+	/**
+	 * @param request
+	 * @param response
+	 * @param parameters
+	 * @param hiddenParam
+	 * This method is called once the existence of the 'page' parameter (hiddenParam) determines that the HTTP request is from a webpage.
+	 * Actions will then be taken based on which page the request originated from and 
+	 */
 	private void comingFromPage(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parameters, String hiddenParam) {
-
+		
 		// Returning from a .jsp page.
 		String forward = SHOWALL;
-
+		
 		switch(hiddenParam) {
-
+		
 		case "mainList":
-
+			
 			if (parameters.containsKey("addBook")) {
 				// Display add page.
 				forward = ADD_BOOK;
-
+				
 			} else if (parameters.containsKey("deleteBook")) {					
 				if (SH.deleteBook(parameters, request)) {
 					// Display delete page.
@@ -126,7 +135,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				} else {
 					// No books were chosen for deletion. Do nothing.
 				}
-
+				
 			} else if (parameters.containsKey("editBook")) {
 				List<Book> booksToEdit = SH.getBooksToEdit(parameters, request);
 				if (booksToEdit.size() != 0) {
@@ -136,10 +145,10 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				} else {
 					// No books were selected for editing. Do nothing.
 				}
-
+				
 			} else if (parameters.containsKey("borrowBook")) {
 				boolean bookBeingBorrowed = SH.sendBorrowedBooks(request, parameters);
-
+				
 				if (bookBeingBorrowed) {
 					// Display borrow page.
 					forward = BORROW_BOOK;
@@ -154,11 +163,11 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				} else {
 					// No books were chosen for returning. Do nothing.
 				}
-
+				
 			} else if (parameters.containsKey("addUser")) {
 				// Display add page.
 				forward = ADD_USER;
-
+				
 			} else if (parameters.containsKey("deleteUser")) {					
 				if (SH.deleteUser(parameters, request)) {
 					// Display delete page.
@@ -166,7 +175,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				} else {
 					// No users were chosen for deletion. Do nothing.
 				}
-
+				
 			} else if (parameters.containsKey("editUser")) {
 				List<User> usersToEdit = SH.getUsersToEdit(parameters, request);
 				if (usersToEdit.size() != 0) {
@@ -176,29 +185,29 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				} else {
 					// No users were selected for editing. Do nothing.
 				}
-
+				
 			} else {
 				// Return to main list.
 			}
-
+			
 			break;
-
+			
 		case "addBook":
 			if (parameters.containsKey("save")) {
 				SH.addBook(request, parameters);
 			}
-
+			
 			// Return to main list.
 			break;
-
+			
 		case "editBook":
 			if (parameters.containsKey("save")) {
 				SH.editBook(request, parameters);
 			}
-
+			
 			// Return to main list.
 			break;
-		
+			
 		case "addUser":
 			if (parameters.containsKey("save")) {
 				SH.addUser(request, parameters);
@@ -206,7 +215,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			
 			// Return to main list.
 			break;
-	
+			
 		case "editUser":
 			if (parameters.containsKey("save")) {
 				SH.editUser(request, parameters);
@@ -215,18 +224,17 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			// Return to main list.
 			break;
 		}
-
-
+		
 		// Populate the list of books with the contents of the database.
 		ArrayList<Book> allBooks = BM.getAllBooks();
 		ArrayList<User> allUsers = UM.getAllUsers();
-
+		
 		// Send book list to next page.
 		if (forward.equals(SHOWALL)) {
 			request.setAttribute("allBooks", allBooks);
 			request.setAttribute("allUsers", allUsers);
 		}
-
+		
 		// Change to required page.
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		try {
@@ -236,6 +244,13 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 * The absence of the 'page' parameter (hiddenParam) determines that the HTTP request has originated from the Android app.
+	 * This method will perform various actions as required, based on the specific command.
+	 */
 	private void comingFromApp(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// Responding to a POST command from the mobile app.
 		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
@@ -278,7 +293,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 			}
 			mapper.writeValue(response.getOutputStream(), borrowedByUsername);
-
+			
 		} else if (json.startsWith("GETBOOKFROMISBN")) {
 			List<Book> booksMatchingIsbn = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {

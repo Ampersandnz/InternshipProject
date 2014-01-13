@@ -98,6 +98,9 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}
 
+	/**
+	 * Map all Buttons in the layout to objects and assign this activity as a listener.
+	 */
 	private void setupButtons() {
 		scanBtn = (Button)findViewById(R.id.scan_button);
 		borrowBtn = (Button)findViewById(R.id.borrow_btn);
@@ -121,6 +124,9 @@ public class MainActivity extends Activity implements OnClickListener{
 		savedUsername.setText(preferences.getString("username", "Choose a username"));
 	}
 
+	/**
+	 * Map all TextViews in the layout to objects.
+	 */
 	private void setupTextViews() {
 		authorText = (TextView)findViewById(R.id.book_author);
 		titleText = (TextView)findViewById(R.id.book_title);
@@ -142,14 +148,20 @@ public class MainActivity extends Activity implements OnClickListener{
 
 		this.checkConnection();
 	}
-	
+
+	/**
+	 * Prepare the list of ImageViews that will display the five rating stars for a book.
+	 */
 	private void setupStars() {
 		starViews=new ImageView[5];
 		for(int s=0; s < starViews.length; s++) {
 			starViews[s]=new ImageView(this);
 		}
 	}
-	
+
+	/**
+	 * Prepare the ListView displaying the list of books currently assigned to the chosen username.
+	 */
 	private void setupListView() {
 		currentlyBorrowedList = (LinearLayout)findViewById(R.id.currentlyBorrowed);
 		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
@@ -185,22 +197,29 @@ public class MainActivity extends Activity implements OnClickListener{
 		dbId.setText(savedInstanceState.getString("id"));
 	}
 
+	/**
+	 * When a View (usually a Button) that this activity listens to is clicked, perform various required actions in response.
+	 */
 	public void onClick(View v) {
 		String username = preferences.getString("username", null);
-		
+
 		switch(v.getId()) {
-		
+
 		case R.id.scan_button:
+			// Start a new book scan.
 			if (isCameraAvailable()) {
-				Intent intent = new Intent(this, ZBarScannerActivity.class);
-				intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.ISBN10, Symbol.ISBN13, Symbol.EAN13});
-				startActivityForResult(intent, SCAN_BARCODE);
+				if (checkConnection()) {
+					Intent intent = new Intent(this, ZBarScannerActivity.class);
+					intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.ISBN10, Symbol.ISBN13, Symbol.EAN13});
+					startActivityForResult(intent, SCAN_BARCODE);
+				}
 			} else {
 				Toast.makeText(this, "Rear Facing Camera Unavailable", Toast.LENGTH_SHORT).show();
 			}
 			break;
 
 		case R.id.borrow_btn:
+			// Assign the current copy of the currently scanned book to the chosen username.
 			if (null == username) {
 				Intent i = new Intent(this, UsernameEntryActivity.class);
 				startActivityForResult(i, CHOOSE_USERNAME);
@@ -219,6 +238,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			break;
 
 		case R.id.return_btn:
+			// Assign the current copy of the currently scanned book to the library system.
 			if (null == username) {
 				Intent i = new Intent(this, UsernameEntryActivity.class);
 				startActivityForResult(i, CHOOSE_USERNAME);
@@ -237,6 +257,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			break;
 
 		case R.id.add_btn:
+			// Add a new copy of the currently scanned book to the library.
 			if (checkConnection()) {
 				new HttpAddAsyncTask().execute(WEBAPP_URL);
 				Toast addToast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" added to library.", Toast.LENGTH_SHORT);
@@ -245,6 +266,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			break;
 
 		case R.id.delete_btn:
+			// Delete the currently selected copy of the currently scanned book from the library.
 			if (checkConnection()) {
 				if (dbId.getText().toString().equals("No copy of this book found in library.")) {
 					Toast noBookToast = Toast.makeText(getApplicationContext(), "No copies of this book exist in the library.", Toast.LENGTH_SHORT);
@@ -258,11 +280,14 @@ public class MainActivity extends Activity implements OnClickListener{
 			break;
 
 		case R.id.saved_username:
+			// Open the UsernameEntry Activity.
 			Intent i = new Intent(this, UsernameEntryActivity.class);
 			startActivityForResult(i, CHOOSE_USERNAME);
 			break;
 
+
 		case R.id.isConnected:
+			// Recheck the connection to the server.
 			checkConnection();
 			break;
 		}
@@ -584,6 +609,10 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}
 
+	/**
+	 * @author Michael Lo
+	 * Class to asynchronously add a copy of the scanned book to the library.
+	 */
 	private class HttpAddAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... URLs) {
@@ -609,6 +638,10 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}	
 
+	/**
+	 * @author Michael Lo
+	 * Class to asynchronously delete the currently selected copy of the scanned book from the library.
+	 */
 	private class HttpDeleteAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... URLs) {
@@ -636,6 +669,10 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}	
 
+	/**
+	 * @author Michael Lo
+	 * Class to asynchronously assign the currently selected copy of the scanned book to the chosen username.
+	 */
 	private class HttpBorrowAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... URLs) {
@@ -655,6 +692,10 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}
 
+	/**
+	 * @author Michael Lo
+	 * Class to asynchronously assign the currently selected copy of the scanned book to the library.
+	 */
 	private class HttpReturnAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... URLs) {

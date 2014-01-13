@@ -1,10 +1,8 @@
 package com.mlo.book;
 
 /**
- * 
  * @author Michael Lo
  * Set() methods return this, so multiple set() calls can be concatenated together.
- * 
  */
 
 public class Book { 

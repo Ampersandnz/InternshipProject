@@ -6,7 +6,7 @@ import javax.persistence.Id;
 
 /**
  * @author Michael Lo
- * Hibernate mapping bean. Each User represents a row in the database. Constructors, getters and setters. No computation or other methods.
+ * Objectify mapping bean. Each User represents a row in the database. Constructors, getters and setters. No computation or other methods.
  * Set() methods return this, so multiple set() calls can be concatenated together.
  */
 @Entity

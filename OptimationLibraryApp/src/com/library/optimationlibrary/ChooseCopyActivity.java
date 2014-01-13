@@ -66,11 +66,11 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// If we've received a touch notification that the user has touched outside the activity, do nothing. This forces the user to select a copy of the book before the activity can close.
+		// If a touch notification is received that is touched outside the activity, do nothing. This forces the user to select a copy of the book before the activity can close.
 		if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
 		}
 		
-		// Delegate everything else to Activity.
+		// Delegate everything else to Activity.class.
 		return super.onTouchEvent(event);
 	}
 }
