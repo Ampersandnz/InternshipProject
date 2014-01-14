@@ -10,7 +10,7 @@ import javax.persistence.Id;
  * Set() methods return this, so multiple set() calls can be concatenated together.
  */
 @Entity
-public class User { 
+public class User implements Comparable<User>{ 
 
 	@Id private Long id; 
 
@@ -60,5 +60,20 @@ public class User {
 	
 	public String toString() {
 		return this.name + " (" + this.email + ")";
+	}
+
+	@Override
+	public int compareTo(User u) {
+	    if (this == u) {
+	    	return 0;
+	    }
+
+	    int comparison = this.name.compareTo(u.name);
+	    
+	    if (comparison != 0) {
+	    	return comparison;
+	    }
+
+	    return 0;
 	}
 } 

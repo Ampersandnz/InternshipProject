@@ -121,6 +121,6 @@
 				value="mainList" />
 		</p>
 	</form>
-	Currently selected user: <%request.getAttribute("selectedUser");%>
+	Currently selected user: <%=request.getAttribute("selectedUser")%>
 </body>
 </html>

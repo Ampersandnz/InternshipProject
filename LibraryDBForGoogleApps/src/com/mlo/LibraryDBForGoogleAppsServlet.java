@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -72,10 +73,14 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		// Hidden parameter identifying the page from which the browser is returning.
 		String forward = SHOWALL;
 
-		// Populate the list of books with the contents of the database.
+		// Populate the lists with the contents of the databases.
 		ArrayList<Book> allBooks = BM.getAllBooks();
 		ArrayList<User> allUsers = UM.getAllUsers();
 
+		// Sort both lists
+		Collections.sort(allBooks);
+		Collections.sort(allUsers);
+		
 		// Send book list to next page.
 		request.setAttribute("allBooks", allBooks);
 		request.setAttribute("allUsers", allUsers);
@@ -171,6 +176,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				} else {
 					// No books were chosen for borrowing. Do nothing.
 				}
+				
 			} else if (parameters.containsKey("returnBook")) {
 				boolean bookBeingReturned = SH.sendReturnedBooks(request, parameters);
 				if (bookBeingReturned) {
@@ -203,15 +209,15 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 			} else if (parameters.containsKey("selectUser")) {
-				User selectedUser = SH.selectUser(request, parameters);
+				boolean newUserSelected = SH.selectUser(request, parameters);
 				
-				if (!(selectedUser.equals(null))) {
-					// Display user selected page.
+				if (newUserSelected) {
+					// Display select page.
 					forward = SELECT_USER;
 				} else {
-					// No users was selected. Do nothing.
+					// No new user was selected. Do nothing.
 				}
-
+				
 			} else {
 				// Return to main list.
 			}
@@ -251,9 +257,13 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			break;
 		}
 
-		// Populate the list of books with the contents of the database.
+		// Populate the lists with the contents of the databases.
 		ArrayList<Book> allBooks = BM.getAllBooks();
 		ArrayList<User> allUsers = UM.getAllUsers();
+
+		// Sort both lists
+		Collections.sort(allBooks);
+		Collections.sort(allUsers);
 
 		// Send book list to next page.
 		if (forward.equals(SHOWALL)) {

@@ -322,29 +322,31 @@ public class ServletHelper {
 	/**
 	 * @param request
 	 * @param parameters
-	 * @return newUser
+	 * @return newUserSelected
 	 */
-	User selectUser(HttpServletRequest request, Map<String, String[]> parameters) {
-		boolean multipleSelected = false;
-
-		User selectedUser = null;
-
+	boolean selectUser(HttpServletRequest request, Map<String, String[]> parameters) {
+		boolean newUserSelected = false;
+		User selected = null;
+		
 		for(String parameter : parameters.keySet()) {
 			if(parameter.startsWith("user")) {
-
-				Long Id = Long.parseLong(parameter.substring(4));
-
-				if (selectedUser.equals(null)) {
-					selectedUser = UM.getUser(Id);
+				if (newUserSelected) {
+					newUserSelected = false;
+					break;
 				} else {
-					multipleSelected = true;
+					newUserSelected = true;
+					Long id = Long.parseLong(parameter.substring(4));
+					selected = UM.getUser(id);
 				}
 			}
 		}
-
-		request.setAttribute("newUser", selectedUser.getName());
-		request.setAttribute("multipleUsers", multipleSelected);
 		
-		return selectedUser;
+		if (newUserSelected) {
+			LibraryDBForGoogleAppsServlet.selectedUser = selected.getName();
+			request.setAttribute("newUser", selected.getName());
+		}
+		return newUserSelected;
 	}
+	// newUser = username
+	// multipleUsers = null or true
 }

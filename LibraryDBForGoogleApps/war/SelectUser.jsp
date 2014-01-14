@@ -9,10 +9,7 @@
 <body>
 
 	<%if (!(null == request.getAttribute("newUser"))) { %>
-		<%=request.getAttribute("newUser") %> selected.
-	<%}%>
-	<%if (!(null == request.getAttribute("multipleUsers"))) { %>
-		Multiple users selected. No change.
+		<%=request.getAttribute("newUser")%> selected.
 	<%}%>
 	
 	<form method="GET" action='librarydbforgoogleapps' name="selectUser">

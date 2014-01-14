@@ -10,7 +10,7 @@ import com.googlecode.objectify.annotation.Entity;
  */
 
 @Entity
-public class Book { 
+public class Book implements Comparable<Book> { 
 
 	@Id private Long id; 
 	
@@ -66,5 +66,20 @@ public class Book {
 	
 	public String toString() {
 		return this.title + " (" + this.isbn + ")";
+	}
+
+	@Override
+	public int compareTo(Book b) {
+	    if (this == b) {
+	    	return 0;
+	    }
+
+	    int comparison = this.title.compareTo(b.title);
+	    
+	    if (comparison != 0) {
+	    	return comparison;
+	    }
+
+	    return 0;
 	}
 } 
