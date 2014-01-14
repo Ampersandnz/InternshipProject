@@ -17,6 +17,10 @@ public class ServletHelper {
 
 	private static final String TEST_USERNAME = "Michael Lo";
 
+	/**
+	 * Class of helper methods for LibraryDBForGoogleAppsServlet. 
+	 * Moves most functionality out of the servlet class to simplify maintenance and ease of understanding the system.
+	 */
 	ServletHelper () {
 		BM = LibraryDBForGoogleAppsServlet.BM;
 		UM = LibraryDBForGoogleAppsServlet.UM;
@@ -347,6 +351,4 @@ public class ServletHelper {
 		}
 		return newUserSelected;
 	}
-	// newUser = username
-	// multipleUsers = null or true
 }

@@ -19,9 +19,8 @@ import com.mlo.book.*;
 import com.mlo.user.*;
 
 public class LibraryDBForGoogleAppsServlet extends HttpServlet {
-
-	private static final long serialVersionUID = 8890271763290445675L;
-
+	private static final long serialVersionUID = 4283110196125569868L;
+	
 	public static final String LIBRARY_USERNAME = "_library";
 	static String selectedUser;
 
@@ -321,7 +320,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			} else {
 				response.getOutputStream().print(INVALIDNAME);
 			}
-
+			
 		} else if (json.startsWith(GETBORROWEDBYUSER)) {
 			List<Book> borrowedByUsername = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {

@@ -31,6 +31,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -312,8 +313,8 @@ public class MainActivity extends Activity implements OnClickListener{
 				// Type of the scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
 				String scanContent = data.getStringExtra(ZBarConstants.SCAN_RESULT);
 				if (scanContent!=null) {
-					borrowBtn.setTag(scanContent);
 					getBook(scanContent);
+					borrowBtn.setTag(scanContent);
 				} else {
 					Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT).show();
 				}
@@ -535,6 +536,12 @@ public class MainActivity extends Activity implements OnClickListener{
 					starLayout.removeAllViews();
 					ratingCountText.setText("");
 					thumbView.setImageBitmap(null);
+					
+					Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+					
+					if (v.hasVibrator()) {
+						v.vibrate(250);
+					}
 				}
 			}
 		}
