@@ -115,10 +115,12 @@
 			<input type="submit" name="addUser" value="Add new user to system" />
 			<input type="submit" name="deleteUser"
 				value="Delete user(s) from system" /> <input type="submit"
-				name="editUser" value="Edit user(s)" /> <input type="reset"
+				name="editUser" value="Edit user(s)" /> <input type="submit"
+				name="selectUser" value="Select user" /> <input type="reset"
 				value="Clear selection" /> <input type="hidden" name="page"
 				value="mainList" />
 		</p>
 	</form>
+	Currently selected user: <%request.getAttribute("selectedUser");%>
 </body>
 </html>

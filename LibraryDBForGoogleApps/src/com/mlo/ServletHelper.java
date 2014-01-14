@@ -14,12 +14,14 @@ import com.mlo.user.UserManager;
 public class ServletHelper {
 	private static BookManager BM;
 	private static UserManager UM;
-	
+
+	private static final String TEST_USERNAME = "Michael Lo";
+
 	ServletHelper () {
 		BM = LibraryDBForGoogleAppsServlet.BM;
 		UM = LibraryDBForGoogleAppsServlet.UM;
 	}
-	
+
 	/**
 	 * Method to initialise and clear the databases, then add default fake entries.
 	 * Will be altered when development is complete.
@@ -28,26 +30,26 @@ public class ServletHelper {
 		// Initialise the database managers
 		BM.initialise();
 		UM.initialise();
-		
+
 		// Empty the databases
 		BM.deleteAllBooks();
 		UM.deleteAllUsers();
 
 		// Add few Book records to database
-		BM.addBook("9780316007573", "The Ashes Of Worlds", LibraryDBForGoogleAppsServlet.TEST_USERNAME); 
-		BM.addBook("9780425037454", "The Stars My Destination", "_library"); 
-		BM.addBook("9780756404079", "The Name Of The Wind", "_library"); 
-		BM.addBook("9781429943840", "Earth Afire",  LibraryDBForGoogleAppsServlet.TEST_USERNAME);
-		BM.addBook("9780345490711", "Judas Unchained", "_library");
-		BM.addBook("9780606005739", "A Wizard Of Earthsea", "_library");
+		BM.addBook("9780316007573", "The Ashes Of Worlds", TEST_USERNAME); 
+		BM.addBook("9780425037454", "The Stars My Destination", LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME); 
+		BM.addBook("9780756404079", "The Name Of The Wind", TEST_USERNAME); 
+		BM.addBook("9781429943840", "Earth Afire",  TEST_USERNAME);
+		BM.addBook("9780345490711", "Judas Unchained", LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
+		BM.addBook("9780606005739", "A Wizard Of Earthsea", LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
 
 		// Add few User records to database
-		UM.addUser(LibraryDBForGoogleAppsServlet.TEST_USERNAME, "michael.lo@optimation.co.nz"); 
+		UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz"); 
 		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com"); 
 		UM.addUser("test", "test@fake.com"); 
 		UM.addUser("test", "test@test.com"); 
 	}
-	
+
 	/**
 	 * @param request
 	 * @param parameters
@@ -66,7 +68,7 @@ public class ServletHelper {
 				String borrowedISBNs = null;
 				String notBorrowedISBNs = null;
 
-				if (book.getInPossessionOf().equals(LibraryDBForGoogleAppsServlet.TEST_USERNAME)) {
+				if (book.getInPossessionOf().equals(LibraryDBForGoogleAppsServlet.selectedUser)) {
 					if (!(null == currentNotBorrowedISBNs)) {
 						notBorrowedISBNs = currentNotBorrowedISBNs + ", " + book.getIsbn();
 					} else {
@@ -80,12 +82,12 @@ public class ServletHelper {
 						borrowedISBNs =  book.getIsbn();
 					}
 					notBorrowedISBNs = currentNotBorrowedISBNs;
-					BM.updateBook(Id, "inPossessionOf", LibraryDBForGoogleAppsServlet.TEST_USERNAME);
+					BM.updateBook(Id, "inPossessionOf", LibraryDBForGoogleAppsServlet.selectedUser);
 				}
 
 				request.setAttribute("notBorrowedISBNs", notBorrowedISBNs);
 				request.setAttribute("borrowedISBNs", borrowedISBNs);
-				request.setAttribute("borrower", LibraryDBForGoogleAppsServlet.TEST_USERNAME);
+				request.setAttribute("borrower", LibraryDBForGoogleAppsServlet.selectedUser);
 			}
 		}
 		return bookBeingBorrowed;
@@ -152,7 +154,7 @@ public class ServletHelper {
 
 		BM.addBook(isbn, title, inPossessionOf);
 	}
-	
+
 	/**
 	 * @param request
 	 * @param parameters
@@ -199,7 +201,7 @@ public class ServletHelper {
 		}
 		return bookBeingDeleted;
 	}
-	
+
 	/**
 	 * @param parameters
 	 * @param request
@@ -252,7 +254,7 @@ public class ServletHelper {
 			}
 		}
 	}
-	
+
 	/**
 	 * @param request
 	 * @param parameters
@@ -287,7 +289,7 @@ public class ServletHelper {
 		}
 		return booksToEdit;
 	}
-	
+
 	/**
 	 * @param parameters
 	 * @param request
@@ -315,5 +317,34 @@ public class ServletHelper {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * @param request
+	 * @param parameters
+	 * @return newUser
+	 */
+	User selectUser(HttpServletRequest request, Map<String, String[]> parameters) {
+		boolean multipleSelected = false;
+
+		User selectedUser = null;
+
+		for(String parameter : parameters.keySet()) {
+			if(parameter.startsWith("user")) {
+
+				Long Id = Long.parseLong(parameter.substring(4));
+
+				if (selectedUser.equals(null)) {
+					selectedUser = UM.getUser(Id);
+				} else {
+					multipleSelected = true;
+				}
+			}
+		}
+
+		request.setAttribute("newUser", selectedUser.getName());
+		request.setAttribute("multipleUsers", multipleSelected);
+		
+		return selectedUser;
 	}
 }
