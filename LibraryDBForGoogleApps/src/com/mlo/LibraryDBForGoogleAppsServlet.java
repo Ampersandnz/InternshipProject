@@ -313,9 +313,9 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			BM.updateBook(Long.parseLong(json.substring(6)), "inPossessionOf", LIBRARY_USERNAME);
 
 		} else if (json.startsWith(CHECKNAME)) {
-			String chosenName = json.substring(13);
-
-			if (SH.checkUsers(chosenName)) {
+			String chosenName = json.substring(13).toLowerCase();
+			
+			if (SH.checkUser(chosenName)) {
 				response.getOutputStream().print(VALIDNAME);
 			} else {
 				response.getOutputStream().print(INVALIDNAME);
@@ -324,7 +324,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		} else if (json.startsWith(GETBORROWEDBYUSER)) {
 			List<Book> borrowedByUsername = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {
-				if (b.getInPossessionOf().equals(json.substring(11))) {
+				if (b.getInPossessionOf().toLowerCase().equals(json.substring(11).toLowerCase())) {
 					borrowedByUsername.add(b);
 				}
 			}

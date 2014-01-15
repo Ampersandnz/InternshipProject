@@ -314,9 +314,9 @@ public class ServletHelper {
 	 * @param chosenName
 	 * @return nameAllowed
 	 */
-	boolean checkUsers(String chosenName) {
+	boolean checkUser(String chosenName) {
 		for (User u: UM.getAllUsers()) {
-			if (u.getName().equals(chosenName)) {
+			if (u.getName().toLowerCase().equals(chosenName)) {
 				return true;
 			}
 		}

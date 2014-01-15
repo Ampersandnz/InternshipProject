@@ -309,8 +309,8 @@ public class MainActivity extends Activity implements OnClickListener{
 		switch (requestCode) {
 		case SCAN_BARCODE:
 			if (resultCode == RESULT_OK) {
-				// Scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT)
-				// Type of the scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
+				// Scan result is retrieved by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT)
+				// Barcode format is retrieved by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
 				String scanContent = data.getStringExtra(ZBarConstants.SCAN_RESULT);
 				if (scanContent!=null) {
 					getBook(scanContent);
