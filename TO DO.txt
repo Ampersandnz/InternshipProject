@@ -1,4 +1,4 @@
-Separate accounts into users and admins, add a necessary password to admin accounts.
+Add password entry when choosing username in mobile app
 
 Clean up UI a bit
 

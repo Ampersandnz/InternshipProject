@@ -40,6 +40,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	static final String EDIT_USER = "/EditUser.jsp";
 	static final String SELECT_USER = "/SelectUser.jsp";
 	static final String MAKE_USER_ADMIN = "/MakeAdmin.jsp";
+	static final String ADMIN_ACCOUNT_SELECTED = "/AdminSelect.jsp";
 
 	public static final String SYSTEM_PASSWORD = "Optimation1000";
 	
@@ -143,7 +144,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	 * Actions will then be taken based on which page the request originated from and 
 	 */
 	private void comingFromPage(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parameters, String hiddenParam) {
-
 		// Returning from a .jsp page.
 		String forward = SHOWALL;
 
@@ -218,13 +218,22 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 			} else if (parameters.containsKey("selectUser")) {
-				boolean newUserSelected = SH.selectUser(request, parameters);
-
-				if (newUserSelected) {
+				int newUserSelected = SH.selectUser(request, parameters);
+				
+				switch (newUserSelected) {
+				case 0:
+					// No user was selected. Do nothing.
+					break;
+					
+				case 1:
 					// Display select page.
 					forward = SELECT_USER;
-				} else {
-					// No user was selected. Do nothing.
+					break;
+					
+				case 2:
+					// Admin selected. Display password entry page.
+					forward = ADMIN_ACCOUNT_SELECTED;
+					break;
 				}
 
 			} else if (parameters.containsKey("makeAdmin")) {
@@ -282,6 +291,15 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			}
 
 			// Return to main list.
+			break;
+			
+		case "adminSelect":
+			if (parameters.containsKey("save")) {
+				if (SH.checkAdminPassword(request, parameters)) {
+					forward = SELECT_USER;
+				}
+			}
+			
 			break;
 		}
 

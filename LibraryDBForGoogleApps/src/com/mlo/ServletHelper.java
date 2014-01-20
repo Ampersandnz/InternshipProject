@@ -55,9 +55,11 @@ public class ServletHelper {
 		UM.addUser("test", "test@fake.com"); 
 		UM.addUser("test", "test@test.com"); 
 		Long id2 = UM.addUser(LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME, " "); 
-		
+
 		UM.updateUser(id1, "isAdmin", "true");
+		UM.updateUser(id1, "password", "lolcano");
 		UM.updateUser(id2, "isAdmin", "true");
+		UM.updateUser(id2, "password", LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD);
 	}
 
 	/**
@@ -307,11 +309,18 @@ public class ServletHelper {
 	 */
 	void makeUserAdmin(HttpServletRequest request, Map<String, String[]> parameters) {
 		// Check whether correct password was entered.
-		if (request.getParameter("password").equals(LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD)) {
+		if (request.getParameter("systemPassword").equals(LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD)) {
 			// Make all selected users admins
 			for (User u: beingMadeAdmin) {
 				UM.updateUser(u.getId(), "isAdmin", "true");
-				
+			}
+			
+			// Add the submitted passwords to all new admins
+			for(String parameter : parameters.keySet()) {
+				if(parameter.startsWith("password")) {
+					Long Id = Long.parseLong(parameter.substring(8));
+					UM.updateUser(Id, "password", request.getParameter(parameter));
+				}
 			}
 		}
 		beingMadeAdmin.clear();
@@ -385,27 +394,65 @@ public class ServletHelper {
 	 * @param parameters
 	 * @return newUserSelected
 	 */
-	boolean selectUser(HttpServletRequest request, Map<String, String[]> parameters) {
-		boolean newUserSelected = false;
+	int selectUser(HttpServletRequest request, Map<String, String[]> parameters) {
+		int newUserSelected = 0;
 		User selected = null;
 
 		for(String parameter : parameters.keySet()) {
 			if(parameter.startsWith("user")) {
-				if (newUserSelected) {
-					newUserSelected = false;
+				if (newUserSelected > 0) {
+					// Multiple users selected.
+					newUserSelected = 0;
 					break;
 				} else {
-					newUserSelected = true;
+					newUserSelected = 1;
+					
 					Long id = Long.parseLong(parameter.substring(4));
 					selected = UM.getUser(id);
+					if (selected.getIsAdmin().equals("true")) {
+						newUserSelected = 2;
+					}
 				}
 			}
 		}
-
-		if (newUserSelected) {
+		
+		switch (newUserSelected) {
+		case 0:
+			break;
+			
+		case 1:
 			LibraryDBForGoogleAppsServlet.selectedUser = selected;
 			request.setAttribute("newUser", selected.getName());
+			break;
+			
+		case 2:
+			request.setAttribute("userId", selected.getId());
+			break;
 		}
+		
 		return newUserSelected;
+	}
+	
+	/**
+	 * @param request
+	 * @param parameters
+	 * Will return, silently failing, if incorrect password was entered.
+	 */
+	boolean checkAdminPassword(HttpServletRequest request, Map<String, String[]> parameters) {
+		Object temp = request.getParameter("userId");
+		Long id = null;
+		if (temp instanceof String) {
+			id = Long.parseLong((String) temp);
+		}
+		
+		User user = UM.getUser(id);
+		
+		// Check whether correct password was entered.
+		if (request.getParameter("userPassword").equals(user.getPassword())) {
+			LibraryDBForGoogleAppsServlet.selectedUser = user;
+			request.setAttribute("newUser", user.getName());
+			return true;
+		}
+		return false;
 	}
 }

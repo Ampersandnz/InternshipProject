@@ -27,15 +27,21 @@
 				<td>Name:</td>
 				<td><%=u.getName()%></td>
 			</tr>
+			<tr>
+				<td>Password:</td>
+				<td><input type="password" name="password<%=u.getId()%>"></td>
+			</tr>
 			
 			<%
 						}
 					}
 			%>
-			
 			<tr>
-				<td>Password:</td>
-				<td><input type="password" name="password"></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td>System password:</td>
+				<td><input type="password" name="systemPassword" ></td>
 			</tr>
 			<tr>
 				<td><input type="submit" name="save" value="Save"> <input
