@@ -1,0 +1,7 @@
+Separate accounts into users and admins, add a necessary password to admin accounts.
+
+Clean up UI a bit
+
+Disallow multiple identical usernames
+
+Optimation-theme app (logo, background, fonts/colours, splash screen)

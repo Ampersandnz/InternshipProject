@@ -14,9 +14,11 @@ import com.mlo.user.UserManager;
 public class ServletHelper {
 	private static BookManager BM;
 	private static UserManager UM;
-
+	
 	private static final String TEST_USERNAME = "Michael Lo";
-
+	
+	static List<User> beingMadeAdmin = new ArrayList<User>();
+	
 	/**
 	 * Class of helper methods for LibraryDBForGoogleAppsServlet. 
 	 * Moves most functionality out of the servlet class to simplify maintenance and ease of understanding the system.
@@ -46,12 +48,16 @@ public class ServletHelper {
 		BM.addBook("9781429943840", "Earth Afire",  TEST_USERNAME);
 		BM.addBook("9780345490711", "Judas Unchained", LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
 		BM.addBook("9780606005739", "A Wizard Of Earthsea", LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
-
+		
 		// Add few User records to database
-		UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz"); 
+		Long id1 = UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz"); 
 		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com"); 
 		UM.addUser("test", "test@fake.com"); 
 		UM.addUser("test", "test@test.com"); 
+		Long id2 = UM.addUser(LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME, " "); 
+
+		UM.updateUser(id1, "isAdmin", "true");
+		UM.updateUser(id2, "isAdmin", "true");
 	}
 
 	/**
@@ -86,7 +92,7 @@ public class ServletHelper {
 						borrowedISBNs =  book.getIsbn();
 					}
 					notBorrowedISBNs = currentNotBorrowedISBNs;
-					BM.updateBook(Id, "inPossessionOf", LibraryDBForGoogleAppsServlet.selectedUser);
+					BM.updateBook(Id, "inPossessionOf", LibraryDBForGoogleAppsServlet.selectedUser.getName());
 				}
 
 				request.setAttribute("notBorrowedISBNs", notBorrowedISBNs);
@@ -162,6 +168,7 @@ public class ServletHelper {
 	/**
 	 * @param request
 	 * @param parameters
+	 * Will return, silently failing, if user with identical name already exists in the system.
 	 */
 	void addUser(HttpServletRequest request, Map<String, String[]> parameters) {
 		String name = "";
@@ -174,6 +181,11 @@ public class ServletHelper {
 			e.printStackTrace();
 		}
 
+		for (User u: UM.getAllUsers()) {
+			if (u.getName().equals(name)) {
+				return;
+			}
+		}
 		UM.addUser(name, email);
 	}
 
@@ -262,13 +274,23 @@ public class ServletHelper {
 	/**
 	 * @param request
 	 * @param parameters
+	 * Will return, silently failing, if user with identical name already exists in the system.
 	 */
 	void editUser(HttpServletRequest request, Map<String, String[]> parameters) {
 		// No way to tell if a field has been changed or not, so just update all of them.
 		for(String parameter : parameters.keySet()) {
 			if(parameter.startsWith("name")) {
 				Long Id = Long.parseLong(parameter.substring(4));
-				UM.updateUser(Id, "name", request.getParameter(parameter));
+
+				String name = request.getParameter(parameter);
+
+				for (User u: UM.getAllUsers()) {
+					if (u.getName().equals(name)) {
+						return;
+					}
+				}
+
+				UM.updateUser(Id, "name", name);
 			}
 
 			if(parameter.startsWith("email")) {
@@ -276,6 +298,23 @@ public class ServletHelper {
 				UM.updateUser(Id, "email", request.getParameter(parameter));
 			}
 		}
+	}
+
+	/**
+	 * @param request
+	 * @param parameters
+	 * Will return, silently failing, if incorrect password was entered.
+	 */
+	void makeUserAdmin(HttpServletRequest request, Map<String, String[]> parameters) {
+		// Check whether correct password was entered.
+		if (request.getParameter("password").equals(LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD)) {
+			// Make all selected users admins
+			for (User u: beingMadeAdmin) {
+				UM.updateUser(u.getId(), "isAdmin", "true");
+				
+			}
+		}
+		beingMadeAdmin.clear();
 	}
 
 	/**
@@ -293,7 +332,7 @@ public class ServletHelper {
 		}
 		return booksToEdit;
 	}
-
+	
 	/**
 	 * @param parameters
 	 * @param request
@@ -308,6 +347,24 @@ public class ServletHelper {
 			}
 		}
 		return usersToEdit;
+	}
+	
+	/**
+	 * @param parameters
+	 * @param request
+	 * @return usersToMakeAdmin
+	 */
+	List<User> getUsersToMakeAdmin(Map<String, String[]> parameters, HttpServletRequest request) {
+		List<User> usersToMakeAdmin = new ArrayList<User>();
+		for(String parameter : parameters.keySet()) {
+			if(parameter.startsWith("user")) {
+				Long Id = Long.parseLong(parameter.substring(4));
+				usersToMakeAdmin.add(UM.getUser(Id));
+			}
+		}
+		
+		beingMadeAdmin = usersToMakeAdmin;
+		return usersToMakeAdmin;
 	}
 
 	/**
@@ -331,7 +388,7 @@ public class ServletHelper {
 	boolean selectUser(HttpServletRequest request, Map<String, String[]> parameters) {
 		boolean newUserSelected = false;
 		User selected = null;
-		
+
 		for(String parameter : parameters.keySet()) {
 			if(parameter.startsWith("user")) {
 				if (newUserSelected) {
@@ -344,9 +401,9 @@ public class ServletHelper {
 				}
 			}
 		}
-		
+
 		if (newUserSelected) {
-			LibraryDBForGoogleAppsServlet.selectedUser = selected.getName();
+			LibraryDBForGoogleAppsServlet.selectedUser = selected;
 			request.setAttribute("newUser", selected.getName());
 		}
 		return newUserSelected;

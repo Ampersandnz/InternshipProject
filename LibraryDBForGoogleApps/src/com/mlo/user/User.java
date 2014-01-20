@@ -16,6 +16,7 @@ public class User implements Comparable<User>{
 
 	private String name; 
 	private String email; 
+	private String isAdmin = "false";
 	
 	public User() {
 	}
@@ -35,7 +36,7 @@ public class User implements Comparable<User>{
 		return id; 
 	} 
 
-	public User setId( Long id ) { 
+	public User setId(Long id) { 
 		this.id = id;
 		return this;
 	} 
@@ -44,22 +45,35 @@ public class User implements Comparable<User>{
 		return name; 
 	} 
 
-	public User setName( String name ) { 
+	public User setName(String name) { 
 		this.name = name;
 		return this;
 	} 
 
 	public String getEmail() { 
 		return email; 
-	} 
+	}
 
-	public User setEmail( String email ) { 
+	public User setEmail(String email) { 
 		this.email = email;
 		return this;
-	} 
+	}
+	
+	public String getIsAdmin() { 
+		return isAdmin; 
+	}
+
+	public User setIsAdmin(String isAdmin) { 
+		this.isAdmin = isAdmin;
+		return this;
+	}
 	
 	public String toString() {
-		return this.name + " (" + this.email + ")";
+		String string = this.name;
+		if (isAdmin.equals("true")) {
+			string = string + " (Admin)";
+		}
+		return string;
 	}
 
 	@Override

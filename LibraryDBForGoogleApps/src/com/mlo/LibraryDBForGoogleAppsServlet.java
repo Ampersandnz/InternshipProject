@@ -15,14 +15,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mlo.book.*;
-import com.mlo.user.*;
+import com.mlo.book.Book;
+import com.mlo.book.BookManager;
+import com.mlo.book.ObjectifyBookManager;
+import com.mlo.user.ObjectifyUserManager;
+import com.mlo.user.User;
+import com.mlo.user.UserManager;
 
 public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static final long serialVersionUID = 4283110196125569868L;
-	
+
 	public static final String LIBRARY_USERNAME = "_library";
-	static String selectedUser;
+	static User selectedUser;
 
 	static final String ADD_BOOK = "/AddBook.jsp";
 	static final String DELETE_BOOK = "/DeleteBook.jsp";
@@ -35,7 +39,10 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	static final String DELETE_USER = "/DeleteUser.jsp";
 	static final String EDIT_USER = "/EditUser.jsp";
 	static final String SELECT_USER = "/SelectUser.jsp";
+	static final String MAKE_USER_ADMIN = "/MakeAdmin.jsp";
 
+	static final String SYSTEM_PASSWORD = "Optimation1000";
+	
 	private static final String ADD = "ADD";
 	private static final String DELETE = "DELETE";
 	private static final String BORROW = "BORROW";
@@ -63,9 +70,15 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//Initialise default values
 		if (firstRun) {
-			selectedUser = LIBRARY_USERNAME;
 			SH = new ServletHelper();
 			SH.firstRun();
+			
+			for (User u: UM.getAllUsers()) {
+				if (u.getName().equals(LIBRARY_USERNAME)) {
+					selectedUser = u;
+				}
+			}
+			
 			firstRun = false;
 		}
 
@@ -79,7 +92,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		// Sort both lists
 		Collections.sort(allBooks);
 		Collections.sort(allUsers);
-		
+
 		// Send book list to next page.
 		request.setAttribute("allBooks", allBooks);
 		request.setAttribute("allUsers", allUsers);
@@ -98,9 +111,15 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//Initialise default values
 		if (firstRun) {
-			selectedUser = LIBRARY_USERNAME;
 			SH = new ServletHelper();
 			SH.firstRun();
+			
+			for (User u: UM.getAllUsers()) {
+				if (u.getName().equals(LIBRARY_USERNAME)) {
+					selectedUser = u;
+				}
+			}
+			
 			firstRun = false;
 		}
 
@@ -175,7 +194,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				} else {
 					// No books were chosen for borrowing. Do nothing.
 				}
-				
+
 			} else if (parameters.containsKey("returnBook")) {
 				boolean bookBeingReturned = SH.sendReturnedBooks(request, parameters);
 				if (bookBeingReturned) {
@@ -209,14 +228,25 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			} else if (parameters.containsKey("selectUser")) {
 				boolean newUserSelected = SH.selectUser(request, parameters);
-				
+
 				if (newUserSelected) {
 					// Display select page.
 					forward = SELECT_USER;
 				} else {
-					// No new user was selected. Do nothing.
+					// No user was selected. Do nothing.
 				}
-				
+
+			} else if (parameters.containsKey("makeAdmin")) {
+				List<User> usersToMakeAdmin = SH.getUsersToMakeAdmin(parameters, request);
+
+				if (usersToMakeAdmin.size() != 0) {
+					request.setAttribute("usersToMakeAdmin", usersToMakeAdmin);
+					// Display admin password entry page.
+					forward = MAKE_USER_ADMIN;
+				} else {
+					// No users were selected. Do nothing.
+				}
+
 			} else {
 				// Return to main list.
 			}
@@ -250,6 +280,14 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		case "editUser":
 			if (parameters.containsKey("save")) {
 				SH.editUser(request, parameters);
+			}
+
+			// Return to main list.
+			break;
+
+		case "makeAdmin":
+			if (parameters.containsKey("save")) {
+				SH.makeUserAdmin(request, parameters);
 			}
 
 			// Return to main list.
@@ -314,13 +352,13 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		} else if (json.startsWith(CHECKNAME)) {
 			String chosenName = json.substring(13).toLowerCase();
-			
+
 			if (SH.checkUser(chosenName)) {
 				response.getOutputStream().print(VALIDNAME);
 			} else {
 				response.getOutputStream().print(INVALIDNAME);
 			}
-			
+
 		} else if (json.startsWith(GETBORROWEDBYUSER)) {
 			List<Book> borrowedByUsername = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {

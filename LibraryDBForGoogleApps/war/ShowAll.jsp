@@ -86,6 +86,8 @@
 				<td>|</td>
 				<td>Email:</td>
 				<td>|</td>
+				<td>Admin?</td>
+				<td>|</td>
 				<td>Total: <%=allUsers.size()%></td>
 			</tr>
 
@@ -100,6 +102,8 @@
 				<td><%=u.getName()%></td>
 				<td>|</td>
 				<td><%=u.getEmail()%></td>
+				<td>|</td>
+				<td><%=u.getIsAdmin()%></td>
 			</tr>
 
 			<%
@@ -112,15 +116,31 @@
 		</table>
 
 		<p>
+		
+			<%
+				Object o = request.getAttribute("selectedUser");
+				if (o instanceof User) {
+					User user = (User) o;
+					if (user.getIsAdmin().equals("true")) {
+			%>
+			
 			<input type="submit" name="addUser" value="Add new user to system" />
-			<input type="submit" name="deleteUser"
-				value="Delete user(s) from system" /> <input type="submit"
-				name="editUser" value="Edit user(s)" /> <input type="submit"
-				name="selectUser" value="Select user" /> <input type="reset"
-				value="Clear selection" /> <input type="hidden" name="page"
-				value="mainList" />
+			<input type="submit" name="deleteUser" value="Delete user(s) from system" /> 
+			<input type="submit" name="editUser" value="Edit user(s)" /> 
+				
+			<%
+					}
+			%>
+			
+			<input type="submit" name="selectUser" value="Select user" /> 
+			<input type="submit" name="makeAdmin" value="Make user(s) admin" /> 
+			<input type="reset" value="Clear selection" /> 
+			<input type="hidden" name="page" value="mainList" />
 		</p>
 	</form>
-	Currently selected user: <%=request.getAttribute("selectedUser")%>
+				Currently selected user: <%=user.toString()%>
+	<%
+				}
+	%>
 </body>
 </html>

@@ -10,8 +10,10 @@ public class ObjectifyUserManager implements UserManager {
 	private static Objectify ofy;
 	private static final String NAME = "name";
 	private static final String EMAIL = "email";
+	private static final String ISADMIN = "isAdmin";
 	private static final String NONAME = "No name available.";
 	private static final String NOEMAIL = "No email available.";
+	private static final String NOISADMIN = "false";
 
 	public void initialise() {
 		ObjectifyService.register(User.class);
@@ -53,7 +55,14 @@ public class ObjectifyUserManager implements UserManager {
 			}
 			user.setEmail(newData);
 			
+		} else if (field.equals(ISADMIN)) {
+			if (newData.equals("")||null==newData) {
+				newData = NOISADMIN;
+			}
+			user.setIsAdmin(newData);
+			
 		}
+		
 		ofy.put(user);
 	}
 
