@@ -11,10 +11,12 @@ public class ObjectifyUserManager implements UserManager {
 	private static final String NAME = "name";
 	private static final String EMAIL = "email";
 	private static final String ISADMIN = "isAdmin";
-	private static final String NONAME = "No name available.";
+	private static final String PASSWORD = "password";
+	public static final String NONAME = "No name available.";
 	private static final String NOEMAIL = "No email available.";
 	private static final String NOISADMIN = "false";
-
+	private static final String NOPASSWORD = com.mlo.LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD;
+	
 	public void initialise() {
 		ObjectifyService.register(User.class);
 		ofy = ObjectifyService.begin();
@@ -54,13 +56,18 @@ public class ObjectifyUserManager implements UserManager {
 				newData = NOEMAIL;
 			}
 			user.setEmail(newData);
-			
+
 		} else if (field.equals(ISADMIN)) {
 			if (newData.equals("")||null==newData) {
 				newData = NOISADMIN;
 			}
 			user.setIsAdmin(newData);
 			
+		} else if (field.equals(PASSWORD)) {
+			if (newData.equals("")||null==newData) {
+				newData = NOPASSWORD;
+			}
+			user.setPassword(newData);
 		}
 		
 		ofy.put(user);

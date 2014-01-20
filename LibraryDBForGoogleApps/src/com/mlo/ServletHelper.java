@@ -55,7 +55,7 @@ public class ServletHelper {
 		UM.addUser("test", "test@fake.com"); 
 		UM.addUser("test", "test@test.com"); 
 		Long id2 = UM.addUser(LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME, " "); 
-
+		
 		UM.updateUser(id1, "isAdmin", "true");
 		UM.updateUser(id2, "isAdmin", "true");
 	}

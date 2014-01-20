@@ -59,14 +59,36 @@
 		</table>
 
 		<p>
-			<input type="submit" name="borrowBook"
-				value="Borrow book(s) from library" /> <input type="submit"
-				name="returnBook" value="Return borrowed book(s) to library" /> <input
-				type="submit" name="addBook" value="Add new book to library" /> <input
-				type="submit" name="deleteBook" value="Delete book(s) from library" />
-			<input type="submit" name="editBook" value="Edit book(s)" /> <input
-				type="reset" value="Clear selection" /> <input type="hidden"
-				name="page" value="mainList" />
+		
+			
+			<%
+				Object o = request.getAttribute("selectedUser");
+				if (o instanceof User) {
+			%>
+			
+					<input type="submit" name="borrowBook" value="Borrow book(s) from library" /> 
+					<input type="submit" name="returnBook" value="Return borrowed book(s) to library" /> 
+			
+			<%
+					User user = (User) o;
+					if (user.getIsAdmin().equals("true")) {
+			%>
+			
+			<input type="submit" name="addBook" value="Add new book to library" /> 
+			<input type="submit" name="deleteBook" value="Delete book(s) from library" />
+			<input type="submit" name="editBook" value="Edit book(s)" /> 
+			
+			<%
+					}
+			%>
+			
+			<input type="reset" value="Clear selection" /> 
+			<input type="hidden" name="page" value="mainList" />
+			
+			<%
+				}
+			%>
+			
 		</p>
 	</form>
 
@@ -93,9 +115,9 @@
 
 			<%
 				if (!(null == allUsers)) {
-						for (Object o : allUsers) {
-							if (o instanceof User) {
-								User u = (User) o;
+						for (Object ob : allUsers) {
+							if (ob instanceof User) {
+								User u = (User) ob;
 			%>
 			<tr>
 				<td><input type="checkbox" name="user<%=u.getId()%>" /></td>
@@ -118,7 +140,6 @@
 		<p>
 		
 			<%
-				Object o = request.getAttribute("selectedUser");
 				if (o instanceof User) {
 					User user = (User) o;
 					if (user.getIsAdmin().equals("true")) {
@@ -130,14 +151,19 @@
 				
 			<%
 					}
+				}
 			%>
 			
 			<input type="submit" name="selectUser" value="Select user" /> 
 			<input type="submit" name="makeAdmin" value="Make user(s) admin" /> 
 			<input type="reset" value="Clear selection" /> 
 			<input type="hidden" name="page" value="mainList" />
+
 		</p>
 	</form>
+	<% if (o instanceof User) {
+		User user = (User) o;
+		%>
 				Currently selected user: <%=user.toString()%>
 	<%
 				}

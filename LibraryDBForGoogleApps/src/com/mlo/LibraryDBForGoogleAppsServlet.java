@@ -41,7 +41,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	static final String SELECT_USER = "/SelectUser.jsp";
 	static final String MAKE_USER_ADMIN = "/MakeAdmin.jsp";
 
-	static final String SYSTEM_PASSWORD = "Optimation1000";
+	public static final String SYSTEM_PASSWORD = "Optimation1000";
 	
 	private static final String ADD = "ADD";
 	private static final String DELETE = "DELETE";
@@ -62,7 +62,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static ServletHelper SH;
 
 	private static boolean firstRun = true;
-
+	
 	/**
 	 * Whenever the user clicks a button, this method is called. 
 	 * It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
@@ -72,12 +72,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		if (firstRun) {
 			SH = new ServletHelper();
 			SH.firstRun();
-			
-			for (User u: UM.getAllUsers()) {
-				if (u.getName().equals(LIBRARY_USERNAME)) {
-					selectedUser = u;
-				}
-			}
 			
 			firstRun = false;
 		}
@@ -113,12 +107,6 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		if (firstRun) {
 			SH = new ServletHelper();
 			SH.firstRun();
-			
-			for (User u: UM.getAllUsers()) {
-				if (u.getName().equals(LIBRARY_USERNAME)) {
-					selectedUser = u;
-				}
-			}
 			
 			firstRun = false;
 		}
@@ -187,21 +175,24 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			} else if (parameters.containsKey("borrowBook")) {
 				boolean bookBeingBorrowed = SH.sendBorrowedBooks(request, parameters);
-
-				if (bookBeingBorrowed) {
-					// Display borrow page.
-					forward = BORROW_BOOK;
-				} else {
-					// No books were chosen for borrowing. Do nothing.
+				if (!(selectedUser.getName().equals(com.mlo.user.ObjectifyUserManager.NONAME))) {
+					if (bookBeingBorrowed) {
+						// Display borrow page.
+						forward = BORROW_BOOK;
+					} else {
+						// No books were chosen for borrowing. Do nothing.
+					}
 				}
 
 			} else if (parameters.containsKey("returnBook")) {
 				boolean bookBeingReturned = SH.sendReturnedBooks(request, parameters);
-				if (bookBeingReturned) {
-					// Display return page.
-					forward = RETURN_BOOK;
-				} else {
-					// No books were chosen for returning. Do nothing.
+				if (!(selectedUser.getName().equals(com.mlo.user.ObjectifyUserManager.NONAME))) {
+					if (bookBeingReturned) {
+						// Display return page.
+						forward = RETURN_BOOK;
+					} else {
+						// No books were chosen for returning. Do nothing.
+					}
 				}
 
 			} else if (parameters.containsKey("addUser")) {
@@ -238,7 +229,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			} else if (parameters.containsKey("makeAdmin")) {
 				List<User> usersToMakeAdmin = SH.getUsersToMakeAdmin(parameters, request);
-
+				
 				if (usersToMakeAdmin.size() != 0) {
 					request.setAttribute("usersToMakeAdmin", usersToMakeAdmin);
 					// Display admin password entry page.

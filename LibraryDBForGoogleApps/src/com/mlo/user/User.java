@@ -17,6 +17,7 @@ public class User implements Comparable<User>{
 	private String name; 
 	private String email; 
 	private String isAdmin = "false";
+	private String password;
 	
 	public User() {
 	}
@@ -65,6 +66,15 @@ public class User implements Comparable<User>{
 
 	public User setIsAdmin(String isAdmin) { 
 		this.isAdmin = isAdmin;
+		return this;
+	}
+	
+	public String getPassword() { 
+		return password; 
+	}
+
+	public User setPassword(String password) { 
+		this.password = password;
 		return this;
 	}
 	
