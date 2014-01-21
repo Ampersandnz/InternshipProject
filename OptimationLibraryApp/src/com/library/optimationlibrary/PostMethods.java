@@ -28,6 +28,7 @@ public class PostMethods {
 	private static final String GETBORROWEDBYUSER = "GETBORROWED";
 	private static final String GETBOOKBYISBN = "GETBOOKFROMISBN";
 	private static final String CHECKNAME = "ISALLOWEDNAME";
+	private static final String CHECKPASSWORD = "PASSWORD";
 
 	PostMethods() {
 	}
@@ -236,13 +237,12 @@ public class PostMethods {
 	 */
 	static String POSTIsAllowedName(String url, String name) {
 		String result = "FALSE";
-		
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
 			
 			String json = CHECKNAME + name;
-
+			
 			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
@@ -324,14 +324,18 @@ public class PostMethods {
 	 * @return response
 	 * Check whether or not the chosen admin account's password has been correctly entered.
 	 */
-	static boolean POSTCheckPassword(String url, String name, String password) {
+	static boolean POSTCheckPassword(String[] data) {
 		boolean result = false;
-		/*
+		
+		String url = data[0];
+		String username = data[1];
+		String password = data[2];
+		
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
 			
-			String json = CHECKNAME + name;
+			String json = username + CHECKPASSWORD + password;
 
 			StringEntity stringEntity = new StringEntity(json);
 
@@ -345,13 +349,13 @@ public class PostMethods {
 			InputStream inputStream = httpResponse.getEntity().getContent();
 			
 			if(inputStream != null) {
-				result = convertInputStreamToString(inputStream);
+				result = Boolean.parseBoolean(convertInputStreamToString(inputStream));
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		*/
+		
 		return result;
 	}
 }

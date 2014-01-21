@@ -44,6 +44,12 @@ public interface UserManager {
 	 * Method to delete the row from the database with the given primary key.
 	 */
 	public void deleteUser(Long id);
+	
+	/**
+	 * @param id
+	 * Method to empty the database.
+	 */
+	public void deleteAllUsers();
 
 	/**
 	 * @return AllUsers
@@ -52,14 +58,15 @@ public interface UserManager {
 	public ArrayList<User> getAllUsers( );
 
 	/**
-	 * Method to delete all entries in all rows of the database.
-	 */
-	public void deleteAllUsers( );
-
-	/**
 	 * @param id
 	 * @return user
 	 * Method to return the User object representing the row of the database identified by the given primary key.
 	 */
 	public User getUser(Long id);
+
+	/**
+	 * @return AllUsers
+	 * Method to return a list of User objects, each representing one row in the database where isAdmin is set to true.
+	 */
+	public ArrayList<User> getAllAdmins();
 }

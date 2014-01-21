@@ -91,6 +91,16 @@ public class ObjectifyUserManager implements UserManager {
 		return allUsers;
 	}
 
+	public ArrayList<User> getAllAdmins() {
+		ArrayList<User> allAdmins = new ArrayList<User>();
+		for (User u: ofy.query(User.class)){
+			if (u.getIsAdmin()) {
+				allAdmins.add(u);
+			}
+		}
+		return allAdmins;
+	}
+
 	public void deleteAllUsers() {
 		ofy.delete(ofy.query(User.class).fetchKeys());
 	}

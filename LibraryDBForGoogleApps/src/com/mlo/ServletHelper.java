@@ -14,11 +14,11 @@ import com.mlo.user.UserManager;
 public class ServletHelper {
 	private static BookManager BM;
 	private static UserManager UM;
-	
+
 	private static final String TEST_USERNAME = "Michael Lo";
-	
+
 	static List<User> beingMadeAdmin = new ArrayList<User>();
-	
+
 	/**
 	 * Class of helper methods for LibraryDBForGoogleAppsServlet. 
 	 * Moves most functionality out of the servlet class to simplify maintenance and ease of understanding the system.
@@ -48,7 +48,7 @@ public class ServletHelper {
 		BM.addBook("9781429943840", "Earth Afire",  TEST_USERNAME);
 		BM.addBook("9780345490711", "Judas Unchained", LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
 		BM.addBook("9780606005739", "A Wizard Of Earthsea", LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
-		
+
 		// Add few User records to database
 		Long id1 = UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz"); 
 		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com"); 
@@ -232,18 +232,21 @@ public class ServletHelper {
 				userBeingDeleted = true;
 				Long Id = Long.parseLong(parameter.substring(4));
 				User user = UM.getUser(Id);
+				
+				// Library account cannot be deleted to ensure that one admin account always remains.
+				if (!(user.getName().equals(LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME))) {
+					String currentNames = (String) request.getAttribute("deletedNames");
+					String updatedNames = "";
 
-				String currentNames = (String) request.getAttribute("deletedNames");
-				String updatedNames = "";
-
-				if (!(null == currentNames)) {
-					updatedNames = currentNames + ", " + user.getName();
-				} else {
-					updatedNames =  user.getName();
+					if (!(null == currentNames)) {
+						updatedNames = currentNames + ", " + user.getName();
+					} else {
+						updatedNames =  user.getName();
+					}
+					request.setAttribute("deletedNames", updatedNames);
+					UM.deleteUser(Id);
+					userBeingDeleted = true;
 				}
-				request.setAttribute("deletedNames", updatedNames);
-				UM.deleteUser(Id);
-				userBeingDeleted = true;
 			}
 		}
 		return userBeingDeleted;
@@ -314,12 +317,16 @@ public class ServletHelper {
 			for (User u: beingMadeAdmin) {
 				UM.updateUser(u.getId(), "isAdmin", "true");
 			}
-			
+
 			// Add the submitted passwords to all new admins
 			for(String parameter : parameters.keySet()) {
 				if(parameter.startsWith("password")) {
 					Long Id = Long.parseLong(parameter.substring(8));
-					UM.updateUser(Id, "password", request.getParameter(parameter));
+					String password = request.getParameter(parameter);
+					if (password == null || password.equals("")) {
+						password = LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD;
+					}
+					UM.updateUser(Id, "password", password);
 				}
 			}
 		}
@@ -341,7 +348,7 @@ public class ServletHelper {
 		}
 		return booksToEdit;
 	}
-	
+
 	/**
 	 * @param parameters
 	 * @param request
@@ -357,7 +364,7 @@ public class ServletHelper {
 		}
 		return usersToEdit;
 	}
-	
+
 	/**
 	 * @param parameters
 	 * @param request
@@ -371,7 +378,7 @@ public class ServletHelper {
 				usersToMakeAdmin.add(UM.getUser(Id));
 			}
 		}
-		
+
 		beingMadeAdmin = usersToMakeAdmin;
 		return usersToMakeAdmin;
 	}
@@ -409,7 +416,7 @@ public class ServletHelper {
 					break;
 				} else {
 					newUserSelected = 1;
-					
+
 					Long id = Long.parseLong(parameter.substring(4));
 					selected = UM.getUser(id);
 					if (selected.getIsAdmin()) {
@@ -418,24 +425,24 @@ public class ServletHelper {
 				}
 			}
 		}
-		
+
 		switch (newUserSelected) {
 		case 0:
 			break;
-			
+
 		case 1:
 			LibraryDBForGoogleAppsServlet.selectedUser = selected;
 			request.setAttribute("newUser", selected.getName());
 			break;
-			
+
 		case 2:
 			request.setAttribute("userId", selected.getId());
 			break;
 		}
-		
+
 		return newUserSelected;
 	}
-	
+
 	/**
 	 * @param request
 	 * @param parameters
@@ -447,9 +454,9 @@ public class ServletHelper {
 		if (temp instanceof String) {
 			id = Long.parseLong((String) temp);
 		}
-		
+
 		User user = UM.getUser(id);
-		
+
 		// Check whether correct password was entered.
 		if (request.getParameter("userPassword").equals(user.getPassword())) {
 			LibraryDBForGoogleAppsServlet.selectedUser = user;

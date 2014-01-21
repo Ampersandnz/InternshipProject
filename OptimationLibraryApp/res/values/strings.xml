@@ -14,9 +14,10 @@
     <string name="cancelBtn">Cancel</string>
     <string name="title_activity_username_entry">Enter username: </string>
     <string name="username">Username</string>
+    <string name="password">Password</string>
     <string name="title_activity_choose_copy">Choose copy by current owner: </string>
     <string name="dbId_text">ID: </string>
     <string name="currentlyBorrowed_list_title_text">Currently borrowed: </string>
-    <string name="title_activity_admin_password_entry">AdminPasswordEntryActivity</string>
+    <string name="title_activity_admin_password_entry">Enter password for admin account: </string>
 
 </resources>

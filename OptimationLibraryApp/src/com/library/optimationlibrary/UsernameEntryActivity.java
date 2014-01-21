@@ -3,9 +3,11 @@ package com.library.optimationlibrary;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -49,6 +51,11 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		window.setAttributes(lp);
 		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
 		window.addFlags(LayoutParams.FLAG_DIM_BEHIND);
+		
+
+		// Allows interception of screen touches that are outside the activity.
+		window.setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL, LayoutParams.FLAG_NOT_TOUCH_MODAL);
+		window.setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 	}
 
 	/**
@@ -93,20 +100,8 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 			if (null == username || "".equals(username)) {
 				notifyServerResponded(false);
 			} else {
-				String url = MainActivity.WEBAPP_URL;
-				String attemptedUsername = username;
-
-				String result = PostMethods.POSTIsAllowedName(url, attemptedUsername);
-				
-				if (result.equals("TRUE")) {
-					notifyServerResponded(true);
-				} else if (result.equals("FALSE")) {
-					notifyServerResponded(false);
-				} else if (result.equals("ADMIN")) {
-					Intent intent = new Intent(this, AdminPasswordEntryActivity.class);
-					intent.putExtra("username", username);
-					startActivityForResult(intent, ADMINPASSWORDENTRY);
-				}
+				String[] data = {MainActivity.WEBAPP_URL, username};
+				new CheckUsername().execute(data);
 			}
 			
 		} else if (v.getId() == R.id.cancelUsername_button) {
@@ -144,5 +139,45 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 			}
 			break;
 		}
+	}
+	
+	/**
+	 * @author michaello
+	 * AsyncTask to query the entered username against the server. 
+	 * A valid username will be saved, an invalid username will be rejected and the username of an admin account will cause the password entry activity to be displayed.
+	 */
+	private class CheckUsername extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... data) {
+			String url = data[0];
+			String username = data[1];
+			
+			String result = PostMethods.POSTIsAllowedName(url, username);
+			
+			return result;
+		}
+
+		protected void onPostExecute(String result) {
+			if (result.equals("TRUE")) {
+				notifyServerResponded(true);
+			} else if (result.equals("FALSE")) {
+				notifyServerResponded(false);
+			} else if (result.equals("ADMIN")) {
+				Intent intent = new Intent(UsernameEntryActivity.this, AdminPasswordEntryActivity.class);
+				intent.putExtra("username", username);
+				startActivityForResult(intent, ADMINPASSWORDENTRY);
+			}
+		}
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		// If a touch notification is received that is outside the activity, do nothing. 
+		// This forces the user to use the buttons.
+		if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
+		}
+		
+		// Otherwise delegate action to Activity.class.
+		return super.onTouchEvent(event);
 	}
 }

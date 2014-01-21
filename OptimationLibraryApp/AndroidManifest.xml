@@ -38,16 +38,15 @@
         <activity
             android:name="com.library.optimationlibrary.ChooseCopyActivity"
             android:label="@string/title_activity_choose_copy"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>
+            android:theme="@android:style/Theme.Dialog" />
         <activity
             android:name="com.dm.zbar.android.scanner.ZBarScannerActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape" />
         <activity
             android:name="com.library.optimationlibrary.AdminPasswordEntryActivity"
-            android:label="@string/title_activity_admin_password_entry" >
-        </activity>
+            android:label="@string/title_activity_admin_password_entry"
+            android:theme="@android:style/Theme.Dialog" />
     </application>
 
 </manifest>

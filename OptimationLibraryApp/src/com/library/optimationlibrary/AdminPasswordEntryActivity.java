@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -48,6 +48,11 @@ public class AdminPasswordEntryActivity extends Activity implements OnClickListe
 		window.setAttributes(lp);
 		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
 		window.addFlags(LayoutParams.FLAG_DIM_BEHIND);
+		
+
+		// Allows interception of screen touches that are outside the activity.
+		window.setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL, LayoutParams.FLAG_NOT_TOUCH_MODAL);
+		window.setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 	}
 
 	/**
@@ -55,7 +60,6 @@ public class AdminPasswordEntryActivity extends Activity implements OnClickListe
 	 */
 	private void setupEditText() {
 		enterPassword = (EditText)findViewById(R.id.enter_password);
-		enterPassword.setText("password");
 	}
 
 	/**
@@ -88,17 +92,9 @@ public class AdminPasswordEntryActivity extends Activity implements OnClickListe
 			if (null == password || "".equals(password)) {
 				notifyServerResponded(false);
 			} else {
-				String url = MainActivity.WEBAPP_URL;
-				String attemptedPassword = password;
-				String username = data.getStringExtra("username");//get from intent putextra
+				String[] data = {MainActivity.WEBAPP_URL, getIntent().getStringExtra("username"), password};
 				
-				boolean result = PostMethods.POSTCheckPassword(url, username, attemptedPassword);
-
-				if (result) {
-					notifyServerResponded(true);
-				} else {
-					notifyServerResponded(false);
-				}
+				new CheckPassword().execute(data);
 			}
 			
 		} else if (v.getId() == R.id.cancelPassword_button) {
@@ -117,5 +113,34 @@ public class AdminPasswordEntryActivity extends Activity implements OnClickListe
 			Toast toast = Toast.makeText(getApplicationContext(), "Incorrect password.", Toast.LENGTH_SHORT);
 			toast.show();
 		}
+	}
+	
+	/**
+	 * @author michaello
+	 * AsyncTask to query the entered admin account password against the server. 
+	 * A valid password will cause both this and the username entry activity to finish, saving the username.
+	 * An invalid password will be rejected.
+	 */
+	private class CheckPassword extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... data) {
+			Boolean result = PostMethods.POSTCheckPassword(data);
+			return result.toString();
+		}
+
+		protected void onPostExecute(String result) {
+			notifyServerResponded(Boolean.parseBoolean(result));
+		}
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		// If a touch notification is received that is outside the activity, do nothing. 
+		// This forces the user to use the buttons.
+		if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
+		}
+		
+		// Otherwise delegate action to Activity.class.
+		return super.onTouchEvent(event);
 	}
 }

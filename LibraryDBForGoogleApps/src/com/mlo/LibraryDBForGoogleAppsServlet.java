@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -43,7 +44,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	static final String ADMIN_ACCOUNT_SELECTED = "/AdminSelect.jsp";
 
 	public static final String SYSTEM_PASSWORD = "Optimation1000";
-	
+
 	private static final String ADD = "ADD";
 	private static final String DELETE = "DELETE";
 	private static final String BORROW = "BORROW";
@@ -51,11 +52,12 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static final String GETBORROWEDBYUSER = "GETBORROWED";
 	private static final String GETBOOKBYISBN = "GETBOOKFROMISBN";
 	private static final String CHECKNAME = "ISALLOWEDNAME";
+	private static final String CHECKPASSWORD = "PASSWORD";
 
 	private static final String VALIDNAME = "TRUE";
 	private static final String INVALIDNAME = "FALSE";
 	private static final String ADMINNAME = "ADMIN";
-	
+
 	static final int USERNAMENOTALLOWED = 0;
 	static final int USERNAMEALLOWED = 1;
 	static final int USERNAMEADMIN = 2;
@@ -68,7 +70,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static ServletHelper SH;
 
 	private static boolean firstRun = true;
-	
+
 	/**
 	 * Whenever the user clicks a button, this method is called. 
 	 * It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
@@ -78,7 +80,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		if (firstRun) {
 			SH = new ServletHelper();
 			SH.firstRun();
-			
+
 			firstRun = false;
 		}
 
@@ -113,7 +115,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		if (firstRun) {
 			SH = new ServletHelper();
 			SH.firstRun();
-			
+
 			firstRun = false;
 		}
 
@@ -180,7 +182,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			} else if (parameters.containsKey("borrowBook")) {
 				boolean bookBeingBorrowed = SH.sendBorrowedBooks(request, parameters);
-				if (!(selectedUser.getName().equals(com.mlo.user.ObjectifyUserManager.NONAME))) {
+				if (!(selectedUser.getName().toLowerCase().equals(com.mlo.user.ObjectifyUserManager.NONAME.toLowerCase()))) {
 					if (bookBeingBorrowed) {
 						// Display borrow page.
 						forward = BORROW_BOOK;
@@ -191,7 +193,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			} else if (parameters.containsKey("returnBook")) {
 				boolean bookBeingReturned = SH.sendReturnedBooks(request, parameters);
-				if (!(selectedUser.getName().equals(com.mlo.user.ObjectifyUserManager.NONAME))) {
+				if (!(selectedUser.getName().toLowerCase().equals(com.mlo.user.ObjectifyUserManager.NONAME.toLowerCase()))) {
 					if (bookBeingReturned) {
 						// Display return page.
 						forward = RETURN_BOOK;
@@ -224,17 +226,17 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			} else if (parameters.containsKey("selectUser")) {
 				int newUserSelected = SH.selectUser(request, parameters);
-				
+
 				switch (newUserSelected) {
 				case 0:
 					// No user was selected. Do nothing.
 					break;
-					
+
 				case 1:
 					// Display select page.
 					forward = SELECT_USER;
 					break;
-					
+
 				case 2:
 					// Admin selected. Display password entry page.
 					forward = ADMIN_ACCOUNT_SELECTED;
@@ -243,7 +245,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			} else if (parameters.containsKey("makeAdmin")) {
 				List<User> usersToMakeAdmin = SH.getUsersToMakeAdmin(parameters, request);
-				
+
 				if (usersToMakeAdmin.size() != 0) {
 					request.setAttribute("usersToMakeAdmin", usersToMakeAdmin);
 					// Display admin password entry page.
@@ -297,14 +299,14 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 			// Return to main list.
 			break;
-			
+
 		case "adminSelect":
 			if (parameters.containsKey("save")) {
 				if (SH.checkAdminPassword(request, parameters)) {
 					forward = SELECT_USER;
 				}
 			}
-			
+
 			break;
 		}
 
@@ -350,42 +352,48 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		}
 
 		if (json.startsWith(ADD)) {
-			Book book = mapper.readValue(json.substring(3), Book.class);
+			Book book = mapper.readValue(json.substring(ADD.length()), Book.class);
 			Long id = BM.addBook(book);
 			mapper.writeValue(response.getOutputStream(), id);
 
 		} else if (json.startsWith(DELETE)) {
-			BM.deleteBook(Long.parseLong(json.substring(6)));
+			BM.deleteBook(Long.parseLong(json.substring(DELETE.length())));
 
 		} else if (json.startsWith(BORROW)) {
-			Book book = mapper.readValue(json.substring(6), Book.class);
+			Book book = mapper.readValue(json.substring(BORROW.length()), Book.class);
 			BM.updateBook(book.getId(), "inPossessionOf", book.getInPossessionOf());
 
 		} else if (json.startsWith(RETURN)) {
-			BM.updateBook(Long.parseLong(json.substring(6)), "inPossessionOf", LIBRARY_USERNAME);
+			BM.updateBook(Long.parseLong(json.substring(RETURN.length())), "inPossessionOf", LIBRARY_USERNAME);
 
 		} else if (json.startsWith(CHECKNAME)) {
-			String chosenName = json.substring(13).toLowerCase();
-			
+			Logger log = Logger.getLogger("asjfdf");
+			String chosenName = json.substring(CHECKNAME.length()).toLowerCase();
+			log.warning("Username is " + chosenName);
 			int result = SH.checkUser(chosenName);
+			log.warning("Result from checkUser() is " + result);
 			switch (result) {
+
 			case USERNAMEALLOWED:
 				response.getOutputStream().print(VALIDNAME);
+				log.warning("Sending back " + VALIDNAME);
 				break;
-				
+
 			case USERNAMENOTALLOWED:
 				response.getOutputStream().print(INVALIDNAME);
+				log.warning("Sending back " + INVALIDNAME);
 				break;
-				
+
 			case USERNAMEADMIN:
 				response.getOutputStream().print(ADMINNAME);
+				log.warning("Sending back " + ADMINNAME);
 				break;
 			}
 
 		} else if (json.startsWith(GETBORROWEDBYUSER)) {
 			List<Book> borrowedByUsername = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {
-				if (b.getInPossessionOf().toLowerCase().equals(json.substring(11).toLowerCase())) {
+				if (b.getInPossessionOf().toLowerCase().equals(json.substring(GETBORROWEDBYUSER.length()).toLowerCase())) {
 					borrowedByUsername.add(b);
 				}
 			}
@@ -394,11 +402,29 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		} else if (json.startsWith(GETBOOKBYISBN)) {
 			List<Book> booksMatchingIsbn = new ArrayList<Book>();
 			for (Book b: BM.getAllBooks()) {
-				if (b.getIsbn().equals(json.substring(15))) {
+				if (b.getIsbn().equals(json.substring(GETBOOKBYISBN.length()))) {
 					booksMatchingIsbn.add(b);
 				}
 			}
 			mapper.writeValue(response.getOutputStream(), booksMatchingIsbn);
+
+		} else if (json.contains(CHECKPASSWORD)) {
+			boolean passwordMatches = false;
+			for (User u: UM.getAllAdmins()) {
+				
+				String[] split = json.split(CHECKPASSWORD);
+				
+				String username = split[0];
+				String password = split[1];
+				
+				if (u.getName().toLowerCase().equals(username.toLowerCase())) {
+					if (u.getPassword().toLowerCase().equals(password.toLowerCase())) {
+						passwordMatches = true;
+					}
+				}
+			}
+			
+			mapper.writeValue(response.getOutputStream(), passwordMatches);
 		}
 
 		response.setContentType(JSON);
