@@ -12,8 +12,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 import com.mlo.book.Book;
 
 /**
@@ -237,8 +235,8 @@ public class PostMethods {
 	 * Check whether or not the chosen username is on the server's list of authenticated user accounts.
 	 */
 	static String POSTIsAllowedName(String url, String name) {
-		Log.d("MyDEBUG", "IsAllowedName() called");
-		String result = "";
+		String result = "FALSE";
+		
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
@@ -257,16 +255,13 @@ public class PostMethods {
 			InputStream inputStream = httpResponse.getEntity().getContent();
 			
 			if(inputStream != null) {
-				Log.d("MyDEBUG", "InputStream not null");
 				result = convertInputStreamToString(inputStream);
-			} else {
-				Log.d("MyDEBUG", "InputStream null");
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Log.d("MyDEBUG", "Result is " + result);
+		
 		return result;
 	}
 
@@ -320,6 +315,43 @@ public class PostMethods {
 			result += line;
 		}
 		inputStream.close();
+		return result;
+	}
+
+	/**
+	 * @param url
+	 * @param name
+	 * @return response
+	 * Check whether or not the chosen admin account's password has been correctly entered.
+	 */
+	static boolean POSTCheckPassword(String url, String name, String password) {
+		boolean result = false;
+		/*
+		try {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(url);
+			
+			String json = CHECKNAME + name;
+
+			StringEntity stringEntity = new StringEntity(json);
+
+			httpPost.setEntity(stringEntity);
+
+			httpPost.setHeader("Accept", "application/json");
+			httpPost.setHeader("Content-type", "application/json");
+
+			HttpResponse httpResponse = httpClient.execute(httpPost);
+
+			InputStream inputStream = httpResponse.getEntity().getContent();
+			
+			if(inputStream != null) {
+				result = convertInputStreamToString(inputStream);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		*/
 		return result;
 	}
 }

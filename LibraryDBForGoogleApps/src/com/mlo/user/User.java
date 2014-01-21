@@ -16,7 +16,7 @@ public class User implements Comparable<User>{
 
 	private String name; 
 	private String email; 
-	private String isAdmin = "false";
+	private boolean isAdmin = false;
 	private String password;
 	
 	public User() {
@@ -60,11 +60,11 @@ public class User implements Comparable<User>{
 		return this;
 	}
 	
-	public String getIsAdmin() { 
+	public boolean getIsAdmin() { 
 		return isAdmin; 
 	}
 
-	public User setIsAdmin(String isAdmin) { 
+	public User setIsAdmin(boolean isAdmin) { 
 		this.isAdmin = isAdmin;
 		return this;
 	}
@@ -80,7 +80,7 @@ public class User implements Comparable<User>{
 	
 	public String toString() {
 		String string = this.name;
-		if (isAdmin.equals("true")) {
+		if (isAdmin) {
 			string = string + " (Admin)";
 		}
 		return string;

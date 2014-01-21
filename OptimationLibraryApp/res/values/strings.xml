@@ -17,4 +17,6 @@
     <string name="title_activity_choose_copy">Choose copy by current owner: </string>
     <string name="dbId_text">ID: </string>
     <string name="currentlyBorrowed_list_title_text">Currently borrowed: </string>
+    <string name="title_activity_admin_password_entry">AdminPasswordEntryActivity</string>
+
 </resources>

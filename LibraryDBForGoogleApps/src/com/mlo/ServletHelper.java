@@ -380,13 +380,16 @@ public class ServletHelper {
 	 * @param chosenName
 	 * @return nameAllowed
 	 */
-	boolean checkUser(String chosenName) {
+	int checkUser(String chosenName) {
 		for (User u: UM.getAllUsers()) {
 			if (u.getName().toLowerCase().equals(chosenName)) {
-				return true;
+				if (u.getIsAdmin()) {
+					return LibraryDBForGoogleAppsServlet.USERNAMEADMIN;
+				}
+				return LibraryDBForGoogleAppsServlet.USERNAMEALLOWED;
 			}
 		}
-		return false;
+		return LibraryDBForGoogleAppsServlet.USERNAMENOTALLOWED;
 	}
 
 	/**
@@ -409,7 +412,7 @@ public class ServletHelper {
 					
 					Long id = Long.parseLong(parameter.substring(4));
 					selected = UM.getUser(id);
-					if (selected.getIsAdmin().equals("true")) {
+					if (selected.getIsAdmin()) {
 						newUserSelected = 2;
 					}
 				}

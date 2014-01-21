@@ -71,7 +71,7 @@
 			
 			<%
 					User user = (User) o;
-					if (user.getIsAdmin().equals("true")) {
+					if (user.getIsAdmin()) {
 			%>
 			
 			<input type="submit" name="addBook" value="Add new book to library" /> 
@@ -142,7 +142,7 @@
 			<%
 				if (o instanceof User) {
 					User user = (User) o;
-					if (user.getIsAdmin().equals("true")) {
+					if (user.getIsAdmin()) {
 			%>
 			
 			<input type="submit" name="addUser" value="Add new user to system" />

@@ -54,6 +54,11 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 	private static final String VALIDNAME = "TRUE";
 	private static final String INVALIDNAME = "FALSE";
+	private static final String ADMINNAME = "ADMIN";
+	
+	static final int USERNAMENOTALLOWED = 0;
+	static final int USERNAMEALLOWED = 1;
+	static final int USERNAMEADMIN = 2;
 
 	private static final String JSON = "application/json";
 
@@ -361,11 +366,20 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		} else if (json.startsWith(CHECKNAME)) {
 			String chosenName = json.substring(13).toLowerCase();
-
-			if (SH.checkUser(chosenName)) {
+			
+			int result = SH.checkUser(chosenName);
+			switch (result) {
+			case USERNAMEALLOWED:
 				response.getOutputStream().print(VALIDNAME);
-			} else {
+				break;
+				
+			case USERNAMENOTALLOWED:
 				response.getOutputStream().print(INVALIDNAME);
+				break;
+				
+			case USERNAMEADMIN:
+				response.getOutputStream().print(ADMINNAME);
+				break;
 			}
 
 		} else if (json.startsWith(GETBORROWEDBYUSER)) {

@@ -3,7 +3,6 @@ package com.library.optimationlibrary;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -28,6 +27,8 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 	private Button cancelButton;
 
 	private String username;
+	
+	private static final int ADMINPASSWORDENTRY = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,13 +89,24 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		if (v.getId() == R.id.saveUsername_button) {
 			username = enterUsername.getText().toString();
 
-			// Check attempted username against webapp's list of allowed usernames.
-			String[] data = {MainActivity.WEBAPP_URL, username};
-			
+			// Check attempted username against webapp's list of allowed usernames.			
 			if (null == username || "".equals(username)) {
-				notifyServerResponded(true);
+				notifyServerResponded(false);
 			} else {
-				new CheckIsAllowedName().execute(data);
+				String url = MainActivity.WEBAPP_URL;
+				String attemptedUsername = username;
+
+				String result = PostMethods.POSTIsAllowedName(url, attemptedUsername);
+				
+				if (result.equals("TRUE")) {
+					notifyServerResponded(true);
+				} else if (result.equals("FALSE")) {
+					notifyServerResponded(false);
+				} else if (result.equals("ADMIN")) {
+					Intent intent = new Intent(this, AdminPasswordEntryActivity.class);
+					intent.putExtra("username", username);
+					startActivityForResult(intent, ADMINPASSWORDENTRY);
+				}
 			}
 			
 		} else if (v.getId() == R.id.cancelUsername_button) {
@@ -115,28 +127,22 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 			toast.show();
 		}
 	}
-
+	
 	/**
-	 * @author Michael Lo
-	 * Class to asynchronously check whether or not the name entered by the user is in the list allowed in the system.
+	 * Method to retrieve data and take actions as appropriate when a method called with StartActivityForResult() finishes.
+	 * Will either retrieve the data from a scanned barcode and use it to pull book information from the Google Books API, 
+	 * 															or get the chosen username and save it in StoredPreferences.
 	 */
-	private class CheckIsAllowedName extends AsyncTask<String, Void, String> {
-		@Override
-		protected String doInBackground(String... URLs) {
-			String url = URLs[0];
-			String attemptedUsername = URLs[1];
-
-			String returnValue = PostMethods.POSTIsAllowedName(url, attemptedUsername);
-
-			return returnValue;
-		}
-
-		protected void onPostExecute(String result) {
-			if (result.equals("TRUE")) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case ADMINPASSWORDENTRY:
+			if (resultCode == RESULT_OK) {
+				// Correct password entered. Perform same actions as save button on non-admin.
 				notifyServerResponded(true);
-			} else if (result.equals("FALSE")) {
-				notifyServerResponded(false);
+			} else if (resultCode == RESULT_CANCELED) {
+				// Password entry canceled. Do nothing. Allow user to attempt a different username.
 			}
+			break;
 		}
 	}
 }

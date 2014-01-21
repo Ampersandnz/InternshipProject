@@ -14,7 +14,7 @@ public class ObjectifyUserManager implements UserManager {
 	private static final String PASSWORD = "password";
 	public static final String NONAME = "No name available.";
 	private static final String NOEMAIL = "No email available.";
-	private static final String NOISADMIN = "false";
+	private static final boolean NOISADMIN = false;
 	private static final String NOPASSWORD = com.mlo.LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD;
 	
 	public void initialise() {
@@ -58,10 +58,16 @@ public class ObjectifyUserManager implements UserManager {
 			user.setEmail(newData);
 
 		} else if (field.equals(ISADMIN)) {
+			boolean setAdmin;
 			if (newData.equals("")||null==newData) {
-				newData = NOISADMIN;
+				setAdmin = NOISADMIN;
+			} else if (newData.equals("true")) {
+				setAdmin = true;
+			} else {
+				setAdmin = NOISADMIN;
 			}
-			user.setIsAdmin(newData);
+			
+			user.setIsAdmin(setAdmin);
 			
 		} else if (field.equals(PASSWORD)) {
 			if (newData.equals("")||null==newData) {
