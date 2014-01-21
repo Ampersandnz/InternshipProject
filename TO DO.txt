@@ -1,7 +1,6 @@
-Add password entry when choosing username in mobile app
+Prevent non-admins from borrowing and returning already-borrowed books (by other user)
+	Add confirmation dialog for admins to borrow and return already-borrowed books
 
 Clean up UI a bit
-
-Disallow multiple identical usernames
 
 Optimation-theme app (logo, background, fonts/colours, splash screen)

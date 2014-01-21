@@ -98,7 +98,7 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 
 			// Check attempted username against webapp's list of allowed usernames.			
 			if (null == username || "".equals(username)) {
-				notifyServerResponded(false);
+				notifyServerResponded(false, false);
 			} else {
 				String[] data = {MainActivity.WEBAPP_URL, username};
 				new CheckUsername().execute(data);
@@ -111,10 +111,11 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	private void notifyServerResponded(boolean validName) {
+	private void notifyServerResponded(boolean validName, boolean isAdmin) {
 		Intent returnIntent = new Intent();
 		if (validName) {
 			returnIntent.putExtra("username", username);
+			returnIntent.putExtra("isAdmin", isAdmin);
 			setResult(RESULT_OK,returnIntent); 
 			finish();
 		} else {
@@ -133,7 +134,7 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 		case ADMINPASSWORDENTRY:
 			if (resultCode == RESULT_OK) {
 				// Correct password entered. Perform same actions as save button on non-admin.
-				notifyServerResponded(true);
+				notifyServerResponded(true, true);
 			} else if (resultCode == RESULT_CANCELED) {
 				// Password entry canceled. Do nothing. Allow user to attempt a different username.
 			}
@@ -159,9 +160,9 @@ public class UsernameEntryActivity extends Activity implements OnClickListener {
 
 		protected void onPostExecute(String result) {
 			if (result.equals("TRUE")) {
-				notifyServerResponded(true);
+				notifyServerResponded(true, false);
 			} else if (result.equals("FALSE")) {
-				notifyServerResponded(false);
+				notifyServerResponded(false, false);
 			} else if (result.equals("ADMIN")) {
 				Intent intent = new Intent(UsernameEntryActivity.this, AdminPasswordEntryActivity.class);
 				intent.putExtra("username", username);

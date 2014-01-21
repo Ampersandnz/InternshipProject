@@ -58,6 +58,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	private static final String API_KEY = "AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
+	private static String currentBookIsbn = null;
+	private static String currentBookId = null;
+
 	private static final int CHOOSE_USERNAME = 1;
 	private static final int CHOOSE_COPY = 2;
 	private static final int SCAN_BARCODE = 3;
@@ -72,7 +75,7 @@ public class MainActivity extends Activity implements OnClickListener{
 
 	private TextView authorText, titleText, descriptionText, dateText, ratingCountText, isConnected, dbIdText, dbId, currentlyBorrowedTitle;
 
-	private static SharedPreferences preferences;
+	static SharedPreferences preferences;
 
 	private LinearLayout starLayout, currentlyBorrowedList;
 
@@ -112,10 +115,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		deleteBtn = (Button)findViewById(R.id.delete_btn);
 		savedUsername = (Button)findViewById(R.id.saved_username);
 
-		borrowBtn.setVisibility(View.GONE);
-		returnBtn.setVisibility(View.GONE);
-		addBtn.setVisibility(View.GONE);
-		deleteBtn.setVisibility(View.GONE);
+		setButtonVisibility();
 
 		scanBtn.setOnClickListener(this);
 		borrowBtn.setOnClickListener(this);
@@ -147,6 +147,8 @@ public class MainActivity extends Activity implements OnClickListener{
 		dbIdText = (TextView)findViewById(R.id.dbId_text);
 		dbId = (TextView)findViewById(R.id.dbId_id);
 		dbIdText.setVisibility(View.GONE);
+		dbIdText.setText(null);
+		currentBookId = null;
 		dbId.setVisibility(View.GONE);
 
 		this.checkConnection();
@@ -190,14 +192,12 @@ public class MainActivity extends Activity implements OnClickListener{
 		starLayout.setTag(numStars);
 		thumbImg = (Bitmap)savedInstanceState.getParcelable("thumbPic");
 		thumbView.setImageBitmap(thumbImg);
-		borrowBtn.setTag(savedInstanceState.getString("isbn"));
 
-		borrowBtn.setVisibility(View.VISIBLE);
-		returnBtn.setVisibility(View.VISIBLE);
-		addBtn.setVisibility(View.VISIBLE);
-		deleteBtn.setVisibility(View.VISIBLE); 
+		setButtonVisibility();
 
 		dbId.setText(savedInstanceState.getString("id"));
+		currentBookId = (savedInstanceState.getString("id"));
+		currentBookIsbn = (savedInstanceState.getString("isbn"));
 	}
 
 	/**
@@ -314,8 +314,9 @@ public class MainActivity extends Activity implements OnClickListener{
 				String scanContent = data.getStringExtra(ZBarConstants.SCAN_RESULT);
 				if (scanContent!=null) {
 					getBook(scanContent);
-					borrowBtn.setTag(scanContent);
+					currentBookIsbn = scanContent;
 				} else {
+					currentBookIsbn = null;
 					Toast.makeText(getApplicationContext(), "Not a valid book!", Toast.LENGTH_SHORT).show();
 				}
 
@@ -327,17 +328,22 @@ public class MainActivity extends Activity implements OnClickListener{
 		case CHOOSE_USERNAME:
 			if(resultCode == RESULT_OK) {
 				String username = data.getStringExtra("username");
+				boolean isAdmin = data.getBooleanExtra("isAdmin", false);
 				Editor edit = preferences.edit();
-
+				
 				if (null == username || "".equals(username)) {
 					savedUsername.setText("Choose a username");
 					username = null;
 				} else {
 					savedUsername.setText(username);
 				}
+
 				edit.putString("username", username);
+				edit.putBoolean("admin", isAdmin);
 				edit.apply();
 				new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+
+				setButtonVisibility();
 			} else if (resultCode == RESULT_CANCELED) {
 			}
 			break;
@@ -346,11 +352,13 @@ public class MainActivity extends Activity implements OnClickListener{
 			if(resultCode == RESULT_OK) {
 				String chosenId = data.getStringExtra("chosenId");
 				if (null != chosenId && !("".equals(chosenId))) {
+					String id = "" + Long.parseLong(chosenId);
 					dbId.setText(Long.parseLong(chosenId) + "");
 					dbIdText.setVisibility(View.VISIBLE);
 					dbId.setVisibility(View.VISIBLE);
-					borrowBtn.setVisibility(View.VISIBLE);
-					returnBtn.setVisibility(View.VISIBLE);
+
+					currentBookId = id;
+					setButtonVisibility();
 				}
 			} else if (resultCode == RESULT_CANCELED) {
 			}
@@ -399,11 +407,11 @@ public class MainActivity extends Activity implements OnClickListener{
 			savedBundle.putInt("stars", Integer.parseInt(starLayout.getTag().toString()));
 		}
 
-		if(borrowBtn.getTag()!=null) {
-			savedBundle.putString("isbn", borrowBtn.getTag().toString());
-		}
+		savedBundle.putString("isbn", currentBookIsbn);
 
-		savedBundle.putString("id", dbId.getText().toString());
+		savedBundle.putString("id", currentBookId);
+
+		savedBundle.putBoolean("admin", preferences.getBoolean("admin", false));
 	}
 
 	private void getBook(String isbn) {
@@ -411,6 +419,33 @@ public class MainActivity extends Activity implements OnClickListener{
 		String bookSearchString = GOOGLE_BOOKS_URL + isbn + "&key=" + API_KEY;
 		new GetBookInfo().execute(bookSearchString);
 		new GetBookId().execute(WEBAPP_URL, isbn);
+	}
+	
+	private void setButtonVisibility() {
+		if (currentBookIsbn != null) {
+			if (preferences.getBoolean("admin", false)) {
+				addBtn.setVisibility(View.VISIBLE);
+				if (currentBookId != null && !(currentBookId.equals(""))) {
+					deleteBtn.setVisibility(View.VISIBLE);
+				}
+			} else {
+				addBtn.setVisibility(View.GONE);
+				deleteBtn.setVisibility(View.GONE);
+			}
+
+			if (currentBookId != null && !(currentBookId.equals(""))) {
+				borrowBtn.setVisibility(View.VISIBLE);
+				returnBtn.setVisibility(View.VISIBLE);
+			} else {
+				borrowBtn.setVisibility(View.GONE);
+				returnBtn.setVisibility(View.GONE);
+			}
+		} else {
+			addBtn.setVisibility(View.GONE);
+			deleteBtn.setVisibility(View.GONE);
+			borrowBtn.setVisibility(View.GONE);
+			returnBtn.setVisibility(View.GONE);
+		}
 	}
 
 	/**
@@ -510,14 +545,12 @@ public class MainActivity extends Activity implements OnClickListener{
 
 					try {
 						returnBtn.setTag(volumeObject.getString("infoLink"));
-						addBtn.setVisibility(View.VISIBLE);
-						deleteBtn.setVisibility(View.VISIBLE);
 					} catch (JSONException jse) { 
-						addBtn.setVisibility(View.GONE);
-						deleteBtn.setVisibility(View.GONE);
 						jse.printStackTrace(); 
 					}
 
+					setButtonVisibility();
+					
 					try { 
 						JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
 						new GetBookThumb().execute(imageInfo.getString("smallThumbnail"));
@@ -536,9 +569,13 @@ public class MainActivity extends Activity implements OnClickListener{
 					starLayout.removeAllViews();
 					ratingCountText.setText("");
 					thumbView.setImageBitmap(null);
+					currentBookIsbn = null;
+					currentBookId = null;
 					
+					setButtonVisibility();
+
 					Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-					
+
 					if (v.hasVibrator()) {
 						v.vibrate(250);
 					}
@@ -582,16 +619,16 @@ public class MainActivity extends Activity implements OnClickListener{
 					dbId.setText("No copy of this book found in library.");
 					dbId.setVisibility(View.VISIBLE);
 					dbIdText.setVisibility(View.GONE);
-					borrowBtn.setVisibility(View.GONE);
-					returnBtn.setVisibility(View.GONE);
-					deleteBtn.setVisibility(View.GONE);
+					dbIdText.setText(null);
+					currentBookId = null;
+					setButtonVisibility();
 				} else if (booksMatchingId.size() == 1) {
-					dbId.setText(booksMatchingId.get(0).getId().toString());
+					String id = booksMatchingId.get(0).getId().toString();
+					dbId.setText(id);
 					dbIdText.setVisibility(View.VISIBLE);
 					dbId.setVisibility(View.VISIBLE);
-					borrowBtn.setVisibility(View.VISIBLE);
-					returnBtn.setVisibility(View.VISIBLE);
-					deleteBtn.setVisibility(View.VISIBLE);
+					currentBookId = id;
+					setButtonVisibility();
 				} else {
 					Intent i = new Intent(MainActivity.this, ChooseCopyActivity.class);
 					ArrayList<String> inPossessionOf = new ArrayList<String>();
@@ -646,7 +683,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		@Override
 		protected String doInBackground(String... URLs) {
 
-			Book book = new Book(borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), LIBRARY_USERNAME);
+			Book book = new Book(currentBookIsbn, titleText.getText().toString().substring(6), LIBRARY_USERNAME);
 
 			String returnValue = "";
 
@@ -660,9 +697,8 @@ public class MainActivity extends Activity implements OnClickListener{
 			dbId.setText(result);
 			dbIdText.setVisibility(View.VISIBLE);
 			dbId.setVisibility(View.VISIBLE);
-			borrowBtn.setVisibility(View.VISIBLE);
-			returnBtn.setVisibility(View.VISIBLE);
-			deleteBtn.setVisibility(View.VISIBLE);
+			currentBookId = result;
+			setButtonVisibility();
 			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}	
@@ -677,7 +713,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			Book book = new Book();
 
 			try {
-				book = new Book(Long.parseLong(dbId.getText().toString()), borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
+				book = new Book(Long.parseLong(dbId.getText().toString()), currentBookIsbn, titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -693,7 +729,10 @@ public class MainActivity extends Activity implements OnClickListener{
 		protected void onPostExecute(String result) {
 			dbIdText.setVisibility(View.GONE);
 			dbId.setVisibility(View.GONE);
-			new GetBookId().execute(WEBAPP_URL, borrowBtn.getTag().toString());
+			dbIdText.setText(null);
+			currentBookId = null;
+			setButtonVisibility();
+			new GetBookId().execute(WEBAPP_URL, currentBookIsbn);
 			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
 		}
 	}	
@@ -706,7 +745,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		@Override
 		protected String doInBackground(String... URLs) {
 
-			Book book = new Book(Long.parseLong(dbId.getText().toString()), borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
+			Book book = new Book(Long.parseLong(dbId.getText().toString()), currentBookIsbn, titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
 
 			String returnValue = "";
 
@@ -729,7 +768,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		@Override
 		protected String doInBackground(String... URLs) {
 
-			Book book = new Book(Long.parseLong(dbId.getText().toString()), borrowBtn.getTag().toString(), titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
+			Book book = new Book(Long.parseLong(dbId.getText().toString()), currentBookIsbn, titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
 
 			String returnValue = "";
 

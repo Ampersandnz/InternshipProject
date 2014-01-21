@@ -30,6 +30,7 @@
 			<tr>
 				<td>Password:</td>
 				<td><input type="password" name="password<%=u.getId()%>"></td>
+				<td>(defaults to System Password)</td>
 			</tr>
 			
 			<%
