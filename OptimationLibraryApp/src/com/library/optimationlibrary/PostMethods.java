@@ -152,7 +152,7 @@ public class PostMethods {
 
 		} catch (Exception e) {
 		}
-
+		
 		return result;
 	}
 
@@ -167,8 +167,16 @@ public class PostMethods {
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
+			JSONObject jsonObject = new JSONObject();
 			
-			String json = RETURN + book.getId();
+			jsonObject.accumulate("id", book.getId());
+			jsonObject.accumulate("isbn", book.getIsbn());
+			jsonObject.accumulate("title", book.getTitle());
+			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
+
+			String json = jsonObject.toString();
+
+			json = RETURN + json;
 
 			StringEntity stringEntity = new StringEntity(json);
 

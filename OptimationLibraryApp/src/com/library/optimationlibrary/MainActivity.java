@@ -21,6 +21,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -33,6 +35,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -124,7 +127,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		deleteBtn.setOnClickListener(this);
 		savedUsername.setOnClickListener(this);
 
-		savedUsername.setText(preferences.getString("username", "Choose a username"));
+		savedUsername.setText(preferences.getString("username", null));
 	}
 
 	/**
@@ -139,7 +142,11 @@ public class MainActivity extends Activity implements OnClickListener{
 		ratingCountText = (TextView)findViewById(R.id.book_rating_count);
 
 		currentlyBorrowedTitle = (TextView)findViewById(R.id.currentlyBorrowed_list_title);
-		currentlyBorrowedTitle.setVisibility(View.GONE);
+		if (!(savedUsername.getText().toString().equals(null))) {
+			currentlyBorrowedTitle.setVisibility(View.VISIBLE);
+		} else {
+			currentlyBorrowedTitle.setVisibility(View.GONE);
+		}
 
 		isConnected = (TextView) findViewById(R.id.isConnected);
 		isConnected.setOnClickListener(this);
@@ -147,7 +154,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		dbIdText = (TextView)findViewById(R.id.dbId_text);
 		dbId = (TextView)findViewById(R.id.dbId_id);
 		dbIdText.setVisibility(View.GONE);
-		dbIdText.setText(null);
+		dbId.setText(null);
 		currentBookId = null;
 		dbId.setVisibility(View.GONE);
 
@@ -233,8 +240,6 @@ public class MainActivity extends Activity implements OnClickListener{
 						noBookToast.show();
 					} else {
 						new HttpBorrowAsyncTask().execute(WEBAPP_URL);
-						Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" borrowed by " + username + ".", Toast.LENGTH_SHORT);
-						toast.show();
 					}
 				}
 			}
@@ -252,8 +257,6 @@ public class MainActivity extends Activity implements OnClickListener{
 						noBookToast.show();
 					} else {
 						new HttpReturnAsyncTask().execute(WEBAPP_URL);
-						Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" returned by " + username + ".", Toast.LENGTH_SHORT);
-						toast.show();
 					}
 				}
 			}
@@ -330,7 +333,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				String username = data.getStringExtra("username");
 				boolean isAdmin = data.getBooleanExtra("isAdmin", false);
 				Editor edit = preferences.edit();
-				
+
 				if (null == username || "".equals(username)) {
 					savedUsername.setText("Choose a username");
 					username = null;
@@ -342,7 +345,8 @@ public class MainActivity extends Activity implements OnClickListener{
 				edit.putBoolean("admin", isAdmin);
 				edit.apply();
 				new GetCurrentlyBorrowed().execute(WEBAPP_URL);
-
+				
+				currentlyBorrowedTitle.setVisibility(View.VISIBLE);
 				setButtonVisibility();
 			} else if (resultCode == RESULT_CANCELED) {
 			}
@@ -420,7 +424,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		new GetBookInfo().execute(bookSearchString);
 		new GetBookId().execute(WEBAPP_URL, isbn);
 	}
-	
+
 	private void setButtonVisibility() {
 		if (currentBookIsbn != null) {
 			if (preferences.getBoolean("admin", false)) {
@@ -454,10 +458,10 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	private class GetBookInfo extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... bookURLs) {
+		protected String doInBackground(String... bookdata) {
 			StringBuilder bookBuilder = new StringBuilder();
 
-			for (String bookSearchURL : bookURLs) {
+			for (String bookSearchURL : bookdata) {
 				HttpClient bookClient = new DefaultHttpClient();
 				try {
 					HttpResponse bookResponse = bookClient.execute(new HttpGet(bookSearchURL));
@@ -550,7 +554,7 @@ public class MainActivity extends Activity implements OnClickListener{
 					}
 
 					setButtonVisibility();
-					
+
 					try { 
 						JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
 						new GetBookThumb().execute(imageInfo.getString("smallThumbnail"));
@@ -571,7 +575,7 @@ public class MainActivity extends Activity implements OnClickListener{
 					thumbView.setImageBitmap(null);
 					currentBookIsbn = null;
 					currentBookId = null;
-					
+
 					setButtonVisibility();
 
 					Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -619,7 +623,7 @@ public class MainActivity extends Activity implements OnClickListener{
 					dbId.setText("No copy of this book found in library.");
 					dbId.setVisibility(View.VISIBLE);
 					dbIdText.setVisibility(View.GONE);
-					dbIdText.setText(null);
+					dbId.setText(null);
 					currentBookId = null;
 					setButtonVisibility();
 				} else if (booksMatchingId.size() == 1) {
@@ -652,9 +656,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	private class GetBookThumb extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... thumbURLs) {
+		protected String doInBackground(String... thumbdata) {
 			try {
-				URL thumbURL = new URL(thumbURLs[0]);
+				URL thumbURL = new URL(thumbdata[0]);
 				URLConnection thumbConn = thumbURL.openConnection(); 
 				thumbConn.connect(); 
 				InputStream thumbIn = thumbConn.getInputStream(); 
@@ -681,13 +685,13 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	private class HttpAddAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... URLs) {
+		protected String doInBackground(String... data) {
 
 			Book book = new Book(currentBookIsbn, titleText.getText().toString().substring(6), LIBRARY_USERNAME);
 
 			String returnValue = "";
 
-			returnValue = PostMethods.POSTAdd(URLs[0], book);
+			returnValue = PostMethods.POSTAdd(data[0], book);
 
 			return returnValue;
 		}
@@ -709,7 +713,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	private class HttpDeleteAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... URLs) {
+		protected String doInBackground(String... data) {
 			Book book = new Book();
 
 			try {
@@ -720,7 +724,7 @@ public class MainActivity extends Activity implements OnClickListener{
 
 			String returnValue = "";
 
-			returnValue = PostMethods.POSTDelete(URLs[0], book);
+			returnValue = PostMethods.POSTDelete(data[0], book);
 
 			return returnValue;
 		}
@@ -729,7 +733,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		protected void onPostExecute(String result) {
 			dbIdText.setVisibility(View.GONE);
 			dbId.setVisibility(View.GONE);
-			dbIdText.setText(null);
+			dbId.setText(null);
 			currentBookId = null;
 			setButtonVisibility();
 			new GetBookId().execute(WEBAPP_URL, currentBookIsbn);
@@ -743,20 +747,35 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	private class HttpBorrowAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... URLs) {
+		protected String doInBackground(String... data) {
 
 			Book book = new Book(Long.parseLong(dbId.getText().toString()), currentBookIsbn, titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
 
 			String returnValue = "";
 
-			returnValue = PostMethods.POSTBorrow(URLs[0], book);
+			returnValue = PostMethods.POSTBorrow(data[0], book);
 
 			return returnValue;
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
-			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+			Log.d("MyDEBUG", "In OnPostExecute of Borrow, result is " + result);
+			if (result.equals("\"ALREADYBORROWED\"")) {
+				Log.d("MyDEBUG", "in alreadyBorrowed, dialog should be created.");
+				new AlertDialog.Builder(MainActivity.this)
+				.setMessage("This book has been borrowed by another user.")
+				.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) { 
+						dialog.cancel();
+					}
+				})
+				.show();
+			} else {
+				new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" borrowed by " + preferences.getString("username", "No username") + ".", Toast.LENGTH_SHORT);
+				toast.show();
+			}
 		}
 	}
 
@@ -766,20 +785,35 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	private class HttpReturnAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... URLs) {
+		protected String doInBackground(String... data) {
 
 			Book book = new Book(Long.parseLong(dbId.getText().toString()), currentBookIsbn, titleText.getText().toString().substring(6), preferences.getString("username", LIBRARY_USERNAME));
 
 			String returnValue = "";
 
-			returnValue = PostMethods.POSTReturn(URLs[0], book);
+			returnValue = PostMethods.POSTReturn(data[0], book);
 
 			return returnValue;
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
-			new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+			Log.d("MyDEBUG", "In OnPostExecute of Return, result is " + result);
+			if (result.equals("\"ALREADYBORROWED\"")) {
+				Log.d("MyDEBUG", "in alreadyBorrowed, dialog should be created.");
+				new AlertDialog.Builder(MainActivity.this)
+				.setMessage("This book has been borrowed by another user.")
+				.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) { 
+						dialog.cancel();
+					}
+				})
+				.show();
+			} else {
+				new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+				Toast toast = Toast.makeText(getApplicationContext(), "Book \"" + titleText.getText().toString().substring(7) + "\" returned by " + preferences.getString("username", "No username") + ".", Toast.LENGTH_SHORT);
+				toast.show();
+			}
 		}
 	}
 
@@ -790,8 +824,8 @@ public class MainActivity extends Activity implements OnClickListener{
 	 */
 	private class GetCurrentlyBorrowed extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... URLs) {
-			String url = URLs[0];
+		protected String doInBackground(String... data) {
+			String url = data[0];
 			String returnValue = "";
 			String username = preferences.getString("username", "");
 
@@ -826,17 +860,13 @@ public class MainActivity extends Activity implements OnClickListener{
 						View v = currentlyBorrowedList.getChildAt(i);
 						v.setVisibility(View.GONE);
 					}
-
+					
 					for(int t = 0; t < currentlyBorrowed.length; t++) {
 						TextView text = currentlyBorrowed[t];
 						text = new TextView(MainActivity.this);
 						text.setText(borrowedByUser.get(t).toString());
 						currentlyBorrowedList.addView(text);
 					}
-
-					currentlyBorrowedTitle.setVisibility(View.VISIBLE);
-				} else {
-					currentlyBorrowedTitle.setVisibility(View.GONE);
 				}
 			}
 		}

@@ -32,11 +32,17 @@
 				<td><input type="password" name="password<%=u.getId()%>"></td>
 				<td>(defaults to System Password)</td>
 			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
 			
 			<%
 						}
 					}
 			%>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
 			<tr>
 				<td>&nbsp;</td>
 			</tr>

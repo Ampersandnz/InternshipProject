@@ -12,6 +12,7 @@
     <string name="deleteBtn">Delete book from library</string>
     <string name="saveBtn">Save</string>
     <string name="cancelBtn">Cancel</string>
+    <string name="confirm">Confirm</string>
     <string name="title_activity_username_entry">Enter username: </string>
     <string name="username">Username</string>
     <string name="password">Password</string>

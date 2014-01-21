@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -53,7 +52,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static final String GETBOOKBYISBN = "GETBOOKFROMISBN";
 	private static final String CHECKNAME = "ISALLOWEDNAME";
 	private static final String CHECKPASSWORD = "PASSWORD";
-
+	private static final String ALREADYBORROWED = "ALREADYBORROWED";
+			
 	private static final String VALIDNAME = "TRUE";
 	private static final String INVALIDNAME = "FALSE";
 	private static final String ADMINNAME = "ADMIN";
@@ -361,32 +361,39 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		} else if (json.startsWith(BORROW)) {
 			Book book = mapper.readValue(json.substring(BORROW.length()), Book.class);
-			BM.updateBook(book.getId(), "inPossessionOf", book.getInPossessionOf());
-
+			
+			// Only borrow the book if it's currently in the library.
+			if(BM.getBook(book.getId()).getInPossessionOf().toLowerCase().equals(LIBRARY_USERNAME.toLowerCase())) {
+				BM.updateBook(book.getId(), "inPossessionOf", book.getInPossessionOf());
+			} else {
+				mapper.writeValue(response.getOutputStream(), ALREADYBORROWED);
+			}
+			
 		} else if (json.startsWith(RETURN)) {
-			BM.updateBook(Long.parseLong(json.substring(RETURN.length())), "inPossessionOf", LIBRARY_USERNAME);
+			Book book = mapper.readValue(json.substring(RETURN.length()), Book.class);
+			
+			// Only return the book if it's currently in possession of the user.
+			if(BM.getBook(book.getId()).getInPossessionOf().toLowerCase().equals(book.getInPossessionOf().toLowerCase())) {
+				BM.updateBook(book.getId(), "inPossessionOf", LIBRARY_USERNAME);
+			} else {
+				mapper.writeValue(response.getOutputStream(), ALREADYBORROWED);
+			}
 
 		} else if (json.startsWith(CHECKNAME)) {
-			Logger log = Logger.getLogger("asjfdf");
 			String chosenName = json.substring(CHECKNAME.length()).toLowerCase();
-			log.warning("Username is " + chosenName);
 			int result = SH.checkUser(chosenName);
-			log.warning("Result from checkUser() is " + result);
 			switch (result) {
 
 			case USERNAMEALLOWED:
 				response.getOutputStream().print(VALIDNAME);
-				log.warning("Sending back " + VALIDNAME);
 				break;
 
 			case USERNAMENOTALLOWED:
 				response.getOutputStream().print(INVALIDNAME);
-				log.warning("Sending back " + INVALIDNAME);
 				break;
 
 			case USERNAMEADMIN:
 				response.getOutputStream().print(ADMINNAME);
-				log.warning("Sending back " + ADMINNAME);
 				break;
 			}
 
