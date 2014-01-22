@@ -50,7 +50,7 @@
 			</tr>
 
 			<%
-							}
+				}
 						}
 					}
 				}
@@ -59,36 +59,38 @@
 		</table>
 
 		<p>
-		
-			
+
+
 			<%
 				Object o = request.getAttribute("selectedUser");
 				if (o instanceof User) {
 			%>
-			
-					<input type="submit" name="borrowBook" value="Borrow book(s) from library" /> 
-					<input type="submit" name="returnBook" value="Return borrowed book(s) to library" /> 
-			
+
+			<input type="submit" name="borrowBook"
+				value="Borrow book(s) from library" /> <input type="submit"
+				name="returnBook" value="Return borrowed book(s) to library" />
+
 			<%
-					User user = (User) o;
+				User user = (User) o;
 					if (user.getIsAdmin()) {
 			%>
-			
-			<input type="submit" name="addBook" value="Add new book to library" /> 
-			<input type="submit" name="deleteBook" value="Delete book(s) from library" />
-			<input type="submit" name="editBook" value="Edit book(s)" /> 
-			
-			<%
-					}
-			%>
-			
-			<input type="reset" value="Clear selection" /> 
-			<input type="hidden" name="page" value="mainList" />
-			
+
+			<input type="submit" name="addBook" value="Add new book to library" />
+			<input type="submit" name="deleteBook"
+				value="Delete book(s) from library" /> <input type="submit"
+				name="editBook" value="Edit book(s)" />
+
 			<%
 				}
 			%>
-			
+
+			<input type="reset" value="Clear selection" /> <input type="hidden"
+				name="page" value="mainList" />
+
+			<%
+				}
+			%>
+
 		</p>
 	</form>
 
@@ -129,7 +131,7 @@
 			</tr>
 
 			<%
-							}
+				}
 						}
 					}
 				}
@@ -138,35 +140,38 @@
 		</table>
 
 		<p>
-		
+
 			<%
 				if (o instanceof User) {
 					User user = (User) o;
 					if (user.getIsAdmin()) {
 			%>
-			
+
 			<input type="submit" name="addUser" value="Add new user to system" />
-			<input type="submit" name="deleteUser" value="Delete user(s) from system" /> 
-			<input type="submit" name="editUser" value="Edit user(s)" /> 
-				
+			<input type="submit" name="deleteUser"
+				value="Delete user(s) from system" /> <input type="submit"
+				name="editUser" value="Edit user(s)" />
+
 			<%
-					}
+				}
 				}
 			%>
-			
-			<input type="submit" name="selectUser" value="Select user" /> 
-			<input type="submit" name="makeAdmin" value="Make user(s) admin" /> 
-			<input type="reset" value="Clear selection" /> 
-			<input type="hidden" name="page" value="mainList" />
+
+			<input type="submit" name="selectUser" value="Select user" /> <input
+				type="submit" name="makeAdmin" value="Make user(s) admin" /> <input
+				type="reset" value="Clear selection" /> <input type="hidden"
+				name="page" value="mainList" />
 
 		</p>
 	</form>
-	<% if (o instanceof User) {
-		User user = (User) o;
-		%>
-				Currently selected user: <%=user.toString()%>
 	<%
-				}
+		if (o instanceof User) {
+			User user = (User) o;
+	%>
+	Currently selected user:
+	<%=user.toString()%>
+	<%
+		}
 	%>
 </body>
 </html>

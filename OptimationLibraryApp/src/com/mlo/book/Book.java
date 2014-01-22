@@ -1,18 +1,18 @@
 package com.mlo.book;
 
 /**
- * @author Michael Lo
- * Set() methods return this, so multiple set() calls can be concatenated together.
+ * @author Michael Lo Set() methods return this, so multiple set() calls can be
+ *         concatenated together.
  */
 
-public class Book { 
+public class Book {
 
-	private Long id; 
-	
-	private String isbn; 
-	private String title; 
-	private String inPossessionOf; 
-	
+	private Long id;
+
+	private String isbn;
+	private String title;
+	private String inPossessionOf;
+
 	public Book() {
 	}
 
@@ -28,43 +28,43 @@ public class Book {
 		this.id = id;
 	}
 
-	public Long getId() { 
-		return id; 
-	} 
+	public Long getId() {
+		return id;
+	}
 
-	public Book setId( Long bookID ) { 
+	public Book setId(Long bookID) {
 		this.id = bookID;
 		return this;
-	} 
+	}
 
-	public String getIsbn() { 
-		return isbn; 
-	} 
+	public String getIsbn() {
+		return isbn;
+	}
 
-	public Book setIsbn( String isbn ) { 
+	public Book setIsbn(String isbn) {
 		this.isbn = isbn;
 		return this;
-	} 
+	}
 
-	public String getTitle() { 
-		return title; 
-	} 
+	public String getTitle() {
+		return title;
+	}
 
-	public Book setTitle( String title ) { 
+	public Book setTitle(String title) {
 		this.title = title;
 		return this;
-	} 
+	}
 
-	public String getInPossessionOf() { 
-		return inPossessionOf; 
-	} 
+	public String getInPossessionOf() {
+		return inPossessionOf;
+	}
 
-	public Book setInPossessionOf( String inPossessionOf ) { 
+	public Book setInPossessionOf(String inPossessionOf) {
 		this.inPossessionOf = inPossessionOf;
 		return this;
-	} 
-	
+	}
+
 	public String toString() {
 		return this.title + " (" + this.isbn + ")";
 	}
-} 
+}

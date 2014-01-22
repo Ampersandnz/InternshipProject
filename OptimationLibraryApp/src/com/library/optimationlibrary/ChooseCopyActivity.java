@@ -16,7 +16,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class ChooseCopyActivity extends Activity implements OnItemClickListener{
+public class ChooseCopyActivity extends Activity implements OnItemClickListener {
 
 	private ListView theList;
 
@@ -32,20 +32,24 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 	private void setupDim() {
 		Window window = getWindow();
 		LayoutParams lp = getWindow().getAttributes();
-		lp.dimAmount=0.75f;
+		lp.dimAmount = 0.75f;
 		window.setAttributes(lp);
 		window.setBackgroundDrawable(new ColorDrawable(0x7f000000));
 		window.addFlags(LayoutParams.FLAG_DIM_BEHIND);
-		
+
 		// Allows interception of screen touches that are outside the activity.
-		window.setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL, LayoutParams.FLAG_NOT_TOUCH_MODAL);
-		window.setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
+		window.setFlags(LayoutParams.FLAG_NOT_TOUCH_MODAL,
+				LayoutParams.FLAG_NOT_TOUCH_MODAL);
+		window.setFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+				LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 	}
 
 	private void setupListView() {
-		theList = (ListView)findViewById(R.id.chooseCopyList);
-		ArrayList<String> nameList = getIntent().getStringArrayListExtra("inPossessionOf");
-		theList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nameList));
+		theList = (ListView) findViewById(R.id.chooseCopyList);
+		ArrayList<String> nameList = getIntent().getStringArrayListExtra(
+				"inPossessionOf");
+		theList.setAdapter(new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, nameList));
 		theList.setOnItemClickListener(this);
 	}
 
@@ -57,20 +61,24 @@ public class ChooseCopyActivity extends Activity implements OnItemClickListener{
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
 		Intent returnIntent = new Intent();
-		returnIntent.putExtra("chosenId", getIntent().getStringArrayListExtra("ids").get(position));
-		setResult(RESULT_OK,returnIntent); 
+		returnIntent.putExtra("chosenId",
+				getIntent().getStringArrayListExtra("ids").get(position));
+		setResult(RESULT_OK, returnIntent);
 		finish();
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// If a touch notification is received that is outside the activity, do nothing. 
-		// This forces the user to select a copy of the book before the activity can close.
+		// If a touch notification is received that is outside the activity, do
+		// nothing.
+		// This forces the user to select a copy of the book before the activity
+		// can close.
 		if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
 		}
-		
+
 		// Otherwise delegate action to Activity.class.
 		return super.onTouchEvent(event);
 	}

@@ -5,20 +5,22 @@ import com.googlecode.objectify.annotation.Entity;
 import javax.persistence.Id;
 
 /**
- * @author Michael Lo
- * Objectify mapping bean. Each User represents a row in the database. Constructors, getters and setters. No computation or other methods.
- * Set() methods return this, so multiple set() calls can be concatenated together.
+ * @author Michael Lo Objectify mapping bean. Each User represents a row in the
+ *         database. Constructors, getters and setters. No computation or other
+ *         methods. Set() methods return this, so multiple set() calls can be
+ *         concatenated together.
  */
 @Entity
-public class User implements Comparable<User>{ 
+public class User implements Comparable<User> {
 
-	@Id private Long id; 
+	@Id
+	private Long id;
 
-	private String name; 
-	private String email; 
+	private String name;
+	private String email;
 	private boolean isAdmin = false;
 	private String password;
-	
+
 	public User() {
 	}
 
@@ -27,57 +29,57 @@ public class User implements Comparable<User>{
 		this.name = name;
 		this.email = email;
 	}
-	
+
 	public User(Long id, String name, String email) {
 		this(name, email);
 		this.id = id;
 	}
 
-	public Long getId() { 
-		return id; 
-	} 
-
-	public User setId(Long id) { 
-		this.id = id;
-		return this;
-	} 
-
-	public String getName() { 
-		return name; 
-	} 
-
-	public User setName(String name) { 
-		this.name = name;
-		return this;
-	} 
-
-	public String getEmail() { 
-		return email; 
+	public Long getId() {
+		return id;
 	}
 
-	public User setEmail(String email) { 
+	public User setId(Long id) {
+		this.id = id;
+		return this;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public User setName(String name) {
+		this.name = name;
+		return this;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public User setEmail(String email) {
 		this.email = email;
 		return this;
 	}
-	
-	public boolean getIsAdmin() { 
-		return isAdmin; 
+
+	public boolean getIsAdmin() {
+		return isAdmin;
 	}
 
-	public User setIsAdmin(boolean isAdmin) { 
+	public User setIsAdmin(boolean isAdmin) {
 		this.isAdmin = isAdmin;
 		return this;
 	}
-	
-	public String getPassword() { 
-		return password; 
+
+	public String getPassword() {
+		return password;
 	}
 
-	public User setPassword(String password) { 
+	public User setPassword(String password) {
 		this.password = password;
 		return this;
 	}
-	
+
 	public String toString() {
 		String string = this.name;
 		if (isAdmin) {
@@ -88,16 +90,16 @@ public class User implements Comparable<User>{
 
 	@Override
 	public int compareTo(User u) {
-	    if (this == u) {
-	    	return 0;
-	    }
+		if (this == u) {
+			return 0;
+		}
 
-	    int comparison = this.name.compareTo(u.name);
-	    
-	    if (comparison != 0) {
-	    	return comparison;
-	    }
+		int comparison = this.name.compareTo(u.name);
 
-	    return 0;
+		if (comparison != 0) {
+			return comparison;
+		}
+
+		return 0;
 	}
-} 
+}

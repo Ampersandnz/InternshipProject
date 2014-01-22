@@ -1,3 +1,3 @@
 Clean up UI a bit
 
-Optimation-theme app (logo, background, fonts/colours, splash screen)
+Optimation-theme app (background, text colours)

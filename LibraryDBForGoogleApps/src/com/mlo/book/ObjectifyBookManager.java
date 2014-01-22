@@ -21,20 +21,20 @@ public class ObjectifyBookManager implements BookManager {
 	}
 
 	public Long addBook(String isbn, String title, String inPossessionOf) {
-		if (isbn.equals("")||null==isbn) {
+		if (isbn.equals("") || null == isbn) {
 			isbn = NOISBN;
 		}
-		
-		if (title.equals("")||null==title) {
+
+		if (title.equals("") || null == title) {
 			title = NOTITLE;
 		}
-		
-		if (inPossessionOf.equals("")||null==inPossessionOf) {
+
+		if (inPossessionOf.equals("") || null == inPossessionOf) {
 			inPossessionOf = LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME;
 		}
-		
+
 		Book book = new Book(isbn, title, inPossessionOf);
-		
+
 		ofy.put(book);
 		return book.getId();
 	}
@@ -46,24 +46,24 @@ public class ObjectifyBookManager implements BookManager {
 
 	public void updateBook(Long bookId, String field, String newData) {
 		Book book = ofy.get(Book.class, bookId);
-		
+
 		if (field.equals(ISBN)) {
-			if (newData.equals("")||null==newData) {
+			if (newData.equals("") || null == newData) {
 				newData = NOISBN;
 			}
 			book.setIsbn(newData);
-			
+
 		} else if (field.equals(TITLE)) {
-			if (newData.equals("")||null==newData) {
+			if (newData.equals("") || null == newData) {
 				newData = NOTITLE;
 			}
 			book.setTitle(newData);
-			
+
 		} else if (field.equals(INPOSSESSIONOF)) {
-			if (newData.equals("")||null==newData) {
+			if (newData.equals("") || null == newData) {
 				newData = LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME;
 			}
-			
+
 			book.setInPossessionOf(newData);
 		}
 		ofy.put(book);
@@ -75,7 +75,7 @@ public class ObjectifyBookManager implements BookManager {
 
 	public ArrayList<Book> getAllBooks() {
 		ArrayList<Book> allBooks = new ArrayList<Book>();
-		for (Book b: ofy.query(Book.class)){
+		for (Book b : ofy.query(Book.class)) {
 			allBooks.add(b);
 		}
 		return allBooks;

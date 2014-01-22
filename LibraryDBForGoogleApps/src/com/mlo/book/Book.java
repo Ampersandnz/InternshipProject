@@ -5,19 +5,20 @@ import javax.persistence.Id;
 import com.googlecode.objectify.annotation.Entity;
 
 /**
- * @author Michael Lo
- * Set() methods return this, so multiple set() calls can be concatenated together.
+ * @author Michael Lo Set() methods return this, so multiple set() calls can be
+ *         concatenated together.
  */
 
 @Entity
-public class Book implements Comparable<Book> { 
+public class Book implements Comparable<Book> {
 
-	@Id private Long id; 
-	
-	private String isbn; 
-	private String title; 
-	private String inPossessionOf; 
-	
+	@Id
+	private Long id;
+
+	private String isbn;
+	private String title;
+	private String inPossessionOf;
+
 	public Book() {
 	}
 
@@ -28,58 +29,58 @@ public class Book implements Comparable<Book> {
 		this.inPossessionOf = inPossessionOf;
 	}
 
-	public Long getId() { 
-		return id; 
-	} 
+	public Long getId() {
+		return id;
+	}
 
-	public Book setId( Long bookID ) { 
+	public Book setId(Long bookID) {
 		this.id = bookID;
 		return this;
-	} 
+	}
 
-	public String getIsbn() { 
-		return isbn; 
-	} 
+	public String getIsbn() {
+		return isbn;
+	}
 
-	public Book setIsbn( String isbn ) { 
+	public Book setIsbn(String isbn) {
 		this.isbn = isbn;
 		return this;
-	} 
+	}
 
-	public String getTitle() { 
-		return title; 
-	} 
+	public String getTitle() {
+		return title;
+	}
 
-	public Book setTitle( String title ) { 
+	public Book setTitle(String title) {
 		this.title = title;
 		return this;
-	} 
+	}
 
-	public String getInPossessionOf() { 
-		return inPossessionOf; 
-	} 
+	public String getInPossessionOf() {
+		return inPossessionOf;
+	}
 
-	public Book setInPossessionOf( String inPossessionOf ) { 
+	public Book setInPossessionOf(String inPossessionOf) {
 		this.inPossessionOf = inPossessionOf;
 		return this;
-	} 
-	
+	}
+
 	public String toString() {
 		return this.title + " (" + this.isbn + ")";
 	}
 
 	@Override
 	public int compareTo(Book b) {
-	    if (this == b) {
-	    	return 0;
-	    }
+		if (this == b) {
+			return 0;
+		}
 
-	    int comparison = this.title.compareTo(b.title);
-	    
-	    if (comparison != 0) {
-	    	return comparison;
-	    }
+		int comparison = this.title.compareTo(b.title);
 
-	    return 0;
+		if (comparison != 0) {
+			return comparison;
+		}
+
+		return 0;
 	}
-} 
+}

@@ -15,9 +15,9 @@ import org.json.JSONObject;
 import com.mlo.book.Book;
 
 /**
- * @author Michael Lo
- * Helper class containing the HTTP POST methods used to send and receive data with the server.
- * Minimises size and complexity of MainActivity and helps with project maintainability.
+ * @author Michael Lo Helper class containing the HTTP POST methods used to send
+ *         and receive data with the server. Minimises size and complexity of
+ *         MainActivity and helps with project maintainability.
  */
 public class PostMethods {
 
@@ -36,16 +36,15 @@ public class PostMethods {
 	/**
 	 * @param url
 	 * @param book
-	 * @return response
-	 * Add a new copy of the scanned book to the library.
+	 * @return response Add a new copy of the scanned book to the library.
 	 */
-	static String POSTAdd(String url, Book book) {		
+	static String POSTAdd(String url, Book book) {
 		String result = "";
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
 			JSONObject jsonObject = new JSONObject();
-			
+
 			jsonObject.accumulate("isbn", book.getIsbn());
 			jsonObject.accumulate("title", book.getTitle());
 			jsonObject.accumulate("inPossessionOf", book.getInPossessionOf());
@@ -64,8 +63,8 @@ public class PostMethods {
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
-			
-			if(inputStream != null) {
+
+			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
 			}
@@ -79,15 +78,15 @@ public class PostMethods {
 	/**
 	 * @param url
 	 * @param book
-	 * @return response
-	 * Delete the selected copy of the scanned book from the system.
+	 * @return response Delete the selected copy of the scanned book from the
+	 *         system.
 	 */
 	static String POSTDelete(String url, Book book) {
 		String result = "";
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
-			
+
 			String json = DELETE + book.getId();
 
 			StringEntity stringEntity = new StringEntity(json);
@@ -101,7 +100,7 @@ public class PostMethods {
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
 
-			if(inputStream != null) {
+			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
 			}
@@ -115,8 +114,8 @@ public class PostMethods {
 	/**
 	 * @param url
 	 * @param book
-	 * @return response
-	 * Assign the selected copy of the scanned book to the chosen username.
+	 * @return response Assign the selected copy of the scanned book to the
+	 *         chosen username.
 	 */
 	static String POSTBorrow(String url, Book book) {
 		String result = "";
@@ -124,7 +123,7 @@ public class PostMethods {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
 			JSONObject jsonObject = new JSONObject();
-			
+
 			jsonObject.accumulate("id", book.getId());
 			jsonObject.accumulate("isbn", book.getIsbn());
 			jsonObject.accumulate("title", book.getTitle());
@@ -145,22 +144,22 @@ public class PostMethods {
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
 
-			if(inputStream != null) {
+			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
 			}
 
 		} catch (Exception e) {
 		}
-		
+
 		return result;
 	}
 
 	/**
 	 * @param url
 	 * @param book
-	 * @return response
-	 * Assign the selected copy of the scanned book to the library.
+	 * @return response Assign the selected copy of the scanned book to the
+	 *         library.
 	 */
 	static String POSTReturn(String url, Book book) {
 		String result = "";
@@ -168,7 +167,7 @@ public class PostMethods {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
 			JSONObject jsonObject = new JSONObject();
-			
+
 			jsonObject.accumulate("id", book.getId());
 			jsonObject.accumulate("isbn", book.getIsbn());
 			jsonObject.accumulate("title", book.getTitle());
@@ -189,7 +188,7 @@ public class PostMethods {
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
 
-			if(inputStream != null) {
+			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
 			}
@@ -203,15 +202,15 @@ public class PostMethods {
 	/**
 	 * @param url
 	 * @param book
-	 * @return response
-	 * Request from the server the list of books that are currently listed as in the possession of the chosen username.
+	 * @return response Request from the server the list of books that are
+	 *         currently listed as in the possession of the chosen username.
 	 */
 	static String POSTGetBorrowed(String url, Book book) {
 		String result = "";
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
-			
+
 			String json = GETBORROWEDBYUSER + book.getInPossessionOf();
 
 			StringEntity stringEntity = new StringEntity(json);
@@ -225,7 +224,7 @@ public class PostMethods {
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
 
-			if(inputStream != null) {
+			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
 			}
@@ -236,21 +235,21 @@ public class PostMethods {
 
 		return result;
 	}
-	
+
 	/**
 	 * @param url
 	 * @param name
-	 * @return response
-	 * Check whether or not the chosen username is on the server's list of authenticated user accounts.
+	 * @return response Check whether or not the chosen username is on the
+	 *         server's list of authenticated user accounts.
 	 */
 	static String POSTIsAllowedName(String url, String name) {
 		String result = "FALSE";
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
-			
+
 			String json = CHECKNAME + name;
-			
+
 			StringEntity stringEntity = new StringEntity(json);
 
 			httpPost.setEntity(stringEntity);
@@ -261,30 +260,30 @@ public class PostMethods {
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
-			
-			if(inputStream != null) {
+
+			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
 
 	/**
 	 * @param url
 	 * @param book
-	 * @return response
-	 * Requests from the server the list of copies of the scanned book.
+	 * @return response Requests from the server the list of copies of the
+	 *         scanned book.
 	 */
 	static String POSTGetBookFromIsbn(String url, Book book) {
 		String result = "";
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
-			
+
 			String json = GETBOOKBYISBN + book.getIsbn();
 
 			StringEntity stringEntity = new StringEntity(json);
@@ -298,7 +297,7 @@ public class PostMethods {
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
 
-			if(inputStream != null) {
+			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream);
 			} else {
 			}
@@ -313,13 +312,16 @@ public class PostMethods {
 	 * @param inputStream
 	 * @return response
 	 * @throws IOException
-	 * Converts the BufferedInputStream received from the server to a String.
+	 *             Converts the BufferedInputStream received from the server to
+	 *             a String.
 	 */
-	private static String convertInputStreamToString(InputStream inputStream) throws IOException {
-		BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+	private static String convertInputStreamToString(InputStream inputStream)
+			throws IOException {
+		BufferedReader bufferedReader = new BufferedReader(
+				new InputStreamReader(inputStream));
 		String line = "";
 		String result = "";
-		while((line = bufferedReader.readLine()) != null) {
+		while ((line = bufferedReader.readLine()) != null) {
 			result += line;
 		}
 		inputStream.close();
@@ -329,20 +331,20 @@ public class PostMethods {
 	/**
 	 * @param url
 	 * @param name
-	 * @return response
-	 * Check whether or not the chosen admin account's password has been correctly entered.
+	 * @return response Check whether or not the chosen admin account's password
+	 *         has been correctly entered.
 	 */
 	static boolean POSTCheckPassword(String[] data) {
 		boolean result = false;
-		
+
 		String url = data[0];
 		String username = data[1];
 		String password = data[2];
-		
+
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(url);
-			
+
 			String json = username + CHECKPASSWORD + password;
 
 			StringEntity stringEntity = new StringEntity(json);
@@ -355,15 +357,16 @@ public class PostMethods {
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 
 			InputStream inputStream = httpResponse.getEntity().getContent();
-			
-			if(inputStream != null) {
-				result = Boolean.parseBoolean(convertInputStreamToString(inputStream));
+
+			if (inputStream != null) {
+				result = Boolean
+						.parseBoolean(convertInputStreamToString(inputStream));
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
 }

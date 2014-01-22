@@ -1,13 +1,13 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#ffffffff" >
+    android:background="#ff000000" >
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="10dp" >
+        android:padding="10dp"  >
 
         <TextView
             android:id="@+id/isConnected"
@@ -28,8 +28,7 @@
             android:layout_centerHorizontal="true"
             android:background="@drawable/black"
             android:padding="10dp"
-            android:text="@string/scan"
-            android:textColor="#ffcccccc" />
+            android:text="@string/scan" />
 
         <LinearLayout
             android:id="@+id/bookDetailsList"
@@ -156,14 +155,16 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/addDeleteButtons"
             android:layout_centerHorizontal="true"
-            android:background="@drawable/blue" />
+            android:background="@drawable/blue"
+            android:text="@string/username_button" />
 
         <TextView
             android:id="@+id/dbId_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/saved_username"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true" 
+            android:background="#ffffffff" />
 
         <TextView
             android:id="@+id/dbId_text"
@@ -171,25 +172,27 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/saved_username"
             android:layout_toLeftOf="@+id/dbId_id"
-            android:text="@string/dbId_text" />
+            android:text="@string/dbId_text" 
+            android:background="#ffffffff" />
 
         <TextView
             android:id="@+id/currentlyBorrowed_list_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/dbId_id"
-            android:layout_centerHorizontal="true"
             android:text="@string/currentlyBorrowed_list_title_text"
-			android:textColor="#ff000000"
+            android:textColor="#ff000000"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold" 
+            android:background="#ffffffff" />
 
         <LinearLayout
             android:id="@+id/currentlyBorrowed"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/currentlyBorrowed_list_title"
-            android:orientation="vertical" />
+            android:orientation="vertical" 
+            android:background="#ffffffff" />
     </RelativeLayout>
 
 </ScrollView>

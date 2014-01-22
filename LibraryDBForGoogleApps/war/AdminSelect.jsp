@@ -11,14 +11,14 @@
 
 	<form method="POST" action='librarydbforgoogleapps' name="adminSelect">
 		<table>
-		
-		<%
-			Object userId = request.getAttribute("userId");
-		%>
+
+			<%
+				Object userId = request.getAttribute("userId");
+			%>
 
 			<tr>
 				<td>Password:</td>
-				<td><input type="password" name="userPassword" ></td>
+				<td><input type="password" name="userPassword"></td>
 			</tr>
 			<tr>
 				<td><input type="submit" name="save" value="Save"> <input

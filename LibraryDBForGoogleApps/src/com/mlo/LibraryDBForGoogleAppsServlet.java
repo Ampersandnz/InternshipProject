@@ -53,7 +53,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static final String CHECKNAME = "ISALLOWEDNAME";
 	private static final String CHECKPASSWORD = "PASSWORD";
 	private static final String ALREADYBORROWED = "ALREADYBORROWED";
-			
+
 	private static final String VALIDNAME = "TRUE";
 	private static final String INVALIDNAME = "FALSE";
 	private static final String ADMINNAME = "ADMIN";
@@ -72,11 +72,13 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	private static boolean firstRun = true;
 
 	/**
-	 * Whenever the user clicks a button, this method is called. 
-	 * It performs different actions and redirects the user's browser to different pages depending on the status of the page and the button that was clicked.
+	 * Whenever the user clicks a button, this method is called. It performs
+	 * different actions and redirects the user's browser to different pages
+	 * depending on the status of the page and the button that was clicked.
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		//Initialise default values
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// Initialise default values
 		if (firstRun) {
 			SH = new ServletHelper();
 			SH.firstRun();
@@ -84,7 +86,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			firstRun = false;
 		}
 
-		// Hidden parameter identifying the page from which the browser is returning.
+		// Hidden parameter identifying the page from which the browser is
+		// returning.
 		String forward = SHOWALL;
 
 		// Populate the lists with the contents of the databases.
@@ -106,12 +109,14 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	}
 
 	/**
-	 * doPost(): receives JSON data, parse it, map it and send back a response if necessary.
-	 * Code based on that sourced from http://hmkcode.com/java-servlet-send-receive-json-using-jquery-ajax/
-	 * 							   and http://hmkcode.com/android-send-json-data-to-server/
+	 * doPost(): receives JSON data, parse it, map it and send back a response
+	 * if necessary. Code based on that sourced from
+	 * http://hmkcode.com/java-servlet-send-receive-json-using-jquery-ajax/ and
+	 * http://hmkcode.com/android-send-json-data-to-server/
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		//Initialise default values
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// Initialise default values
 		if (firstRun) {
 			SH = new ServletHelper();
 			SH.firstRun();
@@ -119,7 +124,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			firstRun = false;
 		}
 
-		// Hidden parameter identifying the page from which the browser is returning.
+		// Hidden parameter identifying the page from which the browser is
+		// returning.
 		String hiddenParam = request.getParameter("page");
 
 		if (hiddenParam != null) {
@@ -127,7 +133,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			@SuppressWarnings("unchecked")
 			Map<String, String[]> parameters = request.getParameterMap();
 
-			try { 
+			try {
 				comingFromPage(request, response, parameters, hiddenParam);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -147,14 +153,18 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	 * @param response
 	 * @param parameters
 	 * @param hiddenParam
-	 * This method is called once the existence of the 'page' parameter (hiddenParam) determines that the HTTP request is from a webpage.
-	 * Actions will then be taken based on which page the request originated from and 
+	 *            This method is called once the existence of the 'page'
+	 *            parameter (hiddenParam) determines that the HTTP request is
+	 *            from a webpage. Actions will then be taken based on which page
+	 *            the request originated from and
 	 */
-	private void comingFromPage(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parameters, String hiddenParam) {
+	private void comingFromPage(HttpServletRequest request,
+			HttpServletResponse response, Map<String, String[]> parameters,
+			String hiddenParam) {
 		// Returning from a .jsp page.
 		String forward = SHOWALL;
 
-		switch(hiddenParam) {
+		switch (hiddenParam) {
 
 		case "mainList":
 
@@ -162,7 +172,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				// Display add page.
 				forward = ADD_BOOK;
 
-			} else if (parameters.containsKey("deleteBook")) {					
+			} else if (parameters.containsKey("deleteBook")) {
 				if (SH.deleteBook(parameters, request)) {
 					// Display delete page.
 					forward = DELETE_BOOK;
@@ -181,8 +191,11 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 			} else if (parameters.containsKey("borrowBook")) {
-				boolean bookBeingBorrowed = SH.sendBorrowedBooks(request, parameters);
-				if (!(selectedUser.getName().toLowerCase().equals(com.mlo.user.ObjectifyUserManager.NONAME.toLowerCase()))) {
+				boolean bookBeingBorrowed = SH.sendBorrowedBooks(request,
+						parameters);
+				if (!(selectedUser.getName().toLowerCase()
+						.equals(com.mlo.user.ObjectifyUserManager.NONAME
+								.toLowerCase()))) {
 					if (bookBeingBorrowed) {
 						// Display borrow page.
 						forward = BORROW_BOOK;
@@ -192,8 +205,11 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 			} else if (parameters.containsKey("returnBook")) {
-				boolean bookBeingReturned = SH.sendReturnedBooks(request, parameters);
-				if (!(selectedUser.getName().toLowerCase().equals(com.mlo.user.ObjectifyUserManager.NONAME.toLowerCase()))) {
+				boolean bookBeingReturned = SH.sendReturnedBooks(request,
+						parameters);
+				if (!(selectedUser.getName().toLowerCase()
+						.equals(com.mlo.user.ObjectifyUserManager.NONAME
+								.toLowerCase()))) {
 					if (bookBeingReturned) {
 						// Display return page.
 						forward = RETURN_BOOK;
@@ -206,7 +222,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				// Display add page.
 				forward = ADD_USER;
 
-			} else if (parameters.containsKey("deleteUser")) {					
+			} else if (parameters.containsKey("deleteUser")) {
 				if (SH.deleteUser(parameters, request)) {
 					// Display delete page.
 					forward = DELETE_USER;
@@ -244,7 +260,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 				}
 
 			} else if (parameters.containsKey("makeAdmin")) {
-				List<User> usersToMakeAdmin = SH.getUsersToMakeAdmin(parameters, request);
+				List<User> usersToMakeAdmin = SH.getUsersToMakeAdmin(
+						parameters, request);
 
 				if (usersToMakeAdmin.size() != 0) {
 					request.setAttribute("usersToMakeAdmin", usersToMakeAdmin);
@@ -338,12 +355,16 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 	 * @param request
 	 * @param response
 	 * @throws IOException
-	 * The absence of the 'page' parameter (hiddenParam) determines that the HTTP request has originated from the Android app.
-	 * This method will perform various actions as required, based on the specific command.
+	 *             The absence of the 'page' parameter (hiddenParam) determines
+	 *             that the HTTP request has originated from the Android app.
+	 *             This method will perform various actions as required, based
+	 *             on the specific command.
 	 */
-	private void comingFromApp(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void comingFromApp(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
 		// Responding to a POST command from the mobile app.
-		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				request.getInputStream()));
 		String json = "";
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -352,7 +373,8 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 		}
 
 		if (json.startsWith(ADD)) {
-			Book book = mapper.readValue(json.substring(ADD.length()), Book.class);
+			Book book = mapper.readValue(json.substring(ADD.length()),
+					Book.class);
 			Long id = BM.addBook(book);
 			mapper.writeValue(response.getOutputStream(), id);
 
@@ -360,27 +382,33 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 			BM.deleteBook(Long.parseLong(json.substring(DELETE.length())));
 
 		} else if (json.startsWith(BORROW)) {
-			Book book = mapper.readValue(json.substring(BORROW.length()), Book.class);
-			
+			Book book = mapper.readValue(json.substring(BORROW.length()),
+					Book.class);
+
 			// Only borrow the book if it's currently in the library.
-			if(BM.getBook(book.getId()).getInPossessionOf().toLowerCase().equals(LIBRARY_USERNAME.toLowerCase())) {
-				BM.updateBook(book.getId(), "inPossessionOf", book.getInPossessionOf());
+			if (BM.getBook(book.getId()).getInPossessionOf().toLowerCase()
+					.equals(LIBRARY_USERNAME.toLowerCase())) {
+				BM.updateBook(book.getId(), "inPossessionOf",
+						book.getInPossessionOf());
 			} else {
 				mapper.writeValue(response.getOutputStream(), ALREADYBORROWED);
 			}
-			
+
 		} else if (json.startsWith(RETURN)) {
-			Book book = mapper.readValue(json.substring(RETURN.length()), Book.class);
-			
+			Book book = mapper.readValue(json.substring(RETURN.length()),
+					Book.class);
+
 			// Only return the book if it's currently in possession of the user.
-			if(BM.getBook(book.getId()).getInPossessionOf().toLowerCase().equals(book.getInPossessionOf().toLowerCase())) {
+			if (BM.getBook(book.getId()).getInPossessionOf().toLowerCase()
+					.equals(book.getInPossessionOf().toLowerCase())) {
 				BM.updateBook(book.getId(), "inPossessionOf", LIBRARY_USERNAME);
 			} else {
 				mapper.writeValue(response.getOutputStream(), ALREADYBORROWED);
 			}
 
 		} else if (json.startsWith(CHECKNAME)) {
-			String chosenName = json.substring(CHECKNAME.length()).toLowerCase();
+			String chosenName = json.substring(CHECKNAME.length())
+					.toLowerCase();
 			int result = SH.checkUser(chosenName);
 			switch (result) {
 
@@ -399,8 +427,11 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		} else if (json.startsWith(GETBORROWEDBYUSER)) {
 			List<Book> borrowedByUsername = new ArrayList<Book>();
-			for (Book b: BM.getAllBooks()) {
-				if (b.getInPossessionOf().toLowerCase().equals(json.substring(GETBORROWEDBYUSER.length()).toLowerCase())) {
+			for (Book b : BM.getAllBooks()) {
+				if (b.getInPossessionOf()
+						.toLowerCase()
+						.equals(json.substring(GETBORROWEDBYUSER.length())
+								.toLowerCase())) {
 					borrowedByUsername.add(b);
 				}
 			}
@@ -408,7 +439,7 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		} else if (json.startsWith(GETBOOKBYISBN)) {
 			List<Book> booksMatchingIsbn = new ArrayList<Book>();
-			for (Book b: BM.getAllBooks()) {
+			for (Book b : BM.getAllBooks()) {
 				if (b.getIsbn().equals(json.substring(GETBOOKBYISBN.length()))) {
 					booksMatchingIsbn.add(b);
 				}
@@ -417,20 +448,21 @@ public class LibraryDBForGoogleAppsServlet extends HttpServlet {
 
 		} else if (json.contains(CHECKPASSWORD)) {
 			boolean passwordMatches = false;
-			for (User u: UM.getAllAdmins()) {
-				
+			for (User u : UM.getAllAdmins()) {
+
 				String[] split = json.split(CHECKPASSWORD);
-				
+
 				String username = split[0];
 				String password = split[1];
-				
+
 				if (u.getName().toLowerCase().equals(username.toLowerCase())) {
-					if (u.getPassword().toLowerCase().equals(password.toLowerCase())) {
+					if (u.getPassword().toLowerCase()
+							.equals(password.toLowerCase())) {
 						passwordMatches = true;
 					}
 				}
 			}
-			
+
 			mapper.writeValue(response.getOutputStream(), passwordMatches);
 		}
 

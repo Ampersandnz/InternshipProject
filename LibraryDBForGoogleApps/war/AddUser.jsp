@@ -21,9 +21,9 @@
 			</tr>
 			<tr>
 				<td><input type="submit" name="save" value="Save"> <input
-					type="reset" name="Reset"> <input type="submit"
-					name="back" value="Back"> <input type="hidden" name="page" value="addUser" />
-				</td>
+					type="reset" name="Reset"> <input type="submit" name="back"
+					value="Back"> <input type="hidden" name="page"
+					value="addUser" /></td>
 			</tr>
 		</table>
 	</form>
