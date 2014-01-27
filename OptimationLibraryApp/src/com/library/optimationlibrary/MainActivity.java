@@ -36,7 +36,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -63,8 +62,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String API_KEY = "AIzaSyBiYyZhPC3K2eTUYTHjmo3LN0-F7CQKfo0";
 	private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
-	private static String currentBookIsbn = null;
-	private static String currentBookId = null;
+	private static String currentBookIsbn;
+	private static String currentBookId;
 
 	private static final int CHOOSE_USERNAME = 1;
 	private static final int CHOOSE_COPY = 2;
@@ -96,7 +95,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
+		currentBookIsbn = null;
+		currentBookId = null;
+		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		super.onCreate(savedInstanceState);
@@ -473,29 +474,44 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private void setButtonVisibility() {
+		
 		if (currentBookIsbn != null) {
+			// A book has been scanned.
+			
 			if (preferences.getBoolean("admin", false)) {
+				// Admins can add books to the library.
 				addBtn.setVisibility(View.VISIBLE);
+				
 				if (currentBookId != null && !(currentBookId.equals(""))) {
+					// Admins can remove existing books from the library.
 					deleteBtn.setVisibility(View.VISIBLE);
 				}
-			} else {
-				addBtn.setVisibility(View.GONE);
-				deleteBtn.setVisibility(View.GONE);
 			}
 
 			if (currentBookId != null && !(currentBookId.equals(""))) {
+				// Existing system copies of books can be borrowed and returned by all users.
 				borrowBtn.setVisibility(View.VISIBLE);
 				returnBtn.setVisibility(View.VISIBLE);
+				
 			} else {
+				// Books with no copy in the system cannot be borrowed or returned.
 				borrowBtn.setVisibility(View.GONE);
 				returnBtn.setVisibility(View.GONE);
+				deleteBtn.setVisibility(View.GONE);
 			}
+			
 		} else {
+			// When no book is scanned, nothing can be done.
 			addBtn.setVisibility(View.GONE);
 			deleteBtn.setVisibility(View.GONE);
 			borrowBtn.setVisibility(View.GONE);
 			returnBtn.setVisibility(View.GONE);
+		}
+		
+		if (!(preferences.getBoolean("admin", false))) {
+			// Only admins can add and remove books.
+			addBtn.setVisibility(View.GONE);
+			deleteBtn.setVisibility(View.GONE);
 		}
 	}
 
@@ -689,7 +705,6 @@ public class MainActivity extends Activity implements OnClickListener {
 					dbId.setText("No copy of this book found in library.");
 					dbId.setVisibility(View.VISIBLE);
 					dbIdText.setVisibility(View.GONE);
-					dbId.setText(null);
 					currentBookId = null;
 					setButtonVisibility();
 				} else if (booksMatchingId.size() == 1) {
@@ -834,10 +849,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		@Override
 		protected void onPostExecute(String result) {
-			Log.d("MyDEBUG", "In OnPostExecute of Borrow, result is " + result);
 			if (result.equals("\"ALREADYBORROWED\"")) {
-				Log.d("MyDEBUG",
-						"in alreadyBorrowed, dialog should be created.");
 				new AlertDialog.Builder(MainActivity.this)
 						.setMessage(
 								"This book has been borrowed by another user.")
@@ -870,12 +882,17 @@ public class MainActivity extends Activity implements OnClickListener {
 	private class HttpReturnAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... data) {
-
-			Book book = new Book(Long.parseLong(dbId.getText().toString()),
+			Book book = null;
+			
+			try {
+			book = new Book(Long.parseLong(dbId.getText().toString()),
 					currentBookIsbn, titleText.getText().toString()
 							.substring(6), preferences.getString("username",
 							LIBRARY_USERNAME));
-
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 			String returnValue = "";
 
 			returnValue = PostMethods.POSTReturn(data[0], book);
@@ -885,10 +902,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		@Override
 		protected void onPostExecute(String result) {
-			Log.d("MyDEBUG", "In OnPostExecute of Return, result is " + result);
 			if (result.equals("\"ALREADYBORROWED\"")) {
-				Log.d("MyDEBUG",
-						"in alreadyBorrowed, dialog should be created.");
 				new AlertDialog.Builder(MainActivity.this)
 						.setMessage(
 								"This book has been borrowed by another user.")
