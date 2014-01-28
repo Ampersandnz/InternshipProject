@@ -85,7 +85,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	static SharedPreferences preferences;
 
-	private LinearLayout starLayout, currentlyBorrowedList;
+	private LinearLayout starLayout, currentlyBorrowedList, bookDetailsList;
 
 	private ImageView[] starViews;
 
@@ -187,6 +187,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void setupListView() {
 		currentlyBorrowedList = (LinearLayout) findViewById(R.id.currentlyBorrowed);
 		new GetCurrentlyBorrowed().execute(WEBAPP_URL);
+		
+		bookDetailsList = (LinearLayout) findViewById(R.id.bookDetailsList);
+		bookDetailsList.setVisibility(View.GONE);
 	}
 
 	/**
@@ -203,7 +206,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		int numStars = savedInstanceState.getInt("stars");
 
 		for (int s = 0; s < numStars; s++) {
-			starViews[s].setImageResource(R.drawable.star);
+			starViews[s].setImageResource(R.drawable.star_gold_24);
 			starLayout.addView(starViews[s]);
 		}
 
@@ -352,6 +355,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			if (resultCode == RESULT_OK) {
 				// Scan result is retrieved by making a call to
 				// data.getStringExtra(ZBarConstants.SCAN_RESULT)
+				
 				// Barcode format is retrieved by making a call to
 				// data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
 				String scanContent = data
@@ -471,6 +475,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		String bookSearchString = GOOGLE_BOOKS_URL + isbn + "&key=" + API_KEY;
 		new GetBookInfo().execute(bookSearchString);
 		new GetBookId().execute(WEBAPP_URL, isbn);
+		bookDetailsList.setVisibility(View.VISIBLE);
+		bookDetailsList.setBackgroundResource(R.drawable.rounded_rectangle);
 	}
 
 	private void setButtonVisibility() {
@@ -607,7 +613,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						starLayout.removeAllViews();
 
 						for (int s = 0; s < numStars; s++) {
-							starViews[s].setImageResource(R.drawable.star);
+							starViews[s].setImageResource(R.drawable.star_gold_24);
 							starLayout.addView(starViews[s]);
 						}
 					} catch (JSONException jse) {
@@ -738,15 +744,15 @@ public class MainActivity extends Activity implements OnClickListener {
 	 */
 	private class GetBookThumb extends AsyncTask<String, Void, String> {
 		@Override
-		protected String doInBackground(String... thumbdata) {
+		protected String doInBackground(String... thumbData) {
 			try {
-				URL thumbURL = new URL(thumbdata[0]);
+				URL thumbURL = new URL(thumbData[0]);
 				URLConnection thumbConn = thumbURL.openConnection();
 				thumbConn.connect();
 				InputStream thumbIn = thumbConn.getInputStream();
 				BufferedInputStream thumbBuff = new BufferedInputStream(thumbIn);
 				thumbImg = BitmapFactory.decodeStream(thumbBuff);
-
+				
 				thumbBuff.close();
 				thumbIn.close();
 			} catch (Exception e) {
