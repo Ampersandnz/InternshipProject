@@ -15,8 +15,6 @@ public class ServletHelper {
 	private static BookManager BM;
 	private static UserManager UM;
 
-	private static final String TEST_USERNAME = "Michael Lo";
-
 	static List<User> beingMadeAdmin = new ArrayList<User>();
 
 	/**
@@ -37,35 +35,6 @@ public class ServletHelper {
 		// Initialise the database managers
 		BM.initialise();
 		UM.initialise();
-
-		// Empty the databases
-		BM.deleteAllBooks();
-		UM.deleteAllUsers();
-
-		// Add few Book records to database
-		BM.addBook("9780316007573", "The Ashes Of Worlds", TEST_USERNAME);
-		BM.addBook("9780425037454", "The Stars My Destination",
-				LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
-		BM.addBook("9780756404079", "The Name Of The Wind", TEST_USERNAME);
-		BM.addBook("9781429943840", "Earth Afire", TEST_USERNAME);
-		BM.addBook("9780345490711", "Judas Unchained",
-				LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
-		BM.addBook("9780606005739", "A Wizard Of Earthsea",
-				LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME);
-
-		// Add few User records to database
-		Long id1 = UM.addUser(TEST_USERNAME, "michael.lo@optimation.co.nz");
-		UM.addUser("Michael_Personal", "nz.ampersand@gmail.com");
-		UM.addUser("test", "test@fake.com");
-		UM.addUser("test", "test@test.com");
-		Long id2 = UM.addUser(LibraryDBForGoogleAppsServlet.LIBRARY_USERNAME,
-				" ");
-
-		UM.updateUser(id1, "isAdmin", "true");
-		UM.updateUser(id1, "password", "lolcano");
-		UM.updateUser(id2, "isAdmin", "true");
-		UM.updateUser(id2, "password",
-				LibraryDBForGoogleAppsServlet.SYSTEM_PASSWORD);
 	}
 
 	/**
